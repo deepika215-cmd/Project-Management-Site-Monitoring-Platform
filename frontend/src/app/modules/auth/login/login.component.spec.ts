@@ -1,0 +1,38 @@
+/// <reference types="jasmine" />
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+
+import { LoginComponent } from './login.component';
+
+describe('LoginComponent', () => {
+  let component: LoginComponent;
+  let fixture: ComponentFixture<LoginComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [LoginComponent, RouterTestingModule]
+    })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(LoginComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should require a valid email address', () => {
+    component.loginForm.controls['email'].setValue('invalid-email');
+
+    expect(component.loginForm.controls['email'].valid).toBeFalse();
+  });
+
+  it('should require a strong password', () => {
+    component.loginForm.controls['password'].setValue('weak');
+
+    expect(component.loginForm.controls['password'].valid).toBeFalse();
+  });
+});
