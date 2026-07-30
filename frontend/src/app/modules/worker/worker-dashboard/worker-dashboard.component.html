@@ -1,0 +1,103 @@
+<div class="worker-shell">
+  <aside class="worker-sidebar">
+    <div class="worker-brand">
+      <div class="worker-logo">WK</div>
+      <div>
+        <h2>Worker Portal</h2>
+        <p>My tasks and attendance</p>
+      </div>
+    </div>
+
+    <nav class="worker-nav">
+      <a *ngFor="let item of sidebar" class="worker-nav-item" [class.active]="item.active">
+        <span>{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="worker-main">
+    <header class="worker-header">
+      <div>
+        <p class="eyebrow">Worker Dashboard</p>
+        <h1>Today’s assignments</h1>
+      </div>
+    </header>
+
+    <section class="worker-grid worker-summary-grid">
+      <article class="worker-card">
+        <p>My Tasks</p>
+        <h2>{{ tasks.length }}</h2>
+      </article>
+      <article class="worker-card">
+        <p>Attendance This Week</p>
+        <h2>2/3</h2>
+      </article>
+      <article class="worker-card">
+        <p>Next Shift</p>
+        <h2>{{ shiftSchedule[0].time }}</h2>
+      </article>
+    </section>
+
+    <section class="worker-grid worker-tasks-panel">
+      <div class="panel worker-panel">
+        <div class="panel-header">
+          <h2>My Tasks</h2>
+          <span>Focus on your next action items</span>
+        </div>
+        <ul class="task-list">
+          <li *ngFor="let task of tasks">
+            <div>
+              <strong>{{ task.title }}</strong>
+              <p>{{ task.project }}</p>
+            </div>
+            <div class="task-meta">
+              <span>{{ task.due }}</span>
+              <span>{{ task.status }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel worker-panel">
+        <div class="panel-header">
+          <h2>Attendance</h2>
+          <span>Recent days</span>
+        </div>
+        <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Status</th>
+              <th>In</th>
+              <th>Out</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of attendance">
+              <td>{{ record.date }}</td>
+              <td>{{ record.status }}</td>
+              <td>{{ record.timeIn }}</td>
+              <td>{{ record.timeOut }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="worker-grid worker-schedule-panel">
+      <div class="panel worker-panel">
+        <div class="panel-header">
+          <h2>Shift Schedule</h2>
+        </div>
+        <ul class="schedule-list">
+          <li *ngFor="let shift of shiftSchedule">
+            <strong>{{ shift.shift }}</strong>
+            <p>{{ shift.time }}</p>
+            <span>{{ shift.location }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>

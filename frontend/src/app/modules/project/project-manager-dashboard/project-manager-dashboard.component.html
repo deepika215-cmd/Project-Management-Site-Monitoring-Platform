@@ -1,0 +1,183 @@
+<div class="pm-dashboard-shell">
+  <aside class="pm-sidebar">
+    <div class="pm-brand">
+      <div class="pm-logo">PM</div>
+      <div>
+        <h2>Project Manager</h2>
+        <p>Site Monitoring Portal</p>
+      </div>
+    </div>
+
+    <nav class="pm-nav">
+      <a *ngFor="let item of navItems" class="pm-nav-item" [class.active]="item.active">
+        <span class="pm-icon">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+
+    <div class="pm-profile-card">
+      <div>
+        <p>Signed in as</p>
+        <strong>Priya R.</strong>
+      </div>
+      <span class="status-pill">Online</span>
+    </div>
+  </aside>
+
+  <main class="pm-main">
+    <header class="pm-header">
+      <div>
+        <p class="eyebrow">Project Manager Dashboard</p>
+        <h1>Work Overview</h1>
+      </div>
+      <button class="pm-action">+ Add Project</button>
+    </header>
+
+    <section class="pm-summary-grid">
+      <article class="summary-card">
+        <p>Assigned Projects</p>
+        <h2>{{ projects.length }}</h2>
+      </article>
+      <article class="summary-card">
+        <p>Milestone Completion</p>
+        <h2>72%</h2>
+      </article>
+      <article class="summary-card">
+        <p>Resource Utilization</p>
+        <h2>81%</h2>
+      </article>
+      <article class="summary-card">
+        <p>Delayed Activities</p>
+        <h2>{{ delayedActivities.length }}</h2>
+      </article>
+    </section>
+
+    <section class="pm-projects-panel panel">
+      <div class="panel-header">
+        <div>
+          <h2>Assigned Projects</h2>
+          <p>Active projects with current deadlines and status.</p>
+        </div>
+      </div>
+
+      <div class="project-cards">
+        <article *ngFor="let project of projects" class="project-card">
+          <div class="project-meta">
+            <h3>{{ project.name }}</h3>
+            <span>{{ project.status }}</span>
+          </div>
+          <p>Manager: {{ project.manager }}</p>
+          <div class="progress-row">
+            <span>{{ project.progress }}%</span>
+            <span>Deadline: {{ project.deadline }}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="project.progress"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="pm-detail-grid">
+      <div class="panel pm-milestone-panel">
+        <div class="panel-header">
+          <h3>Project Milestones</h3>
+        </div>
+        <div class="milestone-list">
+          <div *ngFor="let item of milestones" class="milestone-item">
+            <div>
+              <strong>{{ item.label }}</strong>
+              <span>{{ item.value }}%</span>
+            </div>
+            <div class="progress-bar slim">
+              <div class="progress-fill" [style.width.%]="item.value"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel pm-resource-panel">
+        <div class="panel-header">
+          <h3>Resource Utilization</h3>
+        </div>
+        <ul class="resource-list">
+          <li *ngFor="let resource of resourceUtilization">
+            <strong>{{ resource.label }}</strong>
+            <span>{{ resource.value }}</span>
+            <p>{{ resource.detail }}</p>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel pm-workforce-panel">
+        <div class="panel-header">
+          <h3>Workforce Summary</h3>
+        </div>
+        <ul class="workforce-list">
+          <li *ngFor="let item of workforceSummary">
+            <strong>{{ item.label }}</strong>
+            <span>{{ item.value }}</span>
+            <p>{{ item.detail }}</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="pm-activity-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h3>Delayed Activities</h3>
+        </div>
+        <table class="activity-table">
+          <thead>
+            <tr>
+              <th>Task</th>
+              <th>Project</th>
+              <th>Status</th>
+              <th>Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let activity of delayedActivities">
+              <td>{{ activity.title }}</td>
+              <td>{{ activity.project }}</td>
+              <td>{{ activity.status }}</td>
+              <td>{{ activity.due }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel pm-updates-panel">
+        <div class="panel-header">
+          <h3>Recent Updates</h3>
+        </div>
+        <ul class="update-list">
+          <li *ngFor="let update of recentUpdates">
+            <div>
+              <strong>{{ update.title }}</strong>
+              <p>{{ update.detail }}</p>
+            </div>
+            <span>{{ update.time }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="pm-analytics-panel panel">
+      <div class="panel-header">
+        <h3>Project Analytics</h3>
+      </div>
+      <div class="analytics-grid">
+        <article *ngFor="let stat of analytics" class="analytics-card">
+          <p>{{ stat.label }}</p>
+          <strong>{{ stat.value }}%</strong>
+          <div class="progress-bar slim small">
+            <div class="progress-fill" [style.width.%]="stat.value"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</div>
+

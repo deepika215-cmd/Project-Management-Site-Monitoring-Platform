@@ -1,0 +1,151 @@
+<div class="contractor-shell">
+  <aside class="contractor-sidebar">
+    <div class="contractor-brand">
+      <div class="contractor-logo">CT</div>
+      <div>
+        <h2>Contractor</h2>
+        <p>Worker management</p>
+      </div>
+    </div>
+
+    <nav class="contractor-nav">
+      <a *ngFor="let item of sidebar" class="contractor-nav-item" [class.active]="item.active">
+        <span>{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="contractor-main">
+    <header class="contractor-header">
+      <div>
+        <p class="eyebrow">Contractor Dashboard</p>
+        <h1>Manage work and crews</h1>
+      </div>
+      <button class="contractor-action">Update Progress</button>
+    </header>
+
+    <section class="contractor-grid summary-grid">
+      <article class="summary-card">
+        <p>Assigned Tasks</p>
+        <h2>{{ tasks.length }}</h2>
+      </article>
+      <article class="summary-card">
+        <p>Active Workers</p>
+        <h2>{{ workers.length }}</h2>
+      </article>
+      <article class="summary-card">
+        <p>Work Progress</p>
+        <h2>{{ progressValue }}%</h2>
+      </article>
+      <article class="summary-card">
+        <p>Today's Shift</p>
+        <h2>{{ shifts[0].shift }}</h2>
+      </article>
+    </section>
+
+    <section class="contractor-grid content-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Assigned Tasks</h2>
+          <span>Track task completion status</span>
+        </div>
+        <ul class="task-list">
+          <li *ngFor="let task of tasks">
+            <div>
+              <strong>{{ task.title }}</strong>
+              <p>{{ task.project }}</p>
+            </div>
+            <div class="task-meta">
+              <span>{{ task.due }}</span>
+              <span>{{ task.status }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Worker List</h2>
+          <span>Assigned workers and roles</span>
+        </div>
+        <ul class="worker-list">
+          <li *ngFor="let worker of workers">
+            <div>
+              <strong>{{ worker.name }}</strong>
+              <p>{{ worker.role }}</p>
+            </div>
+            <span>{{ worker.status }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="contractor-grid content-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Attendance</h2>
+          <span>Daily crew attendance</span>
+        </div>
+        <table class="attendance-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Present</th>
+              <th>Absent</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of attendanceSummary">
+              <td>{{ record.date }}</td>
+              <td>{{ record.present }}</td>
+              <td>{{ record.absent }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Shift Schedule</h2>
+          <span>Upcoming work shifts</span>
+        </div>
+        <ul class="shift-list">
+          <li *ngFor="let shift of shifts">
+            <strong>{{ shift.shift }}</strong>
+            <p>{{ shift.time }}</p>
+            <span>{{ shift.site }}</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="contractor-grid lower-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Notifications</h2>
+        </div>
+        <ul class="notification-list">
+          <li *ngFor="let notification of notifications">
+            <div>
+              <strong>{{ notification.title }}</strong>
+              <p>{{ notification.detail }}</p>
+            </div>
+            <span>{{ notification.time }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="panel profile-panel">
+        <div class="panel-header">
+          <h2>Profile</h2>
+        </div>
+        <div class="profile-card">
+          <h3>Karan Mehta</h3>
+          <p>Contractor Supervisor</p>
+          <p>Managing worker assignments and completion status.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

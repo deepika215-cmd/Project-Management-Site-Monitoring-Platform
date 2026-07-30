@@ -1,1 +1,57 @@
-<p>material-list works!</p>
+<div class="material-list">
+	<div class="toolbar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+		<h2>Material List</h2>
+		<div class="controls" style="display:flex;gap:.5rem;align-items:center;">
+			<input type="text" placeholder="Search materials..." [(ngModel)]="filter" />
+			<button class="btn btn-primary" (click)="onAdd()">Add Material</button>
+		</div>
+	</div>
+
+	<div *ngIf="materials?.length; else empty" class="table-responsive">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>#</th>
+					<th>Item Name</th>
+					<th>Category</th>
+					<th>Quantity</th>
+					<th>Unit</th>
+					<th>Unit Price</th>
+					<th>Supplier</th>
+					<th>Delivery Date</th>
+					<th>Location</th>
+					<th>Condition</th>
+					<th>Remarks</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let material of materials; let i = index">
+					<td>{{ i + 1 }}</td>
+					<td>{{ material.name }}</td>
+					<td>{{ material.category }}</td>
+					<td>{{ material.quantity }}</td>
+					<td>{{ material.unit }}</td>
+					<td>{{ material.unitPrice | currency }}</td>
+					<td>{{ material.supplier }}</td>
+					<td>{{ material.deliveryDate | date:'shortDate' }}</td>
+					<td>{{ material.location }}</td>
+					<td>{{ material.condition }}</td>
+					<td>{{ material.remarks }}</td>
+					<td style="white-space:nowrap;">
+						<button class="btn btn-sm btn-outline-secondary" (click)="onEdit(material)">Edit</button>
+						<button class="btn btn-sm btn-outline-danger" (click)="onDelete(material)">Delete</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<ng-template #empty>
+		<div class="empty-state" style="text-align:center;padding:2rem;border:1px dashed #ddd;">
+			<p>No materials found. Click "Add Material" to create one.</p>
+			<button class="btn btn-primary" (click)="onAdd()">Add Material</button>
+		</div>
+	</ng-template>
+</div>
+

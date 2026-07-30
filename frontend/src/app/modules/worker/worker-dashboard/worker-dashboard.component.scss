@@ -1,0 +1,197 @@
+.worker-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.worker-sidebar {
+  background: #111827;
+  color: #e2e8f0;
+  padding: 32px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.worker-brand {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.worker-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: #4f46e5;
+  font-weight: 800;
+}
+
+.worker-brand h2,
+.worker-brand p {
+  margin: 0;
+}
+
+.worker-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.worker-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.worker-nav-item.active,
+.worker-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.worker-main {
+  padding: 30px 36px;
+}
+
+.worker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
+}
+
+.worker-summary-grid,
+.worker-tasks-panel,
+.worker-schedule-panel {
+  display: grid;
+  gap: 20px;
+}
+
+.worker-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 24px;
+}
+
+.worker-card {
+  background: white;
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.worker-card p {
+  margin: 0 0 12px;
+  color: #64748b;
+}
+
+.worker-card h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.worker-panel {
+  background: white;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.panel-header h2,
+.panel-header span {
+  margin: 0;
+}
+
+.task-list,
+.schedule-list,
+.notification-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.task-list li,
+.schedule-list li,
+.notification-list li {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+}
+
+.task-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: right;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.attendance-table th,
+.attendance-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.attendance-table th {
+  text-align: left;
+  color: #64748b;
+}
+
+.se-workforce-panel {
+  padding: 20px;
+}
+
+.schedule-list li {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.schedule-list strong {
+  margin-bottom: 6px;
+}
+
+.worker-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 1100px) {
+  .worker-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .worker-summary-grid,
+  .worker-status-grid {
+    grid-template-columns: 1fr;
+  }
+}
