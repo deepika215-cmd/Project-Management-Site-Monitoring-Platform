@@ -1,7 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+import os
 
 DATABASE_URL = "sqlite:///./buildtrack.db"
+
+print("Current Working Directory:", os.getcwd())
+print("Database Absolute Path:", os.path.abspath("buildtrack.db"))
 
 engine = create_engine(
     DATABASE_URL,
@@ -15,6 +19,7 @@ SessionLocal = sessionmaker(
 )
 
 Base = declarative_base()
+
 def get_db():
     db = SessionLocal()
     try:
