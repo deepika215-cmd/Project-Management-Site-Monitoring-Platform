@@ -1,0 +1,110 @@
+<div class="page-container">
+  <aside class="sidebar">
+    <div class="logo">
+      <h2>BuildTrack</h2>
+      <span>Construction Management</span>
+    </div>
+
+    <nav>
+      <a routerLink="/site-engineer-dashboard" class="active">Dashboard</a>
+      <a routerLink="/site-engineer-projects">Assigned Projects</a>
+      <a routerLink="/projects/milestones">Milestones</a>
+      <a routerLink="/projects/schedule">Schedule</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a>Notifications</a>
+      <a>Profile</a>
+      <a routerLink="/login">Logout</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>Site Engineer Dashboard</h1>
+        <p>Monitor daily construction activities and site progress.</p>
+      </div>
+
+      <button
+        type="button"
+        class="view-projects-btn"
+        routerLink="/projects">
+        View Projects
+      </button>
+    </div>
+
+    <div class="cards">
+      <div class="stat-card">
+        <h3>Assigned Projects</h3>
+        <strong>3</strong>
+        <p>Projects currently assigned</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Daily Reports</h3>
+        <strong>12</strong>
+        <p>Reports submitted this month</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Weekly Reports</h3>
+        <strong>4</strong>
+        <p>Reports submitted this month</p>
+      </div>
+
+      <div class="stat-card warning">
+        <h3>Site Activities</h3>
+        <strong>28</strong>
+        <p>Activities being monitored</p>
+      </div>
+
+      <div class="stat-card">
+        <h3>Equipment Available</h3>
+        <strong>18</strong>
+        <p>Equipment ready for use</p>
+      </div>
+
+      <div class="stat-card danger">
+        <h3>Pending Updates</h3>
+        <strong>5</strong>
+        <p>Updates needing attention</p>
+      </div>
+    </div>
+
+    <section class="dashboard-section">
+      <h2>Today’s Site Activities</h2>
+
+      <div class="activity-item">
+        <div>
+          <strong>Concrete Foundation Work</strong>
+          <p>Green Valley Apartments</p>
+        </div>
+        <span class="in-progress">In Progress</span>
+      </div>
+
+      <div class="activity-item">
+        <div>
+          <strong>Material Quality Inspection</strong>
+          <p>City Mall Construction</p>
+        </div>
+        <span class="scheduled">Scheduled</span>
+      </div>
+
+      <div class="activity-item">
+        <div>
+          <strong>Safety Equipment Check</strong>
+          <p>Industrial Warehouse</p>
+        </div>
+        <span class="completed">Completed</span>
+      </div>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Pending Updates</h2>
+      <p>Upload daily progress report for Green Valley Apartments.</p>
+      <p>Update equipment usage for Industrial Warehouse.</p>
+      <p>Review the material inspection report for City Mall Construction.</p>
+    </section>
+  </main>
+</div>

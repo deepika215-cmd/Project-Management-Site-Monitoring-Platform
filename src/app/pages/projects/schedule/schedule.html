@@ -1,0 +1,579 @@
+<div class="page-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h2>BuildTrack</h2>
+      <span>Construction Management</span>
+    </div>
+
+    <nav>
+
+      <a routerLink="/dashboard">
+        Dashboard
+      </a>
+
+      <a routerLink="/projects">
+        My Projects
+      </a>
+
+      <a routerLink="/projects/create">
+        Create Project
+      </a>
+
+      <a routerLink="/projects/milestones">
+        Milestones
+      </a>
+
+      <a
+        routerLink="/projects/schedule"
+        class="active">
+
+        Schedule
+
+      </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <a>Notifications</a>
+
+      <a>Profile</a>
+
+      <a routerLink="/dashboard">
+        Logout
+      </a>
+
+    </div>
+
+  </aside>
+
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+
+      <div>
+
+        <h1>Project Schedule</h1>
+
+        <p>
+          Plan and monitor construction activities
+          throughout the project lifecycle.
+        </p>
+
+      </div>
+
+      <button
+        class="add-btn"
+        (click)="openAddActivity()">
+
+        + Add Activity
+
+      </button>
+
+    </div>
+
+
+    <!-- Project Selector -->
+    <section class="project-selector">
+
+      <label>
+        Select Project
+      </label>
+
+      <select
+        [(ngModel)]="selectedProject">
+
+        <option value="BT-001">
+          BT-001 - Green Valley Apartments
+        </option>
+
+        <option value="BT-002">
+          BT-002 - City Mall Construction
+        </option>
+
+        <option value="BT-003">
+          BT-003 - National Highway Project
+        </option>
+
+      </select>
+
+    </section>
+
+
+    <!-- Statistics -->
+    <section class="stats">
+
+      <div class="stat-card">
+
+        <span>Total Activities</span>
+
+        <h2>
+          {{ activities.length }}
+        </h2>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <span>Completed</span>
+
+        <h2>
+          {{ getStatusCount('Completed') }}
+        </h2>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <span>In Progress</span>
+
+        <h2>
+          {{ getStatusCount('In Progress') }}
+        </h2>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <span>Delayed</span>
+
+        <h2>
+          {{ getDelayedCount() }}
+        </h2>
+
+      </div>
+
+    </section>
+
+
+    <!-- Schedule Progress -->
+    <section class="progress-card">
+
+      <div class="progress-header">
+
+        <div>
+
+          <h2>
+            Overall Schedule Progress
+          </h2>
+
+          <p>
+            {{ completedPercentage }}%
+            of activities completed
+          </p>
+
+        </div>
+
+        <strong>
+          {{ completedPercentage }}%
+        </strong>
+
+      </div>
+
+
+      <div class="progress-bar">
+
+        <div
+          class="progress"
+          [style.width.%]="completedPercentage">
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Schedule Table -->
+    <section class="schedule-section">
+
+      <div class="section-header">
+
+        <div>
+
+          <h2>
+            Construction Activities
+          </h2>
+
+          <p>
+            Project execution schedule
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-container">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>#</th>
+
+              <th>Activity</th>
+
+              <th>Start Date</th>
+
+              <th>End Date</th>
+
+              <th>Duration</th>
+
+              <th>Dependency</th>
+
+              <th>Status</th>
+
+              <th>Actions</th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let activity of activities;
+                let i = index
+              ">
+
+              <td>
+                {{ i + 1 }}
+              </td>
+
+
+              <td>
+
+                <strong>
+                  {{ activity.name }}
+                </strong>
+
+                <p class="description">
+                  {{ activity.description }}
+                </p>
+
+              </td>
+
+
+              <td>
+                {{ activity.startDate }}
+              </td>
+
+
+              <td>
+                {{ activity.endDate }}
+              </td>
+
+
+              <td>
+                {{ activity.duration }} days
+              </td>
+
+
+              <td>
+
+                <span
+                  *ngIf="activity.dependency">
+
+                  {{ activity.dependency }}
+
+                </span>
+
+                <span
+                  *ngIf="!activity.dependency"
+                  class="no-dependency">
+
+                  None
+
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <span
+                  class="status"
+                  [ngClass]="
+                    getStatusClass(activity.status)
+                  ">
+
+                  {{ activity.status }}
+
+                </span>
+
+              </td>
+
+
+              <td>
+
+                <div class="actions">
+
+                  <button
+                    class="edit-btn"
+                    (click)="editActivity(activity)">
+
+                    Edit
+
+                  </button>
+
+
+                  <button
+                    class="delete-btn"
+                    (click)="deleteActivity(activity.id)">
+
+                    Delete
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+
+            <tr
+              *ngIf="activities.length === 0">
+
+              <td
+                colspan="8"
+                class="no-data">
+
+                No activities found.
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- Add/Edit Activity Modal -->
+    <div
+      class="modal-overlay"
+      *ngIf="showModal">
+
+
+      <div class="modal">
+
+
+        <div class="modal-header">
+
+          <h2>
+
+            {{
+              editingActivity
+              ? 'Edit Activity'
+              : 'Add New Activity'
+            }}
+
+          </h2>
+
+
+          <button
+            class="close-btn"
+            (click)="closeModal()">
+
+            ×
+
+          </button>
+
+        </div>
+
+
+        <form
+          (ngSubmit)="saveActivity()">
+
+
+          <!-- Activity Name -->
+
+          <div class="form-group">
+
+            <label>
+              Activity Name *
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="currentActivity.name"
+              name="activityName"
+              placeholder="Example: Foundation Work"
+              required>
+
+          </div>
+
+
+          <!-- Description -->
+
+          <div class="form-group">
+
+            <label>
+              Description
+            </label>
+
+            <textarea
+              [(ngModel)]="currentActivity.description"
+              name="description"
+              rows="3"
+              placeholder="Enter activity description">
+            </textarea>
+
+          </div>
+
+
+          <!-- Dates -->
+
+          <div class="form-row">
+
+
+            <div class="form-group">
+
+              <label>
+                Start Date *
+              </label>
+
+              <input
+                type="date"
+                [(ngModel)]="currentActivity.startDate"
+                name="startDate"
+                required>
+
+            </div>
+
+
+            <div class="form-group">
+
+              <label>
+                End Date *
+              </label>
+
+              <input
+                type="date"
+                [(ngModel)]="currentActivity.endDate"
+                name="endDate"
+                required>
+
+            </div>
+
+          </div>
+
+
+          <!-- Dependency -->
+
+          <div class="form-group">
+
+            <label>
+              Dependency
+            </label>
+
+            <select
+              [(ngModel)]="currentActivity.dependency"
+              name="dependency">
+
+              <option value="">
+                None
+              </option>
+
+              <option
+                *ngFor="let activity of activities">
+
+                {{ activity.name }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Status -->
+
+          <div class="form-group">
+
+            <label>
+              Status *
+            </label>
+
+            <select
+              [(ngModel)]="currentActivity.status"
+              name="status"
+              required>
+
+              <option value="Not Started">
+                Not Started
+              </option>
+
+              <option value="In Progress">
+                In Progress
+              </option>
+
+              <option value="Completed">
+                Completed
+              </option>
+
+              <option value="Delayed">
+                Delayed
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Buttons -->
+
+          <div class="modal-actions">
+
+            <button
+              type="button"
+              class="cancel-btn"
+              (click)="closeModal()">
+
+              Cancel
+
+            </button>
+
+
+            <button
+              type="submit"
+              class="save-btn">
+
+              {{
+                editingActivity
+                ? 'Save Changes'
+                : 'Add Activity'
+              }}
+
+            </button>
+
+          </div>
+
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

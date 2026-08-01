@@ -1,0 +1,384 @@
+<div class="page-container">
+
+  <!-- ================= Sidebar ================= -->
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h2>BuildTrack</h2>
+      <span>Construction Management</span>
+    </div>
+
+    <nav>
+
+      <a routerLink="/project-manager-dashboard">
+        Dashboard
+      </a>
+
+      <a
+        routerLink="/projects"
+        class="active">
+
+        My Projects
+
+      </a>
+
+      <a routerLink="/projects/create-project">
+        Create Project
+      </a>
+
+      <a routerLink="/projects/milestones">
+        Milestones
+      </a>
+
+      <a routerLink="/projects/schedule">
+        Schedule
+      </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <a routerLink="/notifications">
+        Notifications
+      </a>
+
+      <a routerLink="/profile">
+        Profile
+      </a>
+
+      <a routerLink="/login">
+        Logout
+      </a>
+
+    </div>
+
+  </aside>
+
+  <!-- ================= Main ================= -->
+
+  <main class="main-content">
+
+    <!-- Header -->
+
+    <header class="page-header">
+
+      <div>
+
+        <h1>My Projects</h1>
+
+        <p>
+          Manage and monitor all your construction projects.
+        </p>
+
+      </div>
+
+      <button
+        class="create-btn"
+        routerLink="/projects/create-project">
+
+        + Create Project
+
+      </button>
+
+    </header>
+
+    <!-- Statistics -->
+
+    <section class="stats">
+
+      <div class="stat-card">
+
+        <div class="stat-icon blue">
+          📁
+        </div>
+
+        <div>
+
+          <h2>{{ projects.length }}</h2>
+
+          <span>Total Projects</span>
+
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+
+        <div class="stat-icon orange">
+          📋
+        </div>
+
+        <div>
+
+          <h2>{{ getProjectCount('Planning') }}</h2>
+
+          <span>Planning</span>
+
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+
+        <div class="stat-icon green">
+          🚧
+        </div>
+
+        <div>
+
+          <h2>{{ getProjectCount('In Progress') }}</h2>
+
+          <span>In Progress</span>
+
+        </div>
+
+      </div>
+
+      <div class="stat-card">
+
+        <div class="stat-icon purple">
+          ✔
+        </div>
+
+        <div>
+
+          <h2>{{ getProjectCount('Completed') }}</h2>
+
+          <span>Completed</span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- Filters -->
+
+    <section class="filters">
+
+      <input
+        type="text"
+        placeholder="Search by project name or code..."
+        [(ngModel)]="searchText"
+        (input)="filterProjects()">
+
+      <select
+        [(ngModel)]="selectedCategory"
+        (change)="filterProjects()">
+
+        <option value="">
+          All Categories
+        </option>
+
+        <option value="Residential">
+          Residential
+        </option>
+
+        <option value="Commercial">
+          Commercial
+        </option>
+
+        <option value="Industrial">
+          Industrial
+        </option>
+
+        <option value="Infrastructure">
+          Infrastructure
+        </option>
+
+        <option value="Government">
+          Government
+        </option>
+
+      </select>
+
+      <select
+        [(ngModel)]="selectedStatus"
+        (change)="filterProjects()">
+
+        <option value="">
+          All Status
+        </option>
+
+        <option value="Planning">
+          Planning
+        </option>
+
+        <option value="In Progress">
+          In Progress
+        </option>
+
+        <option value="Completed">
+          Completed
+        </option>
+
+        <option value="On Hold">
+          On Hold
+        </option>
+
+        <option value="Closed">
+          Closed
+        </option>
+
+      </select>
+
+    </section>
+
+    <!-- Project Table Starts Here -->
+     <section class="project-section">
+
+  <div class="section-header">
+
+    <div>
+
+      <h2>Project List</h2>
+
+      <p>{{ filteredProjects.length }} Projects Found</p>
+
+    </div>
+
+  </div>
+
+  <div class="table-container">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>Project Code</th>
+          <th>Project Name</th>
+          <th>Category</th>
+          <th>Project Manager</th>
+          <th>Budget</th>
+          <th>Start Date</th>
+          <th>Progress</th>
+          <th>Status</th>
+          <th>Actions</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        <tr *ngFor="let project of filteredProjects">
+
+          <td>
+
+            <strong>{{ project.code }}</strong>
+
+          </td>
+
+          <td>
+
+            {{ project.name }}
+
+          </td>
+
+          <td>
+
+            {{ project.category }}
+
+          </td>
+
+          <td>
+
+            {{ project.manager }}
+
+          </td>
+
+          <td>
+
+            ₹ {{ project.budget | number }}
+
+          </td>
+
+          <td>
+
+            {{ project.startDate }}
+
+          </td>
+
+          <td>
+
+            <div class="progress-wrapper">
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress"
+                  [style.width.%]="project.progress">
+                </div>
+
+              </div>
+
+              <small>{{ project.progress }}%</small>
+
+            </div>
+
+          </td>
+
+          <td>
+
+            <span
+              class="status"
+              [ngClass]="getStatusClass(project.status)">
+
+              {{ project.status }}
+
+            </span>
+
+          </td>
+
+          <td>
+
+            <div class="action-buttons">
+
+              <button
+    class="view-btn"
+    routerLink="/projects/project-details">
+
+    View
+
+</button>
+
+<button
+    class="edit-btn"
+    routerLink="/projects/update-project">
+
+    Edit
+
+</button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        <tr *ngIf="filteredProjects.length===0">
+
+          <td
+            colspan="9"
+            class="no-data">
+
+            No Projects Found
+
+          </td>
+
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
+
+</main>
+
+</div>

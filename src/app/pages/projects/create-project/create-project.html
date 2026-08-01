@@ -1,0 +1,445 @@
+<div class="page-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h2>BuildTrack</h2>
+      <span>Construction Management</span>
+    </div>
+
+    <nav>
+      <a routerLink="/project-manager-dashboard">Dashboard</a>
+      <a routerLink="/projects">My Projects</a>
+      <a routerLink="/projects/create-project" class="active">
+        Create Project
+      </a>
+      <a routerLink="/projects/milestones">Milestones</a>
+      <a routerLink="/projects/schedule">Schedule</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a>Notifications</a>
+      <a>Profile</a>
+      <a routerLink="/login">Logout</a>
+    </div>
+
+  </aside>
+
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+
+      <div>
+        <h1>Create New Project</h1>
+        <p>
+          Register a new construction project in BuildTrack
+        </p>
+      </div>
+
+      <button
+        class="back-btn"
+        routerLink="/projects">
+
+        ← Back to Projects
+
+      </button>
+
+    </div>
+
+
+    <!-- Form -->
+    <form
+      class="project-form"
+      (ngSubmit)="createProject()">
+
+
+      <!-- Project Information -->
+
+      <section class="form-section">
+
+        <h2>Project Information</h2>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>
+              Project Name *
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="project.name"
+              name="projectName"
+              placeholder="Enter project name"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Project Code *
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="project.code"
+              name="projectCode"
+              placeholder="Example: BT-008"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Project Category *
+            </label>
+
+            <select
+              [(ngModel)]="project.category"
+              name="category"
+              required>
+
+              <option value="">
+                Select Category
+              </option>
+
+              <option value="Residential">
+                Residential
+              </option>
+
+              <option value="Commercial">
+                Commercial
+              </option>
+
+              <option value="Industrial">
+                Industrial
+              </option>
+
+              <option value="Infrastructure">
+                Infrastructure
+              </option>
+
+              <option value="Government">
+                Government
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Priority *
+            </label>
+
+            <select
+              [(ngModel)]="project.priority"
+              name="priority"
+              required>
+
+              <option value="">
+                Select Priority
+              </option>
+
+              <option value="Low">
+                Low
+              </option>
+
+              <option value="Medium">
+                Medium
+              </option>
+
+              <option value="High">
+                High
+              </option>
+
+              <option value="Critical">
+                Critical
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group full-width">
+
+            <label>
+              Project Description
+            </label>
+
+            <textarea
+              [(ngModel)]="project.description"
+              name="description"
+              rows="4"
+              placeholder="Enter project description">
+            </textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- Client Information -->
+
+      <section class="form-section">
+
+        <h2>Client Information</h2>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>
+              Client Name *
+            </label>
+
+            <input
+              type="text"
+              [(ngModel)]="project.clientName"
+              name="clientName"
+              placeholder="Enter client name"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Client Email *
+            </label>
+
+            <input
+              type="email"
+              [(ngModel)]="project.clientEmail"
+              name="clientEmail"
+              placeholder="client@example.com"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Client Phone
+            </label>
+
+            <input
+              type="tel"
+              [(ngModel)]="project.clientPhone"
+              name="clientPhone"
+              placeholder="Enter phone number">
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- Location -->
+
+      <section class="form-section">
+
+        <h2>Project Location</h2>
+
+        <div class="form-grid">
+
+          <div class="form-group full-width">
+
+            <label>
+              Project Address *
+            </label>
+
+            <textarea
+              [(ngModel)]="project.location"
+              name="location"
+              rows="3"
+              placeholder="Enter project location"
+              required>
+            </textarea>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- Budget and Schedule -->
+
+      <section class="form-section">
+
+        <h2>Budget & Schedule</h2>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>
+              Estimated Budget *
+            </label>
+
+            <input
+              type="number"
+              [(ngModel)]="project.budget"
+              name="budget"
+              placeholder="Enter estimated budget"
+              min="0"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Start Date *
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="project.startDate"
+              name="startDate"
+              required>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Expected Completion Date *
+            </label>
+
+            <input
+              type="date"
+              [(ngModel)]="project.completionDate"
+              name="completionDate"
+              required>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- Project Assignment -->
+
+      <section class="form-section">
+
+        <h2>Project Assignment</h2>
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label>
+              Project Manager
+            </label>
+
+            <select
+              [(ngModel)]="project.manager"
+              name="manager">
+
+              <option value="">
+                Select Project Manager
+              </option>
+
+              <option value="Raj Kumar">
+                Raj Kumar
+              </option>
+
+              <option value="Arun Kumar">
+                Arun Kumar
+              </option>
+
+              <option value="Vijay Kumar">
+                Vijay Kumar
+              </option>
+
+              <option value="Suresh Kumar">
+                Suresh Kumar
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label>
+              Initial Project Status
+            </label>
+
+            <select
+              [(ngModel)]="project.status"
+              name="status">
+
+              <option value="Planning">
+                Planning
+              </option>
+
+              <option value="In Progress">
+                In Progress
+              </option>
+
+              <option value="On Hold">
+                On Hold
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- Form Buttons -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="cancel-btn"
+          routerLink="/projects">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="submit"
+          class="submit-btn">
+
+          Create Project
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </main>
+
+</div>
