@@ -10,7 +10,7 @@ import { Router, RouterLink } from '@angular/router';
     RouterLink
   ],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrls: ['./login.css']
 })
 export class Login {
 

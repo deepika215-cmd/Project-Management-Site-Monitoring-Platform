@@ -22,6 +22,7 @@ import { ProjectStatus } from './pages/projects/project-status/project-status';
 import { Schedule } from './pages/projects/schedule/schedule';
 import { UpdateProject } from './pages/projects/update-project/update-project';
 import { SiteEngineerProjects } from './pages/site-engineer-projects/site-engineer-projects';
+import { Notifications } from './pages/notifications/notifications';
 
 export const routes: Routes = [
 
@@ -118,13 +119,13 @@ export const routes: Routes = [
     path: 'resources/resource-allocation',
     component: ResourceAllocation
   },
+  {
+    path: 'notifications',
+    component: Notifications
+  },
 
   // Optional pages (add these after creating the components)
   /*
-  {
-    path: 'notifications',
-    component: NotificationsComponent
-  },
   {
     path: 'profile',
     component: ProfileComponent

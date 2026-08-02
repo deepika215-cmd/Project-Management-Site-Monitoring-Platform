@@ -1,1 +1,26 @@
-<p>notifications works!</p>
+﻿<div class="notifications-page">
+  <header class="notifications-header">
+    <div>
+      <p class="breadcrumb">Dashboard / Notifications</p>
+      <h1>Project Notifications</h1>
+      <p class="subtitle">Stay updated on site alerts, deliveries, approvals, and milestones.</p>
+    </div>
+    <button class="mark-all-btn">Mark all as read</button>
+  </header>
+
+  <section class="notifications-grid">
+    <article class="notification-card" *ngFor="let notification of notifications">
+      <div class="card-icon">{{ notification.icon }}</div>
+      <div class="card-content">
+        <div class="card-title-row">
+          <h2>{{ notification.title }}</h2>
+          <span class="badge {{ notification.status.toLowerCase() }}">
+            {{ notification.status }}
+          </span>
+        </div>
+        <p>{{ notification.description }}</p>
+        <span class="timestamp">{{ notification.timestamp }}</span>
+      </div>
+    </article>
+  </section>
+</div>
