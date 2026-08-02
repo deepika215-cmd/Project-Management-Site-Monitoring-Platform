@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ProjectService, Project } from '../../../services/project';
 
 @Component({
   selector: 'app-project-details',
@@ -14,49 +15,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 })
 export class ProjectDetails {
 
-  project = {
-
-    id: 1,
-
-    name: 'Green Valley Apartments',
-
-    code: 'BT-001',
-
-    category: 'Residential',
-
-    priority: 'High',
-
-    status: 'In Progress',
-
-    manager: 'Raj Kumar',
-
-    progress: 65,
-
-    description:
-      'Construction of a modern residential apartment complex with multiple buildings and supporting infrastructure.',
-
-    location:
-      'Chennai, Tamil Nadu, India',
-
-    clientName:
-      'Green Valley Developers',
-
-    clientEmail:
-      'client@greenvalley.com',
-
-    clientPhone:
-      '+91 98765 43210',
-
-    budget:
-      5000000,
-
-    startDate:
-      '2026-01-15',
-
-    completionDate:
-      '2027-06-30'
-
-  };
+  project!: Project;
 
 
   milestones = [
@@ -134,18 +93,23 @@ export class ProjectDetails {
 
 
   constructor(
-    private route: ActivatedRoute
-  ) {
+  private route: ActivatedRoute,
+  private projectService: ProjectService
+) {
 
-    const projectId =
-      this.route.snapshot.paramMap.get('id');
+  const projectId = this.route.snapshot.paramMap.get('id');
 
-    console.log(
-      'Viewing Project:',
-      projectId
-    );
+  if (projectId) {
+
+    const foundProject = this.projectService.getProjectById(projectId);
+
+    if (foundProject) {
+      this.project = foundProject;
+    }
 
   }
+
+}
 
 
   getStatusClass(

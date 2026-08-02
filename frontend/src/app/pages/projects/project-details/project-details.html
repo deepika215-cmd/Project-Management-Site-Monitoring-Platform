@@ -18,7 +18,7 @@
     <div class="sidebar-bottom">
       <a>Notifications</a>
       <a>Profile</a>
-      <a routerLink="/dashboard">Logout</a>
+      <a routerLink="/login">Logout</a>
     </div>
 
   </aside>
@@ -30,7 +30,7 @@
 
       <div>
         <h1>{{ project.name }}</h1>
-        <p>Project Code: {{ project.code }}</p>
+        <p>Project Code: {{ project.id }}</p>
       </div>
 
       <div class="header-actions">
@@ -44,12 +44,12 @@
         </button>
 
         <button
-          class="edit-btn"
-          [routerLink]="['/projects/update', project.id]">
+  class="edit-btn"
+  routerLink="/projects/update-project">
 
-          Edit Project
+  Edit Project
 
-        </button>
+</button>
 
       </div>
 
@@ -145,7 +145,7 @@
 
         <div>
           <label>Project Code</label>
-          <p>{{ project.code }}</p>
+          <p>{{ project.id }}</p>
         </div>
 
         <div>

@@ -1,21 +1,271 @@
-<div class="dashboard">
+<div class="page-container">
 
-  <h1>Contractor Dashboard</h1>
+    <!-- Sidebar -->
 
-  <p>Manage your assigned workforce and tasks.</p>
+    <aside class="sidebar">
 
-  <div class="cards">
+        <div class="logo">
+            <h2>BuildTrack</h2>
+            <span>Construction Management</span>
+        </div>
 
-    <div>Assigned Tasks: 18</div>
+        <nav>
 
-    <div>Workers: 45</div>
+            <a
+                routerLink="/contractor-dashboard"
+                class="active">
 
-    <div>Attendance: 92%</div>
+                Dashboard
 
-    <div>Work Progress: 76%</div>
+            </a>
 
-    <div>Today's Shift: Morning</div>
+            <a routerLink="/contractor-projects">
+                My Contracts
+            </a>
 
-  </div>
+            <a routerLink="/contractor-materials">
+                Material Requests
+            </a>
+
+            <a routerLink="/contractor-tasks">
+                Tasks
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a routerLink="/notifications">
+    Notifications
+</a>
+
+            <a>Profile</a>
+
+            <a routerLink="/login">
+                Logout
+            </a>
+
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <header class="page-header">
+
+            <div>
+
+                <h1>Contractor Dashboard</h1>
+
+                <p>
+                    Welcome! Manage your contracts, materials and work progress.
+                </p>
+
+            </div>
+
+        </header>
+
+        <!-- Statistics -->
+
+        <section class="stats-row">
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    📁
+                </div>
+
+                <div>
+
+                    <h3>3</h3>
+
+                    <span>Total Contracts</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    🚧
+                </div>
+
+                <div>
+
+                    <h3>1</h3>
+
+                    <span>Active Contracts</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    ⏳
+                </div>
+
+                <div>
+
+                    <h3>1</h3>
+
+                    <span>Pending Approval</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ✅
+                </div>
+
+                <div>
+
+                    <h3>1</h3>
+
+                    <span>Completed Jobs</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Current Contracts -->
+
+        <section class="dashboard-section">
+
+            <h2>Current Contracts</h2>
+
+            <div
+                class="activity-item"
+                *ngFor="let contract of contracts">
+
+                <div>
+
+                    <strong>{{ contract.project }}</strong>
+
+                    <p>{{ contract.work }}</p>
+
+                </div>
+
+                <span
+                    [ngClass]="contract.status.toLowerCase().replace(' ', '-')">
+
+                    {{ contract.status }}
+
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- Material Requests -->
+
+        <section class="dashboard-section">
+
+            <h2>Material Requests</h2>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Cement (200 Bags)</strong>
+
+                    <p>Requested on 12 July 2026</p>
+
+                </div>
+
+                <span class="completed">
+                    Approved
+                </span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Steel Rods</strong>
+
+                    <p>Requested on 15 July 2026</p>
+
+                </div>
+
+                <span class="pending">
+                  Pending
+                </span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Bricks</strong>
+
+                    <p>Delivered Successfully</p>
+
+                </div>
+
+                <span class="completed">
+                    Delivered
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- Upcoming Tasks -->
+
+        <section class="dashboard-section">
+
+            <h2>Upcoming Tasks</h2>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Foundation Inspection</strong>
+
+                    <p>18 July 2026</p>
+
+                </div>
+
+            </div>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Roof Casting</strong>
+
+                    <p>22 July 2026</p>
+
+                </div>
+
+            </div>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Electrical Installation</strong>
+
+                    <p>28 July 2026</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
 
 </div>

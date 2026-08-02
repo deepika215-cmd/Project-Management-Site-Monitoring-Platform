@@ -11,6 +11,12 @@ import { ContractorDashboard } from './pages/dashboards/contractor-dashboard/con
 import { WorkerDashboard } from './pages/dashboards/worker-dashboard/worker-dashboard';
 import { ClientDashboard } from './pages/dashboards/client-dashboard/client-dashboard';
 
+import { AdminNotifications } from './pages/admin-notifications/admin-notifications';
+import { ContractorNotifications } from './pages/contractor-notifications/contractor-notifications';
+import { ClientNotifications } from './pages/client-notifications/client-notifications';
+import { WorkerNotifications } from './pages/worker-notifications/worker-notifications';
+import { SiteEngineerNotifications } from './pages/site-engineer-notifications/site-engineer-notifications';
+
 import { UserManagement } from './pages/user-management/user-management';
 import { ResourceAllocation } from './pages/resources/resource-allocation/resource-allocation';
 
@@ -21,7 +27,11 @@ import { ProjectDetails } from './pages/projects/project-details/project-details
 import { ProjectStatus } from './pages/projects/project-status/project-status';
 import { Schedule } from './pages/projects/schedule/schedule';
 import { UpdateProject } from './pages/projects/update-project/update-project';
+
 import { SiteEngineerProjects } from './pages/site-engineer-projects/site-engineer-projects';
+import { SiteEngineerMilestones } from './pages/site-engineer-milestones/site-engineer-milestones';
+
+import { Notifications } from './pages/notifications/notifications';
 
 export const routes: Routes = [
 
@@ -77,6 +87,16 @@ export const routes: Routes = [
     component: UserManagement
   },
 
+  // Resource Allocation
+  {
+    path: 'resource-allocation',
+    component: ResourceAllocation
+  },
+  {
+    path: 'resources/resource-allocation',
+    component: ResourceAllocation
+  },
+
   // Project Management
   {
     path: 'projects',
@@ -91,7 +111,7 @@ export const routes: Routes = [
     component: Milestones
   },
   {
-    path: 'projects/project-details',
+    path: 'projects/project-details/:id',
     component: ProjectDetails
   },
   {
@@ -111,24 +131,36 @@ export const routes: Routes = [
     component: SiteEngineerProjects
   },
   {
-    path: 'resource-allocation',
-    component: ResourceAllocation
-  },
-  {
-    path: 'resources/resource-allocation',
-    component: ResourceAllocation
+    path: 'site-engineer-milestones',
+    component: SiteEngineerMilestones
   },
 
-  // Optional pages (add these after creating the components)
-  /*
+  // General Notifications
   {
     path: 'notifications',
-    component: NotificationsComponent
+    component: Notifications
+  },
+
+  // Role Notifications
+  {
+    path: 'admin-notifications',
+    component: AdminNotifications
   },
   {
-    path: 'profile',
-    component: ProfileComponent
+    path: 'contractor-notifications',
+    component: ContractorNotifications
+  },
+  {
+    path: 'client-notifications',
+    component: ClientNotifications
+  },
+  {
+    path: 'worker-notifications',
+    component: WorkerNotifications
+  },
+  {
+    path: 'site-engineer-notifications',
+    component: SiteEngineerNotifications
   }
-  */
 
 ];

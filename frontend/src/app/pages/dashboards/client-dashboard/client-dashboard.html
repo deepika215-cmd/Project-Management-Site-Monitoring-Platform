@@ -1,33 +1,255 @@
-<div class="dashboard">
+<div class="page-container">
 
-  <h1>Client Dashboard</h1>
+    <!-- Sidebar -->
 
-  <p>Monitor your construction project.</p>
+    <aside class="sidebar">
 
-  <div class="cards">
+        <div class="logo">
 
-    <div>Project Progress: 68%</div>
+            <h2>BuildTrack</h2>
 
-    <div>Milestones Completed: 8</div>
+            <span>Construction Management</span>
 
-    <div>Pending Milestones: 3</div>
+        </div>
 
-    <div>Project Status: In Progress</div>
+        <nav>
 
-  </div>
+            <a
+                routerLink="/client-dashboard"
+                class="active">
 
-  <div class="section">
+                Dashboard
 
-    <h2>Recent Updates</h2>
+            </a>
 
-    <p>
-      Structural work has been completed.
-    </p>
+            <a routerLink="/client-projects">
 
-    <p>
-      Electrical installation is currently in progress.
-    </p>
+                My Projects
 
-  </div>
+            </a>
+
+            <a routerLink="/client-payments">
+
+                Payments
+
+            </a>
+
+            <a routerLink="/client-documents">
+
+                Documents
+
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a routerLink="/notifications">
+    Notifications
+</a>
+
+            <a>Profile</a>
+
+            <a routerLink="/login">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main-content">
+
+        <header class="page-header">
+
+            <div>
+
+                <h1>Client Dashboard</h1>
+
+                <p>
+
+                    Track your projects, milestones and payments.
+
+                </p>
+
+            </div>
+
+        </header>
+
+        <!-- Statistics -->
+
+        <section class="stats-row">
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">📁</div>
+
+                <div>
+
+                    <h3>3</h3>
+
+                    <span>Total Projects</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">🚧</div>
+
+                <div>
+
+                    <h3>2</h3>
+
+                    <span>Active Projects</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">✅</div>
+
+                <div>
+
+                    <h3>1</h3>
+
+                    <span>Completed</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">💰</div>
+
+                <div>
+
+                    <h3>₹15L</h3>
+
+                    <span>Pending Payments</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- My Projects -->
+
+        <section class="dashboard-section">
+
+            <h2>My Projects</h2>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Green Valley Apartments</strong>
+
+                    <p>Chennai</p>
+
+                </div>
+
+                <span class="in-progress">
+
+                    In Progress
+
+                </span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>City Mall Construction</strong>
+
+                    <p>Coimbatore</p>
+
+                </div>
+
+                <span class="scheduled">
+
+                    Planning
+
+                </span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <div>
+
+                    <strong>Industrial Warehouse</strong>
+
+                    <p>Bangalore</p>
+
+                </div>
+
+                <span class="completed">
+
+                    Completed
+
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- Recent Updates -->
+
+        <section class="dashboard-section">
+
+            <h2>Recent Updates</h2>
+
+            <p>✔ Foundation work completed successfully.</p>
+
+            <p>🚧 Electrical installation has started.</p>
+
+            <p>📅 Site inspection scheduled for 20 Aug 2026.</p>
+
+        </section>
+
+        <!-- Payment Summary -->
+
+        <section class="dashboard-section">
+
+            <h2>Payment Summary</h2>
+
+            <div class="activity-item">
+
+                <strong>Total Budget</strong>
+
+                <span>₹50,00,000</span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <strong>Paid</strong>
+
+                <span>₹35,00,000</span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <strong>Pending</strong>
+
+                <span>₹15,00,000</span>
+
+            </div>
+
+        </section>
+
+    </main>
 
 </div>

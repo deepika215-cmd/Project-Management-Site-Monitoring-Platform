@@ -3,620 +3,236 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
-
 interface Milestone {
-
   id: number;
-
   name: string;
-
   description: string;
-
   plannedDate: string;
-
-  actualDate: string;
-
+  actualDate: string | null;
   status: string;
-
 }
 
-
 @Component({
-
   selector: 'app-milestones',
-
   standalone: true,
-
-  imports: [
-
-    CommonModule,
-
-    FormsModule,
-
-    RouterLink
-
-  ],
-
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './milestones.html',
-
   styleUrl: './milestones.css'
-
 })
-
-
 export class Milestones {
-
 
   selectedProject = 'BT-001';
 
+  editingMilestoneId: number | null = null;
 
-  showModal = false;
-
-
-  editingMilestone = false;
-
-
-  currentMilestone: Milestone = {
-
-    id: 0,
-
+  editForm = {
     name: '',
-
     description: '',
-
     plannedDate: '',
-
-    actualDate: '',
-
-    status: 'Pending'
-
+    status: ''
   };
 
+  // ===== Modal =====
+
+  showAddModal = false;
+
+  newMilestone = {
+    name: '',
+    description: '',
+    plannedDate: '',
+    status: 'Pending'
+  };
 
   milestones: Milestone[] = [
-
-
     {
-
       id: 1,
-
-      name:
-        'Foundation Completed',
-
+      name: 'Foundation Completed',
       description:
         'Completion of foundation and underground structural work.',
-
-      plannedDate:
-        '2026-03-15',
-
-      actualDate:
-        '2026-03-12',
-
-      status:
-        'Completed'
-
+      plannedDate: '2026-03-15',
+      actualDate: '2026-03-12',
+      status: 'Completed'
     },
-
-
     {
-
       id: 2,
-
-      name:
-        'Structural Work Completed',
-
+      name: 'Structural Work Completed',
       description:
         'Completion of major structural construction activities.',
-
-      plannedDate:
-        '2026-07-30',
-
-      actualDate:
-        '',
-
-      status:
-        'In Progress'
-
+      plannedDate: '2026-07-30',
+      actualDate: null,
+      status: 'In Progress'
     },
-
-
     {
-
       id: 3,
-
-      name:
-        'Electrical Work Completed',
-
+      name: 'Electrical Work Completed',
       description:
         'Completion of electrical wiring and installations.',
-
-      plannedDate:
-        '2026-10-30',
-
-      actualDate:
-        '',
-
-      status:
-        'Pending'
-
+      plannedDate: '2026-10-30',
+      actualDate: null,
+      status: 'Pending'
     },
-
-
     {
-
       id: 4,
-
-      name:
-        'Plumbing Completed',
-
+      name: 'Plumbing Completed',
       description:
         'Completion of plumbing and water supply systems.',
-
-      plannedDate:
-        '2026-11-30',
-
-      actualDate:
-        '',
-
-      status:
-        'Pending'
-
-    },
-
-
-    {
-
-      id: 5,
-
-      name:
-        'Finishing Completed',
-
-      description:
-        'Completion of painting, flooring and interior finishing.',
-
-      plannedDate:
-        '2027-03-30',
-
-      actualDate:
-        '',
-
-      status:
-        'Pending'
-
-    },
-
-
-    {
-
-      id: 6,
-
-      name:
-        'Final Inspection Completed',
-
-      description:
-        'Final inspection and quality verification of the project.',
-
-      plannedDate:
-        '2027-05-30',
-
-      actualDate:
-        '',
-
-      status:
-        'Pending'
-
-    },
-
-
-    {
-
-      id: 7,
-
-      name:
-        'Project Handover',
-
-      description:
-        'Official handover of completed project to the client.',
-
-      plannedDate:
-        '2027-06-30',
-
-      actualDate:
-        '',
-
-      status:
-        'Pending'
-
+      plannedDate: '2026-11-30',
+      actualDate: null,
+      status: 'Pending'
     }
-
   ];
 
-
   get completedPercentage(): number {
-
-
     if (this.milestones.length === 0) {
-
       return 0;
-
     }
 
-
-    const completed =
-
-      this.milestones.filter(
-
-        milestone =>
-
-          milestone.status === 'Completed'
-
-      ).length;
-
-
-    return Math.round(
-
-      (completed /
-
-        this.milestones.length) *
-
-        100
-
-    );
-
-  }
-
-
-  getStatusCount(
-    status: string
-  ): number {
-
-
-    return this.milestones.filter(
-
-      milestone =>
-
-        milestone.status === status
-
+    const completed = this.milestones.filter(
+      m => m.status === 'Completed'
     ).length;
 
+    return Math.round((completed / this.milestones.length) * 100);
   }
 
+  getStatusCount(status: string): number {
+    return this.milestones.filter(
+      m => m.status === status
+    ).length;
+  }
 
   getDelayedCount(): number {
-
-
     return this.milestones.filter(
-
-      milestone =>
-
-        this.isDelayed(milestone)
-
+      m => this.isDelayed(m)
     ).length;
-
   }
 
+  isDelayed(milestone: Milestone): boolean {
 
-  isDelayed(
-    milestone: Milestone
-  ): boolean {
-
-
-    if (
-
-      milestone.status ===
-
-      'Completed'
-
-    ) {
-
+    if (milestone.status === 'Completed') {
       return false;
-
     }
 
-
-    if (
-
-      milestone.status ===
-
-      'Delayed'
-
-    ) {
-
-      return true;
-
-    }
-
-
-    if (
-
-      !milestone.plannedDate
-
-    ) {
-
-      return false;
-
-    }
-
-
-    const today =
-
-      new Date();
-
-
-    const plannedDate =
-
-      new Date(
-
-        milestone.plannedDate
-
-      );
-
-
-    return (
-
-      today >
-
-      plannedDate
-
-    );
-
+    return new Date() > new Date(milestone.plannedDate);
   }
-
-
-  getStatusClass(
-    status: string
-  ): string {
-
-
-    switch (status) {
-
-
-      case 'Pending':
-
-        return 'pending';
-
-
-      case 'In Progress':
-
-        return 'in-progress';
-
-
-      case 'Completed':
-
-        return 'completed';
-
-
-      case 'Delayed':
-
-        return 'delayed';
-
-
-      default:
-
-        return '';
-
-    }
-
-  }
-
+    // ============================
+  // ADD MILESTONE MODAL
+  // ============================
 
   openAddMilestone(): void {
-
-
-    this.editingMilestone =
-
-      false;
-
-
-    this.currentMilestone = {
-
-
-      id: 0,
-
-
+    this.newMilestone = {
       name: '',
-
-
       description: '',
-
-
       plannedDate: '',
-
-
-      actualDate: '',
-
-
       status: 'Pending'
-
-
     };
 
-
-    this.showModal = true;
-
+    this.showAddModal = true;
   }
 
-
-  editMilestone(
-    milestone: Milestone
-  ): void {
-
-
-    this.editingMilestone =
-
-      true;
-
-
-    this.currentMilestone = {
-
-      ...milestone
-
-    };
-
-
-    this.showModal = true;
-
+  closeAddMilestone(): void {
+    this.showAddModal = false;
   }
 
-
-  saveMilestone(): void {
-
+  addMilestone(): void {
 
     if (
-
-      this.editingMilestone
-
+      !this.newMilestone.name.trim() ||
+      !this.newMilestone.plannedDate
     ) {
-
-
-      const index =
-
-        this.milestones.findIndex(
-
-          milestone =>
-
-            milestone.id ===
-
-            this.currentMilestone.id
-
-        );
-
-
-      if (index !== -1) {
-
-
-        this.milestones[index] =
-
-          {
-
-            ...this.currentMilestone
-
-          };
-
-      }
-
-
-      alert(
-
-        'Milestone updated successfully!'
-
-      );
-
-
-    } else {
-
-
-      const newMilestone: Milestone = {
-
-
-        ...this.currentMilestone,
-
-
-        id:
-
-          this.getNextId()
-
-      };
-
-
-      this.milestones.push(
-
-        newMilestone
-
-      );
-
-
-      alert(
-
-        'Milestone added successfully!'
-
-      );
-
+      return;
     }
 
+    const milestone: Milestone = {
+      id: this.milestones.length
+        ? Math.max(...this.milestones.map(m => m.id)) + 1
+        : 1,
 
-    this.closeModal();
+      name: this.newMilestone.name,
 
+      description:
+        this.newMilestone.description || 'No description',
+
+      plannedDate: this.newMilestone.plannedDate,
+
+      actualDate:
+        this.newMilestone.status === 'Completed'
+          ? new Date().toISOString().split('T')[0]
+          : null,
+
+      status: this.newMilestone.status
+    };
+
+    this.milestones.push(milestone);
+
+    this.closeAddMilestone();
   }
 
+  // ============================
+  // EDIT MILESTONE
+  // ============================
 
-  deleteMilestone(
-    id: number
-  ): void {
+  startEdit(milestone: Milestone): void {
 
+    this.editingMilestoneId = milestone.id;
 
-    const confirmed =
+    this.editForm = {
+      name: milestone.name,
+      description: milestone.description,
+      plannedDate: milestone.plannedDate,
+      status: milestone.status
+    };
+  }
 
-      confirm(
+  saveEdit(milestone: Milestone): void {
 
-        'Are you sure you want to delete this milestone?'
+    milestone.name = this.editForm.name;
+    milestone.description = this.editForm.description;
+    milestone.plannedDate = this.editForm.plannedDate;
+    milestone.status = this.editForm.status;
 
-      );
-
-
-    if (!confirmed) {
-
-      return;
-
+    if (
+      milestone.status === 'Completed' &&
+      !milestone.actualDate
+    ) {
+      milestone.actualDate =
+        new Date().toISOString().split('T')[0];
     }
 
+    if (milestone.status !== 'Completed') {
+      milestone.actualDate = null;
+    }
 
-    this.milestones =
+    this.editingMilestoneId = null;
+  }
+    // ============================
+  // CANCEL EDIT
+  // ============================
 
-      this.milestones.filter(
+  cancelEdit(): void {
+    this.editingMilestoneId = null;
+  }
 
-        milestone =>
+  // ============================
+  // DELETE MILESTONE
+  // ============================
 
-          milestone.id !== id
+  deleteMilestone(id: number): void {
 
-      );
-
-
-    alert(
-
-      'Milestone deleted successfully!'
-
+    const confirmed = confirm(
+      'Are you sure you want to delete this milestone?'
     );
 
-  }
-
-
-  closeModal(): void {
-
-
-    this.showModal =
-
-      false;
-
-  }
-
-
-  private getNextId(): number {
-
-
-    if (
-
-      this.milestones.length === 0
-
-    ) {
-
-      return 1;
-
+    if (!confirmed) {
+      return;
     }
 
+    this.milestones = this.milestones.filter(
+      milestone => milestone.id !== id
+    );
 
-    return Math.max(
-
-      ...this.milestones.map(
-
-        milestone =>
-
-          milestone.id
-
-      )
-
-    ) + 1;
-
+    if (this.editingMilestoneId === id) {
+      this.editingMilestoneId = null;
+    }
   }
 
 }

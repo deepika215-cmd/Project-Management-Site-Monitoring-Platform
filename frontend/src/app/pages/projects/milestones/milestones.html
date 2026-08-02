@@ -1,560 +1,652 @@
 <div class="page-container">
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
+    <!-- ================= Sidebar ================= -->
 
-    <div class="logo">
-      <h2>BuildTrack</h2>
-      <span>Construction Management</span>
-    </div>
+    <aside class="sidebar">
 
-    <nav>
+        <div class="logo">
+            <h2>BuildTrack</h2>
+            <span>Construction Management</span>
+        </div>
 
-      <a routerLink="/dashboard">
-        Dashboard
-      </a>
+        <nav>
 
-      <a routerLink="/projects">
-        My Projects
-      </a>
+            <a routerLink="/project-manager-dashboard">
+                Dashboard
+            </a>
 
-      <a routerLink="/projects/create">
-        Create Project
-      </a>
+            <a routerLink="/projects">
+                My Projects
+            </a>
 
-      <a
-        routerLink="/projects/milestones"
-        class="active">
+            <a routerLink="/projects/create-project">
+                Create Project
+            </a>
 
-        Milestones
+            <a
+                routerLink="/projects/milestones"
+                class="active">
 
-      </a>
+                Milestones
 
-      <a routerLink="/projects/schedule">
-        Schedule
-      </a>
+            </a>
 
-    </nav>
+            <a routerLink="/projects/schedule">
+                Schedule
+            </a>
 
-    <div class="sidebar-bottom">
+        </nav>
 
-      <a>Notifications</a>
+        <div class="sidebar-bottom">
 
-      <a>Profile</a>
+            <a routerLink="/notifications">
+                Notifications
+            </a>
 
-      <a routerLink="/dashboard">
-        Logout
-      </a>
+            <a routerLink="/profile">
+                Profile
+            </a>
 
-    </div>
-
-  </aside>
-
-
-  <!-- Main Content -->
-  <main class="main-content">
-
-    <!-- Header -->
-    <div class="page-header">
-
-      <div>
-
-        <h1>Project Milestones</h1>
-
-        <p>
-          Track major achievements and checkpoints
-          throughout the project lifecycle.
-        </p>
-
-      </div>
-
-      <button
-        class="add-btn"
-        (click)="openAddMilestone()">
-
-        + Add Milestone
-
-      </button>
-
-    </div>
-
-
-    <!-- Project Selector -->
-    <section class="project-selector">
-
-      <label>
-        Select Project
-      </label>
-
-      <select
-        [(ngModel)]="selectedProject">
-
-        <option value="BT-001">
-          BT-001 - Green Valley Apartments
-        </option>
-
-        <option value="BT-002">
-          BT-002 - City Mall Construction
-        </option>
-
-        <option value="BT-003">
-          BT-003 - National Highway Project
-        </option>
-
-      </select>
-
-    </section>
-
-
-    <!-- Statistics -->
-    <section class="stats">
-
-      <div class="stat-card">
-
-        <span>Total Milestones</span>
-
-        <h2>
-          {{ milestones.length }}
-        </h2>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <span>Completed</span>
-
-        <h2>
-          {{ getStatusCount('Completed') }}
-        </h2>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <span>In Progress</span>
-
-        <h2>
-          {{ getStatusCount('In Progress') }}
-        </h2>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <span>Delayed</span>
-
-        <h2>
-          {{ getDelayedCount() }}
-        </h2>
-
-      </div>
-
-    </section>
-
-
-    <!-- Overall Progress -->
-    <section class="progress-card">
-
-      <div class="progress-header">
-
-        <div>
-
-          <h2>
-            Overall Milestone Progress
-          </h2>
-
-          <p>
-            {{ completedPercentage }}%
-            of milestones completed
-          </p>
+            <a routerLink="/login">
+                Logout
+            </a>
 
         </div>
 
-        <strong>
-          {{ completedPercentage }}%
-        </strong>
+    </aside>
 
-      </div>
+    <!-- ================= MAIN CONTENT ================= -->
 
+    <main class="main-content">
 
-      <div class="progress-bar">
+        <!-- ================= PAGE HEADER ================= -->
 
-        <div
-          class="progress"
-          [style.width.%]="completedPercentage">
-        </div>
+        <header class="page-header">
 
-      </div>
+            <div>
 
-    </section>
+                <h1>Project Milestones</h1>
 
-
-    <!-- Milestone Table -->
-    <section class="milestone-section">
-
-      <div class="section-header">
-
-        <div>
-
-          <h2>
-            Milestone List
-          </h2>
-
-          <p>
-            Major project checkpoints
-          </p>
-
-        </div>
-
-      </div>
-
-
-      <div class="table-container">
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>#</th>
-
-              <th>Milestone</th>
-
-              <th>Planned Date</th>
-
-              <th>Actual Date</th>
-
-              <th>Status</th>
-
-              <th>Delay</th>
-
-              <th>Actions</th>
-
-            </tr>
-
-          </thead>
-
-
-          <tbody>
-
-            <tr
-              *ngFor="
-                let milestone of milestones;
-                let i = index
-              ">
-
-              <td>
-                {{ i + 1 }}
-              </td>
-
-
-              <td>
-
-                <strong>
-                  {{ milestone.name }}
-                </strong>
-
-                <p class="description">
-                  {{ milestone.description }}
+                <p>
+                    Track major achievements and checkpoints throughout the project lifecycle.
                 </p>
 
-              </td>
+            </div>
 
+            <button
+                class="back-btn"
+                (click)="openAddMilestone()">
 
-              <td>
-                {{ milestone.plannedDate }}
-              </td>
+                + Add Milestone
 
+            </button>
 
-              <td>
+        </header>
 
-                <span
-                  *ngIf="milestone.actualDate">
+        <!-- ================= DASHBOARD CARDS ================= -->
 
-                  {{ milestone.actualDate }}
+        <section class="stats-row">
 
-                </span>
+            <div class="stat-card">
 
-                <span
-                  *ngIf="!milestone.actualDate"
-                  class="not-completed">
+                <div class="stat-icon blue">
+                    📋
+                </div>
 
-                  Not Completed
+                <div>
 
-                </span>
+                    <h3>{{ milestones?.length || 0 }}</h3>
 
-              </td>
-
-
-              <td>
-
-                <span
-                  class="status"
-                  [ngClass]="
-                    getStatusClass(milestone.status)
-                  ">
-
-                  {{ milestone.status }}
-
-                </span>
-
-              </td>
-
-
-              <td>
-
-                <span
-                  *ngIf="isDelayed(milestone)"
-                  class="delay">
-
-                  Delayed
-
-                </span>
-
-                <span
-                  *ngIf="!isDelayed(milestone)"
-                  class="on-time">
-
-                  On Time
-
-                </span>
-
-              </td>
-
-
-              <td>
-
-                <div class="actions">
-
-                  <button
-                    class="edit-btn"
-                    (click)="editMilestone(milestone)">
-
-                    Edit
-
-                  </button>
-
-
-                  <button
-                    class="delete-btn"
-                    (click)="deleteMilestone(milestone.id)">
-
-                    Delete
-
-                  </button>
+                    <span>Total Milestones</span>
 
                 </div>
 
-              </td>
+            </div>
 
-            </tr>
+            <div class="stat-card">
 
+                <div class="stat-icon green">
+                    ✅
+                </div>
 
-            <tr
-              *ngIf="milestones.length === 0">
+                <div>
 
-              <td
-                colspan="7"
-                class="no-data">
+                    <h3>{{ getStatusCount('Completed') }}</h3>
 
-                No milestones found.
+                    <span>Completed</span>
 
-              </td>
+                </div>
 
-            </tr>
+            </div>
 
-          </tbody>
+            <div class="stat-card">
 
-        </table>
+                <div class="stat-icon orange">
+                    🚧
+                </div>
 
-      </div>
+                <div>
 
-    </section>
+                    <h3>{{ getStatusCount('In Progress') }}</h3>
 
+                    <span>In Progress</span>
 
-    <!-- Add/Edit Modal -->
-    <div
-      class="modal-overlay"
-      *ngIf="showModal">
+                </div>
 
+            </div>
 
-      <div class="modal">
+            <div class="stat-card">
 
+                <div class="stat-icon purple">
+                    ⏰
+                </div>
 
-        <div class="modal-header">
+                <div>
 
-          <h2>
+                    <h3>{{ getDelayedCount() }}</h3>
 
-            {{
-              editingMilestone
-              ? 'Edit Milestone'
-              : 'Add New Milestone'
-            }}
+                    <span>Delayed</span>
 
-          </h2>
+                </div>
 
+            </div>
 
-          <button
-            class="close-btn"
-            (click)="closeModal()">
+        </section>
 
-            ×
+        <!-- ================= PROJECT INFORMATION ================= -->
 
-          </button>
+        <section class="form-section">
+
+            <h2>📁 Project Information</h2>
+
+            <div class="form-grid">
+
+                <div class="form-group full-width">
+
+                    <label>Select Project</label>
+
+                    <select [(ngModel)]="selectedProject">
+
+                        <option value="BT-001">
+                            BT-001 - Green Valley Apartments
+                        </option>
+
+                        <option value="BT-002">
+                            BT-002 - City Mall Construction
+                        </option>
+
+                        <option value="BT-003">
+                            BT-003 - National Highway Project
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= OVERALL PROGRESS ================= -->
+
+        <section class="form-section">
+
+            <div
+                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+
+                <div>
+
+                    <h2>📈 Overall Milestone Progress</h2>
+
+                    <p style="color:#666;margin-top:8px;">
+
+                        Monitor the overall completion status of all project milestones.
+
+                    </p>
+
+                </div>
+
+                <h2 style="color:#2947b3;">
+
+                    {{ completedPercentage }}%
+
+                </h2>
+
+            </div>
+
+            <div class="progress-wrapper">
+
+                <div class="progress-bar">
+
+                    <div
+                        class="progress"
+                        [style.width.%]="completedPercentage">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ================= MILESTONE LIST ================= -->
+
+        <section class="form-section">
+
+            <h2>📋 Milestone List</h2>
+
+            <div class="table-responsive">
+
+                <table class="milestone-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>#</th>
+
+                            <th>Milestone</th>
+
+                            <th>Planned Date</th>
+
+                            <th>Actual Date</th>
+
+                            <th>Status</th>
+
+                            <th>Delay</th>
+
+                            <th>Actions</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        <tr
+                            *ngFor="let milestone of milestones; let i=index">
+
+                            <td>{{ i+1 }}</td>
+
+                            <ng-container *ngIf="editingMilestoneId !== milestone.id">
+                                    <!-- ================= VIEW MODE ================= -->
+
+    <td>
+
+        <div class="milestone-info">
+
+            <div class="milestone-name">
+
+                📌 {{ milestone.name }}
+
+            </div>
+
+            <div class="milestone-description">
+
+                {{ milestone.description }}
+
+            </div>
 
         </div>
 
+    </td>
 
-        <form
-          (ngSubmit)="saveMilestone()">
+    <!-- Planned Date -->
 
+    <td>
 
-          <!-- Name -->
+        {{ milestone.plannedDate }}
 
-          <div class="form-group">
+    </td>
 
-            <label>
-              Milestone Name *
-            </label>
+    <!-- Actual Date -->
+
+    <td>
+
+        <span *ngIf="milestone.actualDate">
+
+            {{ milestone.actualDate }}
+
+        </span>
+
+        <span
+            *ngIf="!milestone.actualDate"
+            class="text-muted">
+
+            Not Completed
+
+        </span>
+
+    </td>
+
+    <!-- Status -->
+
+    <td>
+
+        <span
+            class="status-badge"
+            [ngClass]="milestone.status.toLowerCase().replace(' ','-')">
+
+            {{ milestone.status }}
+
+        </span>
+
+    </td>
+
+    <!-- Delay -->
+
+    <td>
+
+        <span
+            *ngIf="isDelayed(milestone)"
+            class="delay-badge delayed">
+
+            Delayed
+
+        </span>
+
+        <span
+            *ngIf="!isDelayed(milestone)"
+            class="delay-badge on-time">
+
+            On Time
+
+        </span>
+
+    </td>
+
+    <!-- Actions -->
+
+    <td>
+
+        <div class="actions">
+
+            <button
+                class="edit-btn"
+                (click)="startEdit(milestone)">
+
+                Edit
+
+            </button>
+
+            <button
+                class="delete-btn"
+                (click)="deleteMilestone(milestone.id)">
+
+                Delete
+
+            </button>
+
+        </div>
+
+    </td>
+
+</ng-container>
+
+<!-- ================= EDIT MODE ================= -->
+
+<ng-container *ngIf="editingMilestoneId === milestone.id">
+
+    <td>
+
+        <div class="edit-container">
 
             <input
-              type="text"
-              [(ngModel)]="currentMilestone.name"
-              name="milestoneName"
-              placeholder="Example: Foundation Completed"
-              required>
-
-          </div>
-
-
-          <!-- Description -->
-
-          <div class="form-group">
-
-            <label>
-              Description
-            </label>
+                type="text"
+                [(ngModel)]="editForm.name"
+                placeholder="Milestone Name">
 
             <textarea
-              [(ngModel)]="currentMilestone.description"
-              name="description"
-              rows="3"
-              placeholder="Enter milestone description">
+                rows="2"
+                [(ngModel)]="editForm.description"
+                placeholder="Description">
             </textarea>
 
-          </div>
+        </div>
 
+    </td>
 
-          <!-- Dates -->
+    <td>
 
-          <div class="form-row">
+        <input
+            type="date"
+            [(ngModel)]="editForm.plannedDate">
 
+    </td>
+        <!-- Actual Date -->
 
-            <div class="form-group">
+    <td>
 
-              <label>
-                Planned Completion Date *
-              </label>
+        <span class="text-muted">
 
-              <input
-                type="date"
-                [(ngModel)]="currentMilestone.plannedDate"
-                name="plannedDate"
-                required>
+            Auto Generated
 
-            </div>
+        </span>
 
+    </td>
 
-            <div class="form-group">
+    <!-- Status -->
 
-              <label>
-                Actual Completion Date
-              </label>
+    <td>
 
-              <input
-                type="date"
-                [(ngModel)]="currentMilestone.actualDate"
-                name="actualDate">
+        <select [(ngModel)]="editForm.status">
 
-            </div>
-
-
-          </div>
-
-
-          <!-- Status -->
-
-          <div class="form-group">
-
-            <label>
-              Status *
-            </label>
-
-            <select
-              [(ngModel)]="currentMilestone.status"
-              name="status"
-              required>
-
-              <option value="Pending">
-                Pending
-              </option>
-
-              <option value="In Progress">
-                In Progress
-              </option>
-
-              <option value="Completed">
+            <option value="Completed">
                 Completed
-              </option>
+            </option>
 
-              <option value="Delayed">
-                Delayed
-              </option>
+            <option value="In Progress">
+                In Progress
+            </option>
 
-            </select>
+            <option value="Pending">
+                Pending
+            </option>
 
-          </div>
+        </select>
 
+    </td>
 
-          <!-- Buttons -->
+    <!-- Delay -->
 
-          <div class="modal-actions">
+    <td>
+
+        -
+
+    </td>
+
+    <!-- Save / Cancel -->
+
+    <td>
+
+        <div class="actions">
 
             <button
-              type="button"
-              class="cancel-btn"
-              (click)="closeModal()">
+                class="save-btn"
+                (click)="saveEdit(milestone)">
 
-              Cancel
+                Save
 
             </button>
 
-
             <button
-              type="submit"
-              class="save-btn">
+                class="cancel-btn"
+                (click)="cancelEdit()">
 
-              {{
-                editingMilestone
-                ? 'Save Changes'
-                : 'Add Milestone'
-              }}
+                Cancel
 
             </button>
 
-          </div>
+        </div>
 
+    </td>
+
+</ng-container>
+
+</tr>
+
+<!-- ================= NO DATA ================= -->
+
+<tr *ngIf="!milestones || milestones.length === 0">
+
+    <td
+        colspan="7"
+        class="no-data">
+
+        No milestones available.
+
+    </td>
+
+</tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+            <!-- ================= END MAIN CONTENT ================= -->
+
+    </main>
+
+</div>
+
+<!-- ================= ADD MILESTONE MODAL ================= -->
+
+<!-- ================= ADD MILESTONE MODAL ================= -->
+
+<div
+    class="modal-overlay"
+    *ngIf="showAddModal">
+
+    <div class="modal">
+
+        <!-- Header -->
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>📌 Add New Milestone</h2>
+
+                <p>
+                    Create a new milestone for the selected project.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="close-btn"
+                (click)="closeAddMilestone()">
+
+                ✕
+
+            </button>
+
+        </div>
+
+        <form (ngSubmit)="addMilestone()">
+
+            <!-- Name -->
+
+            <div class="form-group">
+
+                <label>Milestone Name</label>
+
+                <input
+                    type="text"
+                    name="name"
+                    [(ngModel)]="newMilestone.name"
+                    placeholder="Example: Foundation Completed"
+                    required>
+
+            </div>
+
+            <!-- Description -->
+
+            <div class="form-group">
+
+                <label>Description</label>
+
+                <textarea
+                    rows="4"
+                    name="description"
+                    [(ngModel)]="newMilestone.description"
+                    placeholder="Briefly describe this milestone">
+                </textarea>
+
+            </div>
+
+            <!-- Two-column layout -->
+
+            <div class="modal-grid">
+
+                <div class="form-group">
+
+                    <label>📅 Planned Date</label>
+
+                    <input
+                        type="date"
+                        name="plannedDate"
+                        [(ngModel)]="newMilestone.plannedDate"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>🚦 Status</label>
+
+                    <select
+                        name="status"
+                        [(ngModel)]="newMilestone.status">
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="In Progress">
+                            In Progress
+                        </option>
+
+                        <option value="Completed">
+                            Completed
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    (click)="closeAddMilestone()">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="submit-btn">
+
+                    ➕ Add Milestone
+
+                </button>
+
+            </div>
 
         </form>
 
-      </div>
-
     </div>
-
-  </main>
 
 </div>

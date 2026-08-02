@@ -1,19 +1,238 @@
-<div class="dashboard">
+<div class="page-container">
 
-  <h1>Worker Dashboard</h1>
+    <!-- Sidebar -->
 
-  <p>Welcome to your BuildTrack workspace.</p>
+    <aside class="sidebar">
 
-  <div class="cards">
+        <div class="logo">
 
-    <div>My Tasks: 4</div>
+            <h2>BuildTrack</h2>
 
-    <div>Attendance: 95%</div>
+            <span>Construction Management</span>
 
-    <div>Today's Shift: Morning</div>
+        </div>
 
-    <div>Tasks Completed: 12</div>
+        <nav>
 
-  </div>
+            <a
+                routerLink="/worker-dashboard"
+                class="active">
+
+                Dashboard
+
+            </a>
+
+            <a routerLink="/worker-tasks">
+
+                My Tasks
+
+            </a>
+
+            <a routerLink="/worker-attendance">
+
+                Attendance
+
+            </a>
+
+            <a routerLink="/worker-schedule">
+
+                Work Schedule
+
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <a routerLink="/notifications">
+    Notifications
+</a>
+
+            <a>Profile</a>
+
+            <a routerLink="/login">
+
+                Logout
+
+            </a>
+
+        </div>
+
+    </aside>
+
+    <!-- Main -->
+
+    <main class="main-content">
+
+        <header class="page-header">
+
+            <div>
+
+                <h1>Worker Dashboard</h1>
+
+                <p>
+
+                    View your assigned tasks and daily schedule.
+
+                </p>
+
+            </div>
+
+        </header>
+
+        <!-- Statistics -->
+
+        <section class="stats-row">
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">📋</div>
+
+                <div>
+
+                    <h3>8</h3>
+
+                    <span>Assigned Tasks</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">✅</div>
+
+                <div>
+
+                    <h3>5</h3>
+
+                    <span>Completed</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">⏳</div>
+
+                <div>
+
+                    <h3>3</h3>
+
+                    <span>Pending</span>
+
+                </div>
+
+            </div>
+
+            <div class="stat-card">
+
+                <div class="stat-icon purple">🕒</div>
+
+                <div>
+
+                    <h3>96%</h3>
+
+                    <span>Attendance</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Today's Tasks -->
+
+        <section class="dashboard-section">
+
+            <h2>Today's Tasks</h2>
+
+            <div
+                class="activity-item"
+                *ngFor="let task of tasks">
+
+                <div>
+
+                    <strong>{{ task.task }}</strong>
+
+                    <p>{{ task.project }}</p>
+
+                </div>
+
+                <span
+                    [ngClass]="task.status.toLowerCase().replace(' ', '-')">
+
+                    {{ task.status }}
+
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- Schedule -->
+
+        <section class="dashboard-section">
+
+            <h2>Today's Schedule</h2>
+
+            <div class="activity-item">
+
+                <strong>08:00 AM</strong>
+
+                <span>Site Check-in</span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <strong>09:00 AM</strong>
+
+                <span>Foundation Work</span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <strong>01:00 PM</strong>
+
+                <span>Lunch Break</span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <strong>02:00 PM</strong>
+
+                <span>Bricklaying</span>
+
+            </div>
+
+            <div class="activity-item">
+
+                <strong>05:30 PM</strong>
+
+                <span>End Shift</span>
+
+            </div>
+
+        </section>
+
+        <!-- Announcements -->
+
+        <section class="dashboard-section">
+
+            <h2>Announcements</h2>
+
+            <p>⚠ Safety meeting at 8:30 AM.</p>
+
+            <p>🦺 Safety helmet is mandatory.</p>
+
+            <p>🚧 Block B is temporarily closed for maintenance.</p>
+
+        </section>
+
+    </main>
 
 </div>
