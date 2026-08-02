@@ -11,9 +11,15 @@
 
   align-items: center;
 
-  background: #f4f6f9;
+  background: linear-gradient(rgba(15, 23, 42, 0.80), rgba(15, 23, 42, 0.80)),
+    url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=80')
+    center/cover no-repeat;
+
+  background-attachment: fixed;
 
   padding: 20px;
+
+  color: #e2e8f0;
 }
 
 .auth-card {
@@ -21,7 +27,16 @@
 
   max-width: 450px;
 
-  background: white;
+  background: rgba(15, 23, 42, 0.94);
+
+  padding: 40px;
+
+  border-radius: 16px;
+
+  border: 1px solid rgba(148, 163, 184, 0.18);
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.35);
 
   padding: 40px;
 
@@ -41,13 +56,13 @@
 .logo-section h1 {
   margin: 0;
 
-  color: #2563eb;
+  color: #f8fafc;
 
   font-size: 32px;
 }
 
 .logo-section p {
-  color: #6b7280;
+  color: #cbd5e1;
 
   font-size: 13px;
 }

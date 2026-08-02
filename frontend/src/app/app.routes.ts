@@ -29,8 +29,11 @@ import { Schedule } from './pages/projects/schedule/schedule';
 import { UpdateProject } from './pages/projects/update-project/update-project';
 
 import { SiteEngineerProjects } from './pages/site-engineer-projects/site-engineer-projects';
+<<<<<<< HEAD
 import { SiteEngineerMilestones } from './pages/site-engineer-milestones/site-engineer-milestones';
 
+=======
+>>>>>>> 60d61182f3bcd948dd0338842f23ae837bca1e0b
 import { Notifications } from './pages/notifications/notifications';
 
 export const routes: Routes = [
@@ -134,9 +137,14 @@ export const routes: Routes = [
     path: 'site-engineer-milestones',
     component: SiteEngineerMilestones
   },
+  {
+    path: 'notifications',
+    component: Notifications
+  },
 
   // General Notifications
   {
+<<<<<<< HEAD
     path: 'notifications',
     component: Notifications
   },
@@ -161,6 +169,10 @@ export const routes: Routes = [
   {
     path: 'site-engineer-notifications',
     component: SiteEngineerNotifications
+=======
+    path: 'profile',
+    component: ProfileComponent
+>>>>>>> 60d61182f3bcd948dd0338842f23ae837bca1e0b
   }
 
 ];
