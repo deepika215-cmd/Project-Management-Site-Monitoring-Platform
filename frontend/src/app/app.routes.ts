@@ -29,12 +29,10 @@ import { Schedule } from './pages/projects/schedule/schedule';
 import { UpdateProject } from './pages/projects/update-project/update-project';
 
 import { SiteEngineerProjects } from './pages/site-engineer-projects/site-engineer-projects';
-<<<<<<< HEAD
 import { SiteEngineerMilestones } from './pages/site-engineer-milestones/site-engineer-milestones';
 
-=======
->>>>>>> 60d61182f3bcd948dd0338842f23ae837bca1e0b
 import { Notifications } from './pages/notifications/notifications';
+
 
 export const routes: Routes = [
 
@@ -45,134 +43,158 @@ export const routes: Routes = [
   },
 
   // Authentication
+
   {
     path: 'login',
     component: Login
   },
+
   {
     path: 'register',
     component: Register
   },
+
   {
     path: 'forgot-password',
     component: ForgotPassword
   },
 
+
   // Dashboards
+
   {
     path: 'admin-dashboard',
     component: AdminDashboard
   },
+
   {
     path: 'project-manager-dashboard',
     component: ProjectManagerDashboard
   },
+
   {
     path: 'site-engineer-dashboard',
     component: SiteEngineerDashboard
   },
+
   {
     path: 'contractor-dashboard',
     component: ContractorDashboard
   },
+
   {
     path: 'worker-dashboard',
     component: WorkerDashboard
   },
+
   {
     path: 'client-dashboard',
     component: ClientDashboard
   },
 
+
   // User Management
+
   {
     path: 'user-management',
     component: UserManagement
   },
 
-  // Resource Allocation
+
+  // Resources
+
   {
     path: 'resource-allocation',
     component: ResourceAllocation
   },
+
   {
     path: 'resources/resource-allocation',
     component: ResourceAllocation
   },
 
-  // Project Management
+
+  // Projects
+
   {
     path: 'projects',
     component: ProjectList
   },
+
   {
     path: 'projects/create-project',
     component: CreateProject
   },
+
   {
     path: 'projects/milestones',
     component: Milestones
   },
+
   {
     path: 'projects/project-details/:id',
     component: ProjectDetails
   },
+
   {
     path: 'projects/project-status',
     component: ProjectStatus
   },
+
   {
     path: 'projects/schedule',
     component: Schedule
   },
+
   {
     path: 'projects/update-project',
     component: UpdateProject
   },
+
+
+  // Site Engineer
+
   {
     path: 'site-engineer-projects',
     component: SiteEngineerProjects
   },
+
   {
     path: 'site-engineer-milestones',
     component: SiteEngineerMilestones
   },
+
+
+  // Notifications
+
   {
     path: 'notifications',
     component: Notifications
   },
 
-  // General Notifications
-  {
-<<<<<<< HEAD
-    path: 'notifications',
-    component: Notifications
-  },
-
-  // Role Notifications
   {
     path: 'admin-notifications',
     component: AdminNotifications
   },
+
   {
     path: 'contractor-notifications',
     component: ContractorNotifications
   },
+
   {
     path: 'client-notifications',
     component: ClientNotifications
   },
+
   {
     path: 'worker-notifications',
     component: WorkerNotifications
   },
+
   {
     path: 'site-engineer-notifications',
     component: SiteEngineerNotifications
-=======
-    path: 'profile',
-    component: ProfileComponent
->>>>>>> 60d61182f3bcd948dd0338842f23ae837bca1e0b
   }
 
 ];
