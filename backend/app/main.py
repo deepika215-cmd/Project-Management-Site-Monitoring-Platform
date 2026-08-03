@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.users import router as users_router
 from app.database.database import Base, engine
 
 # Import Models
@@ -31,6 +32,14 @@ Base.metadata.create_all(bind=engine)
 
 # Create FastAPI application
 app = FastAPI(title="BuildTrack API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.include_router(users_router)
 
 # Register API Routers
 app.include_router(auth_router)
