@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String
+
 from app.database.database import Base
-import datetime
 
 
 class Notification(Base):
@@ -8,13 +8,10 @@ class Notification(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    title = Column(String(100), nullable=False)
+    title = Column(String(200), nullable=False)
 
-    message = Column(String(500), nullable=False)
+    message = Column(String(500))
 
-    notification_type = Column(String(50))
+    recipient = Column(String(100))
 
-    created_at = Column(
-        DateTime,
-        default=datetime.datetime.utcnow
-    )
+    status = Column(String(50), default="Unread")

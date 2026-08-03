@@ -9,15 +9,13 @@ class Worker(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    name = Column(String(100), nullable=False)
+    name = Column(String(200), nullable=False)
 
-    phone = Column(String(15))
+    role = Column(String(100))
 
-    designation = Column(String(50))
+    phone = Column(String(20))
 
-    salary = Column(Integer)
-
-    status = Column(String(30), default="Active")
+    address = Column(String(300))
 
     project_id = Column(
         Integer,

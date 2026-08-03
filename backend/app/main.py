@@ -18,6 +18,13 @@ from app.models.report import Report
 from app.api.auth import router as auth_router
 from app.api.project import router as project_router
 from app.api.milestone import router as milestone_router
+from app.api.resource import router as resource_router
+from app.api.inventory import router as inventory_router
+from app.api.worker import router as worker_router
+from app.api.attendance import router as attendance_router
+from app.api.procurement import router as procurement_router
+from app.api.notification import router as notification_router
+from app.api.report import router as report_router   # <-- NEW
 
 # Create all database tables
 Base.metadata.create_all(bind=engine)
@@ -29,6 +36,13 @@ app = FastAPI(title="BuildTrack API")
 app.include_router(auth_router)
 app.include_router(project_router)
 app.include_router(milestone_router)
+app.include_router(resource_router)
+app.include_router(inventory_router)
+app.include_router(worker_router)
+app.include_router(attendance_router)
+app.include_router(procurement_router)
+app.include_router(notification_router)
+app.include_router(report_router)   # <-- NEW
 
 # Home Route
 @app.get("/")

@@ -1,25 +1,21 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
 
 class Procurement(Base):
-    __tablename__ = "procurements"
+    __tablename__ = "procurement"
 
     id = Column(Integer, primary_key=True, index=True)
 
-    item_name = Column(String(100), nullable=False)
+    item_name = Column(String(200), nullable=False)
 
-    quantity = Column(Integer, nullable=False)
+    quantity = Column(Integer)
 
-    supplier = Column(String(100))
+    supplier = Column(String(200))
 
-    order_date = Column(Date)
-
-    expected_delivery = Column(Date)
-
-    status = Column(String(50), default="Ordered")
+    status = Column(String(100))
 
     project_id = Column(
         Integer,

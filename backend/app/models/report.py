@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Date
+from sqlalchemy import Column, Integer, String
+
 from app.database.database import Base
 
 
@@ -7,12 +8,10 @@ class Report(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    report_name = Column(String(100), nullable=False)
+    title = Column(String(200), nullable=False)
 
-    report_type = Column(String(50))
+    description = Column(String(500))
 
-    generated_date = Column(Date)
+    report_type = Column(String(100))
 
-    generated_by = Column(String(100))
-
-    file_path = Column(String(255))
+    status = Column(String(100))
