@@ -1,171 +1,142 @@
 <div class="dashboard">
 
+  <!-- LEFT SIDEBAR -->
+
   <aside class="sidebar">
 
-    <h2>BuildTrack</h2>
+```
+<h2>BuildTrack</h2>
 
-    <nav>
+<nav>
 
-      <a class="active">Dashboard</a>
+  <a routerLink="/admin-dashboard">
+    Dashboard
+  </a>
 
-      <a routerLink="/user-management">
-        User Management
-      </a>
+  <a routerLink="/user-management">
+    User Management
+  </a>
 
-      <a routerLink="/projects">
-        Project Management
-      </a>
+  <a routerLink="/projects">
+    Project Management
+  </a>
 
-      <a>
-        Workforce Management
-      </a>
+  <a routerLink="/workforce">
+    Workforce Management
+  </a>
 
-      <a>
-        Resource Management
-      </a>
+  <a routerLink="/resources">
+    Resource Management
+  </a>
 
-      <a>
-        Material & Inventory
-      </a>
+  <a routerLink="/inventory">
+    Material & Inventory
+  </a>
 
-      <a>
-        Procurement
-      </a>
+  <a routerLink="/procurement">
+    Procurement
+  </a>
 
-      <a>
-        Budget Management
-      </a>
+  <a routerLink="/budget">
+    Budget Management
+  </a>
 
-      <a>
-        Reports
-      </a>
+  <a routerLink="/reports">
+    Reports
+  </a>
 
-      <a routerLink="/admin-notifications">
+  <a routerLink="/admin-notifications">
     Notifications
-</a>
+  </a>
 
-      <a>
-        Analytics
-      </a>
+  <a routerLink="/analytics">
+    Analytics
+  </a>
 
-      <a>
-        Settings
-      </a>
+  <a routerLink="/settings">
+    Settings
+  </a>
 
-<<<<<<< HEAD
-      <a (click)="logout()">
-=======
-      <a routerLink="/login">
->>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
-        Logout
-      </a>
+  <a (click)="logout()">
+    Logout
+  </a>
 
-    </nav>
+</nav>
+```
 
   </aside>
 
+  <!-- MAIN CONTENT -->
 
   <main class="main-content">
 
-    <h1>
-      Administrator Dashboard
-    </h1>
+```
+<h1>Administrator Dashboard</h1>
 
-    <p>
-      Welcome to BuildTrack Administration.
-    </p>
+<p>Welcome to BuildTrack Administration.</p>
 
 
-    <div class="stats-grid">
+<!-- STATISTICS -->
+<div class="stats-grid">
 
-      <div class="stat-card">
+  <div class="stat-card">
+    <h3>Total Projects</h3>
+    <strong>24</strong>
+  </div>
 
-        <h3>Total Projects</h3>
+  <div class="stat-card">
+    <h3>Active Projects</h3>
+    <strong>18</strong>
+  </div>
 
-        <strong>24</strong>
+  <div class="stat-card">
+    <h3>Total Users</h3>
+    <strong>342</strong>
+  </div>
 
-      </div>
+  <div class="stat-card">
+    <h3>Active Workers</h3>
+    <strong>280</strong>
+  </div>
 
+  <div class="stat-card">
+    <h3>Procurement Requests</h3>
+    <strong>15</strong>
+  </div>
 
-      <div class="stat-card">
+  <div class="stat-card">
+    <h3>Budget Utilization</h3>
+    <strong>68%</strong>
+  </div>
 
-        <h3>Active Projects</h3>
-
-        <strong>18</strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <h3>Total Users</h3>
-
-        <strong>342</strong>
-
-      </div>
-
-
-      <div class="stat-card">
-
-        <h3>Active Workers</h3>
-
-        <strong>280</strong>
-
-      </div>
+</div>
 
 
-      <div class="stat-card">
+<!-- RECENT ACTIVITIES -->
+<section class="dashboard-section">
 
-        <h3>Procurement Requests</h3>
+  <h2>Recent Activities</h2>
 
-        <strong>15</strong>
+  <p>Project Green Valley Apartments was updated.</p>
 
-      </div>
+  <p>New contractor registered.</p>
 
+  <p>Procurement request submitted.</p>
 
-      <div class="stat-card">
-
-        <h3>Budget Utilization</h3>
-
-        <strong>68%</strong>
-
-      </div>
-
-    </div>
+</section>
 
 
-    <div class="dashboard-section">
+<!-- NOTIFICATIONS -->
+<section class="dashboard-section">
 
-      <h2>Recent Activities</h2>
+  <h2>Notifications</h2>
 
-      <p>
-        Project Green Valley Apartments was updated.
-      </p>
+  <p>3 projects have approaching deadlines.</p>
 
-      <p>
-        New contractor registered.
-      </p>
+  <p>2 new user registrations require review.</p>
 
-      <p>
-        Procurement request submitted.
-      </p>
-
-    </div>
-
-
-    <div class="dashboard-section">
-
-      <h2>Notifications</h2>
-
-      <p>
-        3 projects have approaching deadlines.
-      </p>
-
-      <p>
-        2 new user registrations require review.
-      </p>
-
-    </div>
+</section>
+```
 
   </main>
 
