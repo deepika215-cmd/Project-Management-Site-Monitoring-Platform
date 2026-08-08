@@ -22,4 +22,7 @@ class ProjectMilestone(Base):
         ForeignKey("projects.id")
     )
 
-    project = relationship("Project")
+    project = relationship(
+        "Project",
+        back_populates="milestones"
+    )

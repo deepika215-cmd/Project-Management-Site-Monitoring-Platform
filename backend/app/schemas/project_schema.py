@@ -1,4 +1,6 @@
 from datetime import date
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -9,7 +11,12 @@ class ProjectCreate(BaseModel):
     start_date: date
     end_date: date
     budget: int
-    status: str
+    status: Literal[
+        "Planning",
+        "In Progress",
+        "Completed",
+        "Closed"
+    ]
     manager_id: int
 
 
@@ -26,3 +33,12 @@ class ProjectResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ProjectStatusUpdate(BaseModel):
+    status: Literal[
+        "Planning",
+        "In Progress",
+        "Completed",
+        "Closed"
+    ]
