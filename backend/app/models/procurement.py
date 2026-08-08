@@ -11,11 +11,13 @@ class Procurement(Base):
 
     item_name = Column(String(200), nullable=False)
 
-    quantity = Column(Integer)
+    quantity = Column(Integer, nullable=False)
+
+    used = Column(Integer, default=0, nullable=False)
 
     supplier = Column(String(200))
 
-    status = Column(String(100))
+    status = Column(String(100), default="Available")
 
     project_id = Column(
         Integer,

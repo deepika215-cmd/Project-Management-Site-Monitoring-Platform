@@ -13,7 +13,11 @@ class Resource(Base):
 
     type = Column(String(100))
 
-    quantity = Column(Integer)
+    # Total quantity of the resource
+    quantity = Column(Integer, nullable=False, default=0)
+
+    # Quantity currently allocated/used
+    allocated_quantity = Column(Integer, nullable=False, default=0)
 
     status = Column(String(50), default="Available")
 

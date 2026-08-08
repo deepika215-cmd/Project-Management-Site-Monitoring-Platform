@@ -12,6 +12,9 @@ class Inventory(Base):
 
     quantity = Column(Integer)
 
+    # Quantity that has been used
+    used = Column(Integer, default=0)
+
     unit = Column(String(50))
 
     supplier = Column(String(200))

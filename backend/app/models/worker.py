@@ -1,5 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Integer, String
 
 from app.database.database import Base
 
@@ -11,15 +10,10 @@ class Worker(Base):
 
     name = Column(String(200), nullable=False)
 
-    role = Column(String(100))
+    role = Column(String(100), nullable=False)
 
     phone = Column(String(20))
 
-    address = Column(String(300))
+    email = Column(String(200))
 
-    project_id = Column(
-        Integer,
-        ForeignKey("projects.id")
-    )
-
-    project = relationship("Project")
+    status = Column(String(100), default="Active")

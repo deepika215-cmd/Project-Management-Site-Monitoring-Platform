@@ -5,17 +5,21 @@ class WorkerCreate(BaseModel):
     name: str
     role: str
     phone: str
-    address: str
-    project_id: int
+    email: str
+    status: str = "Active"
 
 
-class WorkerResponse(BaseModel):
+class WorkerResponse(WorkerCreate):
     id: int
-    name: str
-    role: str
-    phone: str
-    address: str
-    project_id: int
 
     class Config:
         from_attributes = True
+
+
+class WorkerUtilization(BaseModel):
+    worker_id: int
+    name: str
+    role: str
+    status: str
+    utilization_percentage: float
+

@@ -119,7 +119,9 @@ export const routes: Routes = [
 
   {
     path: 'resources/resource-allocation',
-    component: ResourceAllocation
+    component: ResourceAllocation,
+    canActivate: [authGuard]
+
   },
 
 

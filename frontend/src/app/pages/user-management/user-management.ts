@@ -1,23 +1,36 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+<<<<<<< HEAD
 import { Api } from '../../services/api';
+=======
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
 
 interface User {
   name: string;
   email: string;
   role: string;
+<<<<<<< HEAD
   is_active: boolean;
+=======
+  status: 'Active' | 'Inactive';
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
 }
 
 @Component({
   selector: 'app-user-management',
   standalone: true,
+<<<<<<< HEAD
   imports: [FormsModule],
+=======
+  imports: [FormsModule, HttpClientModule],
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
   templateUrl: './user-management.html',
   styleUrl: './user-management.css'
 })
 export class UserManagement implements OnInit {
 
+<<<<<<< HEAD
   showForm = false;
 
   users: User[] = [];
@@ -29,11 +42,15 @@ export class UserManagement implements OnInit {
   };
 
   constructor(private api: Api) {}
+=======
+  constructor(private http: HttpClient) {}
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
 
   ngOnInit(): void {
     this.loadUsers();
   }
 
+<<<<<<< HEAD
   loadUsers(): void {
 
     this.api.getUsers().subscribe({
@@ -58,6 +75,30 @@ export class UserManagement implements OnInit {
 
     });
 
+=======
+  showForm = false;
+
+  users: User[] = [];
+
+  newUser: User = {
+    name: '',
+    email: '',
+    role: '',
+    status: 'Active'
+  };
+
+  // Load users from backend
+  loadUsers(): void {
+    this.http.get<User[]>('http://127.0.0.1:8000/users')
+      .subscribe({
+        next: (data) => {
+          this.users = data;
+        },
+        error: (error) => {
+          console.error(error);
+        }
+      });
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
   }
 
   openForm(): void {
@@ -65,12 +106,16 @@ export class UserManagement implements OnInit {
   }
 
   cancel(): void {
+<<<<<<< HEAD
 
+=======
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
     this.showForm = false;
 
     this.newUser = {
       name: '',
       email: '',
+<<<<<<< HEAD
       role: ''
     };
 
@@ -147,3 +192,52 @@ export class UserManagement implements OnInit {
   }
 
 }
+=======
+      role: '',
+      status: 'Active'
+    };
+  }
+
+  addUser(): void {
+    if (!this.newUser.name || !this.newUser.email || !this.newUser.role) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    this.http.post('http://127.0.0.1:8000/users', this.newUser)
+      .subscribe({
+        next: (response: any) => {
+          // Reload users from database
+          this.loadUsers();
+
+          // Reset form
+          this.cancel();
+
+          alert('User saved to database successfully');
+        },
+        error: (error) => {
+          console.error(error);
+          alert('Failed to save user');
+        }
+      });
+  }
+
+  removeUser(email: string): void {
+  const confirmed = confirm('Are you sure you want to remove this user?');
+
+  if (confirmed) {
+    this.http.delete(`http://127.0.0.1:8000/users/${email}`)
+      .subscribe({
+        next: () => {
+          this.loadUsers(); // reload from database
+          alert('User deleted successfully');
+        },
+        error: (error) => {
+          console.error(error);
+          alert('Failed to delete user');
+        }
+      });
+    }
+  }
+}
+>>>>>>> dea0b03a8b5bb7a945a9c80d1f323fcfd5e53242
