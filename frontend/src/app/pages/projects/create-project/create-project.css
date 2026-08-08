@@ -1,0 +1,532 @@
+/* ===========================================
+   GLOBAL
+=========================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#eef3fb;
+}
+
+.page-container{
+    display:flex;
+    min-height:100vh;
+    background:#eef3fb;
+}
+
+/* ===========================================
+   SIDEBAR
+=========================================== */
+
+.sidebar{
+    width:220px;
+    background:#2947b3;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    padding:20px;
+}
+
+.logo h2{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.logo span{
+    font-size:12px;
+    color:#dbe5ff;
+}
+
+.sidebar nav{
+    margin-top:35px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.sidebar nav a,
+.sidebar-bottom a{
+    color:#fff;
+    text-decoration:none;
+    padding:13px 15px;
+    border-radius:10px;
+    transition:.3s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active{
+    background:rgba(255,255,255,.18);
+}
+
+.sidebar-bottom{
+    margin-top:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+/* ===========================================
+   MAIN CONTENT
+=========================================== */
+
+.main-content{
+    flex:1;
+    padding:30px;
+}
+
+/* ===========================================
+   HEADER
+=========================================== */
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.page-header h1{
+    font-size:52px;
+    color:#1f3763;
+    margin-bottom:10px;
+    font-weight:700;
+}
+
+.page-header p{
+    color:#666;
+    font-size:24px;
+}
+
+.back-btn{
+    background:#2947b3;
+    color:#fff;
+    border:none;
+    padding:14px 28px;
+    border-radius:12px;
+    font-size:18px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.back-btn:hover{
+    background:#1f3d9d;
+}
+
+/* ===========================================
+   DASHBOARD CARDS
+=========================================== */
+
+.stats-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:22px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    background:#fff;
+    border-radius:18px;
+    padding:28px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.stat-icon{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    color:#fff;
+}
+
+.blue{
+    background:#2563eb;
+}
+
+.orange{
+    background:#f59e0b;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.purple{
+    background:#7c3aed;
+}
+
+.stat-card h3{
+    font-size:42px;
+    color:#1f3763;
+    margin-bottom:5px;
+}
+
+.stat-card span{
+    color:#666;
+    font-size:18px;
+}
+/* ===========================================
+   PROJECT FORM
+=========================================== */
+
+.project-form{
+    width:100%;
+    max-width:100%;
+}
+
+.form-section{
+    background:#fff;
+    border-radius:18px;
+    padding:30px;
+    margin-bottom:30px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.form-section h2{
+    font-size:38px;
+    color:#1f3763;
+    margin-bottom:25px;
+}
+
+/* ===========================================
+   FORM GRID
+=========================================== */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:25px;
+}
+
+.full-width{
+    grid-column:1/-1;
+}
+
+/* ===========================================
+   FORM GROUP
+=========================================== */
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    font-size:16px;
+    font-weight:600;
+    color:#374151;
+    margin-bottom:10px;
+}
+
+/* ===========================================
+   INPUTS
+=========================================== */
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+    padding:15px;
+    border:1px solid #d8dce6;
+    border-radius:10px;
+    background:#fff;
+    font-size:16px;
+    transition:.3s;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder{
+    color:#9ca3af;
+}
+
+.form-group textarea{
+    min-height:140px;
+    resize:vertical;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    outline:none;
+    border-color:#2947b3;
+    box-shadow:0 0 0 4px rgba(41,71,179,.12);
+}
+
+/* ===========================================
+   SMALL INPUTS
+=========================================== */
+
+input[type="date"],
+input[type="number"],
+select{
+    height:52px;
+}
+
+/* ===========================================
+   SECTION SPACING
+=========================================== */
+
+.form-section + .form-section{
+    margin-top:25px;
+}
+/* ===========================================
+   ACTION CARD
+=========================================== */
+
+.action-card{
+    background:#fff;
+    border-radius:18px;
+    padding:25px 30px;
+    margin-top:25px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.form-actions{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+/* ===========================================
+   BUTTONS
+=========================================== */
+
+.cancel-btn,
+.draft-btn,
+.submit-btn{
+    border:none;
+    border-radius:10px;
+    padding:14px 28px;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .3s ease;
+}
+
+/* Cancel */
+
+.cancel-btn{
+    background:#dbeafe;
+    color:#2563eb;
+}
+
+.cancel-btn:hover{
+    background:#bfdbfe;
+}
+
+/* Save Draft */
+
+.draft-btn{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+.draft-btn:hover{
+    background:#fde68a;
+}
+
+/* Submit */
+
+.submit-btn{
+    background:#2947b3;
+    color:#fff;
+}
+
+.submit-btn:hover{
+    background:#1f3d9d;
+    transform:translateY(-2px);
+    box-shadow:0 8px 18px rgba(41,71,179,.25);
+}
+
+.submit-btn:active{
+    transform:translateY(0);
+}
+
+/* ===========================================
+   CARD SPACING
+=========================================== */
+
+.form-section:not(:last-child){
+    margin-bottom:30px;
+}
+
+/* ===========================================
+   OPTIONAL DIVIDER
+=========================================== */
+
+.section-divider{
+    height:1px;
+    background:#e5e7eb;
+    margin:25px 0;
+}
+
+/* ===========================================
+   OPTIONAL SECTION TITLE
+=========================================== */
+
+.section-title{
+    font-size:22px;
+    font-weight:700;
+    color:#1f3763;
+    margin-bottom:20px;
+}
+/* ===========================================
+   SCROLLBAR
+=========================================== */
+
+::-webkit-scrollbar{
+    width:8px;
+}
+
+::-webkit-scrollbar-track{
+    background:#eef3fb;
+}
+
+::-webkit-scrollbar-thumb{
+    background:#c7d2e3;
+    border-radius:20px;
+}
+
+::-webkit-scrollbar-thumb:hover{
+    background:#9aa8be;
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width:1200px){
+
+    .stats-row{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .form-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media (max-width:900px){
+
+    .page-container{
+        flex-direction:column;
+    }
+
+    .sidebar{
+        width:100%;
+        padding:20px;
+    }
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:20px;
+    }
+
+    .page-header h1{
+        font-size:42px;
+    }
+
+    .page-header p{
+        font-size:20px;
+    }
+
+    .stats-row{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .full-width{
+        grid-column:auto;
+    }
+
+    .form-actions{
+        flex-direction:column;
+        width:100%;
+    }
+
+    .cancel-btn,
+    .draft-btn,
+    .submit-btn{
+        width:100%;
+    }
+
+}
+
+@media (max-width:600px){
+
+    .main-content{
+        padding:20px;
+    }
+
+    .page-header h1{
+        font-size:34px;
+    }
+
+    .page-header p{
+        font-size:18px;
+    }
+
+    .form-section{
+        padding:20px;
+    }
+
+    .stat-card{
+        padding:20px;
+    }
+
+    .stat-card h3{
+        font-size:32px;
+    }
+
+    .stat-card span{
+        font-size:16px;
+    }
+
+    .stat-icon{
+        width:50px;
+        height:50px;
+        font-size:22px;
+    }
+
+}
+
+/* ===========================================
+   SMOOTH ANIMATIONS
+=========================================== */
+
+.form-section,
+.stat-card,
+.action-card{
+    transition:all .3s ease;
+}
+
+.form-section:hover,
+.stat-card:hover,
+.action-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 24px rgba(0,0,0,.10);
+}
+
+input,
+select,
+textarea,
+button{
+    transition:all .25s ease;
+}

@@ -1,0 +1,647 @@
+<div class="page-container">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h2>BuildTrack</h2>
+      <span>Construction Management</span>
+    </div>
+
+    <nav>
+
+      <a routerLink="/dashboard">
+        Dashboard
+      </a>
+
+      <a routerLink="/projects">
+        My Projects
+      </a>
+
+      <a routerLink="/projects/create">
+        Create Project
+      </a>
+
+      <a routerLink="/projects/milestones">
+        Milestones
+      </a>
+
+      <a routerLink="/projects/schedule">
+        Schedule
+      </a>
+
+      <a
+        routerLink="/projects/status"
+        class="active">
+
+        Project Status
+
+      </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+      <a>
+        Notifications
+      </a>
+
+      <a>
+        Profile
+      </a>
+
+      <a routerLink="/dashboard">
+        Logout
+      </a>
+
+    </div>
+
+  </aside>
+
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <div class="page-header">
+
+      <div>
+
+        <h1>
+          Project Status Tracking
+        </h1>
+
+        <p>
+          Monitor project lifecycle and manage project closure.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- Project Selection -->
+    <section class="project-selector">
+
+      <div>
+
+        <label>
+          Select Project
+        </label>
+
+        <select
+          [(ngModel)]="selectedProjectId"
+          (change)="selectProject()">
+
+          <option
+            *ngFor="let project of projects"
+            [value]="project.id">
+
+            {{ project.code }} -
+            {{ project.name }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+    </section>
+
+
+    <!-- Project Summary -->
+    <section class="project-summary">
+
+      <div>
+
+        <span class="label">
+          Project Name
+        </span>
+
+        <h2>
+          {{ selectedProject.name }}
+        </h2>
+
+      </div>
+
+
+      <div>
+
+        <span class="label">
+          Project Code
+        </span>
+
+        <strong>
+          {{ selectedProject.code }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span class="label">
+          Project Manager
+        </span>
+
+        <strong>
+          {{ selectedProject.manager }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span class="label">
+          Completion
+        </span>
+
+        <strong class="percentage">
+          {{ selectedProject.completion }}%
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- Current Status -->
+    <section class="status-card">
+
+      <div class="status-header">
+
+        <div>
+
+          <h2>
+            Current Project Status
+          </h2>
+
+          <p>
+            Update the current lifecycle stage of the project.
+          </p>
+
+        </div>
+
+
+        <span
+          class="status-badge"
+          [ngClass]="
+            getStatusClass(
+              selectedProject.status
+            )
+          ">
+
+          {{ selectedProject.status }}
+
+        </span>
+
+      </div>
+
+
+      <div class="status-update">
+
+        <label>
+          Change Project Status
+        </label>
+
+        <select
+          [(ngModel)]="newStatus">
+
+          <option value="Planning">
+            Planning
+          </option>
+
+          <option value="In Progress">
+            In Progress
+          </option>
+
+          <option value="On Hold">
+            On Hold
+          </option>
+
+          <option value="Completed">
+            Completed
+          </option>
+
+          <option value="Closed">
+            Closed
+          </option>
+
+        </select>
+
+
+        <div
+          *ngIf="newStatus === 'On Hold'"
+          class="hold-reason">
+
+          <label>
+            Reason for On Hold
+          </label>
+
+          <textarea
+            [(ngModel)]="holdReason"
+            placeholder="Enter reason for putting the project on hold..."
+            rows="3">
+          </textarea>
+
+        </div>
+
+
+        <button
+          class="update-btn"
+          (click)="updateStatus()">
+
+          Update Status
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- Progress -->
+    <section class="progress-section">
+
+      <div class="section-title">
+
+        <div>
+
+          <h2>
+            Project Completion
+          </h2>
+
+          <p>
+            Overall progress based on completed milestones.
+          </p>
+
+        </div>
+
+        <strong>
+          {{ selectedProject.completion }}%
+        </strong>
+
+      </div>
+
+
+      <div class="progress-bar">
+
+        <div
+          class="progress"
+          [style.width.%]="
+            selectedProject.completion
+          ">
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Closure Requirements -->
+    <section class="closure-section">
+
+      <div class="section-title">
+
+        <div>
+
+          <h2>
+            Project Closure Checklist
+          </h2>
+
+          <p>
+            All requirements must be completed before closing the project.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="checklist">
+
+
+        <div class="check-item">
+
+          <div>
+
+            <h3>
+              All Milestones Completed
+            </h3>
+
+            <p>
+              Verify that every project milestone has been completed.
+            </p>
+
+          </div>
+
+          <span
+            [class.completed-check]="
+              selectedProject.milestonesCompleted
+            "
+            [class.pending-check]="
+              !selectedProject.milestonesCompleted
+            ">
+
+            {{
+              selectedProject.milestonesCompleted
+              ? 'Completed'
+              : 'Pending'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <div class="check-item">
+
+          <div>
+
+            <h3>
+              Final Inspection Approved
+            </h3>
+
+            <p>
+              Confirm that final construction inspections are approved.
+            </p>
+
+          </div>
+
+          <span
+            [class.completed-check]="
+              selectedProject.inspectionApproved
+            "
+            [class.pending-check]="
+              !selectedProject.inspectionApproved
+            ">
+
+            {{
+              selectedProject.inspectionApproved
+              ? 'Approved'
+              : 'Pending'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <div class="check-item">
+
+          <div>
+
+            <h3>
+              Financial Settlement Completed
+            </h3>
+
+            <p>
+              Confirm all financial settlements have been completed.
+            </p>
+
+          </div>
+
+          <span
+            [class.completed-check]="
+              selectedProject.financialSettlement
+            "
+            [class.pending-check]="
+              !selectedProject.financialSettlement
+            ">
+
+            {{
+              selectedProject.financialSettlement
+              ? 'Completed'
+              : 'Pending'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <div class="check-item">
+
+          <div>
+
+            <h3>
+              Pending Issues Resolved
+            </h3>
+
+            <p>
+              Ensure all outstanding project issues are resolved.
+            </p>
+
+          </div>
+
+          <span
+            [class.completed-check]="
+              selectedProject.issuesResolved
+            "
+            [class.pending-check]="
+              !selectedProject.issuesResolved
+            ">
+
+            {{
+              selectedProject.issuesResolved
+              ? 'Resolved'
+              : 'Pending'
+            }}
+
+          </span>
+
+        </div>
+
+
+        <div class="check-item">
+
+          <div>
+
+            <h3>
+              Client Acceptance
+            </h3>
+
+            <p>
+              Confirm that the client has officially accepted the completed project.
+            </p>
+
+          </div>
+
+          <span
+            [class.completed-check]="
+              selectedProject.clientAccepted
+            "
+            [class.pending-check]="
+              !selectedProject.clientAccepted
+            ">
+
+            {{
+              selectedProject.clientAccepted
+              ? 'Accepted'
+              : 'Pending'
+            }}
+
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Closure Button -->
+
+      <div class="closure-action">
+
+        <div>
+
+          <h3>
+            Close Project
+          </h3>
+
+          <p>
+            Once closed, no further construction activities can be recorded.
+          </p>
+
+        </div>
+
+
+        <button
+          class="close-project-btn"
+          [disabled]="
+            !canCloseProject()
+          "
+          (click)="closeProject()">
+
+          Close Project
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="!canCloseProject()"
+        class="warning">
+
+        ⚠ The project cannot be closed until all closure requirements are completed.
+
+      </div>
+
+    </section>
+
+
+    <!-- Status History -->
+    <section class="history-section">
+
+      <div class="section-title">
+
+        <div>
+
+          <h2>
+            Status History
+          </h2>
+
+          <p>
+            Track changes made to the project status.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="history-table">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+                Previous Status
+              </th>
+
+              <th>
+                New Status
+              </th>
+
+              <th>
+                Updated By
+              </th>
+
+              <th>
+                Reason
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let history of statusHistory
+              ">
+
+              <td>
+                {{ history.date }}
+              </td>
+
+              <td>
+                {{ history.previousStatus }}
+              </td>
+
+              <td>
+                <span
+                  class="history-status">
+
+                  {{ history.newStatus }}
+
+                </span>
+              </td>
+
+              <td>
+                {{ history.updatedBy }}
+              </td>
+
+              <td>
+                {{ history.reason }}
+              </td>
+
+            </tr>
+
+
+            <tr
+              *ngIf="
+                statusHistory.length === 0
+              ">
+
+              <td
+                colspan="5"
+                class="no-data">
+
+                No status history available.
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

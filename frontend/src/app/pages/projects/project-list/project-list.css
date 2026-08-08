@@ -1,0 +1,319 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#eef3fb;
+}
+
+.page-container{
+    display:flex;
+    min-height:100vh;
+    background:#eef3fb;
+}
+
+/* Sidebar */
+
+.sidebar{
+    width:220px;
+    background:#2947b3;
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    padding:20px;
+}
+
+.logo h2{
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.logo span{
+    font-size:12px;
+    color:#dbe5ff;
+}
+
+.sidebar nav{
+    margin-top:35px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.sidebar nav a,
+.sidebar-bottom a{
+    color:white;
+    text-decoration:none;
+    padding:13px 15px;
+    border-radius:10px;
+    transition:.3s;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active{
+    background:rgba(255,255,255,.18);
+}
+
+.sidebar-bottom{
+    margin-top:auto;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+/* Main */
+
+.main-content{
+    flex:1;
+    padding:30px;
+}
+
+/* Header */
+
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.page-header h1{
+    font-size:52px;
+    color:#1f3763;
+    margin-bottom:10px;
+}
+
+.page-header p{
+    color:#666;
+    font-size:24px;
+}
+
+.create-btn{
+    background:#2947b3;
+    color:white;
+    border:none;
+    padding:14px 28px;
+    border-radius:12px;
+    font-size:18px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.create-btn:hover{
+    background:#1f3d9d;
+}
+
+/* Cards */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:22px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    background:white;
+    border-radius:18px;
+    padding:28px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.stat-card span{
+    color:#666;
+    font-size:18px;
+}
+
+.stat-card h2{
+    margin-top:15px;
+    font-size:42px;
+    color:#1f3763;
+}
+
+/* Filters */
+
+.filters{
+    display:flex;
+    gap:20px;
+    background:white;
+    padding:20px;
+    border-radius:18px;
+    margin-bottom:25px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.filters input,
+.filters select{
+    flex:1;
+    padding:14px;
+    border:1px solid #ddd;
+    border-radius:10px;
+    font-size:16px;
+}
+
+/* Table */
+
+.project-section{
+    background:white;
+    border-radius:18px;
+    padding:25px;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}
+
+.section-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.section-header h2{
+    font-size:38px;
+    color:#1f3763;
+}
+
+.table-container{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#eef3fb;
+    color:#1f3763;
+    padding:18px;
+    text-align:left;
+}
+
+td{
+    padding:18px;
+    border-bottom:1px solid #ececec;
+}
+
+.progress-bar{
+    height:10px;
+    background:#e5e5e5;
+    border-radius:20px;
+    overflow:hidden;
+    width:120px;
+}
+
+.progress{
+    height:100%;
+    background:#2d62ea;
+}
+
+.status{
+    padding:7px 15px;
+    border-radius:20px;
+    color:white;
+    font-size:13px;
+}
+
+.completed{
+    background:#22c55e;
+}
+
+.in-progress{
+    background:#2563eb;
+}
+
+.planning{
+    background:#f59e0b;
+}
+
+.view-btn,
+.edit-btn{
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-right:8px;
+}
+
+.view-btn{
+    background:#dbeafe;
+    color:#2563eb;
+}
+
+.edit-btn{
+    background:#fef3c7;
+    color:#b45309;
+}
+
+/* Responsive */
+
+@media(max-width:1200px){
+
+.stats{
+grid-template-columns:repeat(2,1fr);
+}
+
+}
+
+@media(max-width:768px){
+
+.page-container{
+flex-direction:column;
+}
+
+.sidebar{
+width:100%;
+}
+
+.page-header{
+flex-direction:column;
+align-items:flex-start;
+gap:20px;
+}
+
+.stats{
+grid-template-columns:1fr;
+}
+
+.filters{
+flex-direction:column;
+}
+
+}
+/* Dashboard Style Stat Cards */
+
+.stat-card{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.stat-icon{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:28px;
+    color:white;
+    flex-shrink:0;
+}
+
+.blue{
+    background:#2563eb;
+}
+
+.green{
+    background:#22c55e;
+}
+
+.orange{
+    background:#f59e0b;
+}
+
+.purple{
+    background:#7c3aed;
+}
