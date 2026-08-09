@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, Float
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -22,6 +22,8 @@ class Project(Base):
     budget = Column(Integer)
 
     status = Column(String(50), default="Planning")
+
+    completion_percentage = Column(Float, default=0.0)
 
     manager_id = Column(
         Integer,

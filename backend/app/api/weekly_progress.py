@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from app.models.project import Project
 
 from app.database.database import get_db
 from app.models.weekly_progress import WeeklyProgress
@@ -47,41 +48,26 @@ def create_weekly_progress(
     progress: WeeklyProgressCreate,
     db: Session = Depends(get_db),
 ):
-    new_progress = WeeklyProgress(**progress.model_dump())
+    # Check whether project exists
+    project = db.query(Project).filter(
+        Project.id == progress.project_id
+    ).first()
+
+    if project is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Project not found"
+        )
+
+    new_progress = WeeklyProgress(
+        **progress.model_dump()
+    )
 
     db.add(new_progress)
     db.commit()
     db.refresh(new_progress)
 
     return new_progress
-
-
-# PUT
-@router.put("/{progress_id}", response_model=WeeklyProgressResponse)
-def update_weekly_progress(
-    progress_id: int,
-    updated_progress: WeeklyProgressCreate,
-    db: Session = Depends(get_db),
-):
-    progress = (
-        db.query(WeeklyProgress)
-        .filter(WeeklyProgress.id == progress_id)
-        .first()
-    )
-
-    if progress is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Weekly Progress not found"
-        )
-
-    for key, value in updated_progress.model_dump().items():
-        setattr(progress, key, value)
-
-    db.commit()
-    db.refresh(progress)
-
-    return progress
 
 
 # DELETE

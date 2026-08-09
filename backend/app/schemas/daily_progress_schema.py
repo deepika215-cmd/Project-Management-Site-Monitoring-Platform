@@ -4,6 +4,8 @@ from pydantic import BaseModel
 
 class DailyProgressCreate(BaseModel):
     project_id: int
+    milestone_id: int | None = None
+
     report_date: date
     work_category: str
     activity: str

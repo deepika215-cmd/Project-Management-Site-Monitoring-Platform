@@ -4,6 +4,8 @@ from app.models.user import User
 from app.models.project import Project
 from app.models.daily_progress import DailyProgress
 from app.models.weekly_progress import WeeklyProgress
+from app.models.site_activity_log import SiteActivityLog
+from app.models.progress_photo import ProgressPhoto
 
 from app.models.attendance import Attendance
 from app.models.inventory import Inventory

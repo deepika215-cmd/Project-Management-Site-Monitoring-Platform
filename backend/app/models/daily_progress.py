@@ -9,7 +9,16 @@ class DailyProgress(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    project_id = Column(Integer, ForeignKey("projects.id"))
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id")
+    )
+
+    milestone_id = Column(
+        Integer,
+        ForeignKey("project_milestones.id"),
+        nullable=True
+    )
 
     report_date = Column(Date)
 
@@ -42,3 +51,5 @@ class DailyProgress(Base):
     comments = Column(Text)
 
     project = relationship("Project")
+
+    milestone = relationship("ProjectMilestone")

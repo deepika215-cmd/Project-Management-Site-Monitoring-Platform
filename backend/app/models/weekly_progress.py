@@ -9,7 +9,11 @@ class WeeklyProgress(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    project_id = Column(Integer, ForeignKey("projects.id"))
+    project_id = Column(
+    Integer,
+    ForeignKey("projects.id"),
+    nullable=False
+)
 
     week_start = Column(Date)
     week_end = Column(Date)
