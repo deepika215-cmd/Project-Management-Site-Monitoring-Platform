@@ -1,37 +1,37 @@
 from pydantic import BaseModel
 
 
-class ProjectAnalytics(BaseModel):
+class ProjectSummary(BaseModel):
     total: int
     active: int
     completed: int
     pending: int
 
 
-class WorkerAnalytics(BaseModel):
+class WorkerSummary(BaseModel):
     total: int
     present: int
     absent: int
 
 
-class ResourceAnalytics(BaseModel):
+class ResourceSummary(BaseModel):
     total: int
 
 
-class InventoryAnalytics(BaseModel):
+class InventorySummary(BaseModel):
     total: int
 
 
-class ProcurementAnalytics(BaseModel):
+class ProcurementSummary(BaseModel):
     total: int
 
 
 class AnalyticsResponse(BaseModel):
-    projects: ProjectAnalytics
-    workers: WorkerAnalytics
-    resources: ResourceAnalytics
-    inventory: InventoryAnalytics
-    procurements: ProcurementAnalytics
+    projects: ProjectSummary
+    workers: WorkerSummary
+    resources: ResourceSummary
+    inventory: InventorySummary
+    procurements: ProcurementSummary
 
 
 class ResourceUtilization(BaseModel):

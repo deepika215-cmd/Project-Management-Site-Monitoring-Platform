@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel, ConfigDict
 
 
 class ReportCreate(BaseModel):
@@ -12,5 +13,4 @@ class ReportCreate(BaseModel):
 class ReportResponse(ReportCreate):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

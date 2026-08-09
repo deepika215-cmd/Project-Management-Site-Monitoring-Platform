@@ -5,7 +5,7 @@ class NotificationCreate(BaseModel):
     title: str
     message: str
     recipient: str
-    status: str
+    status: str = "Unread"
 
 
 class NotificationResponse(NotificationCreate):

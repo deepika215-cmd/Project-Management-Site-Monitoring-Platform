@@ -10,8 +10,8 @@ class Report(Base):
 
     title = Column(String(200), nullable=False)
 
-    description = Column(String(500))
+    description = Column(String(500), nullable=True)
 
-    report_type = Column(String(100))
+    report_type = Column(String(100), nullable=True)
 
-    status = Column(String(100))
+    status = Column(String(100), nullable=True)

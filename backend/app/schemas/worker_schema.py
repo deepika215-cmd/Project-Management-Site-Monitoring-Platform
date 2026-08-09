@@ -16,10 +16,4 @@ class WorkerResponse(WorkerCreate):
         from_attributes = True
 
 
-class WorkerUtilization(BaseModel):
-    worker_id: int
-    name: str
-    role: str
-    status: str
-    utilization_percentage: float
 

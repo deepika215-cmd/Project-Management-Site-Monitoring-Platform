@@ -1,31 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ProcurementCreate(BaseModel):
     item_name: str
     quantity: int
     supplier: str
-    status: str = "Available"
+    status: str
     project_id: int
 
 
 class ProcurementResponse(ProcurementCreate):
     id: int
-    used: int
 
-    class Config:
-        from_attributes = True
-
-
-class ProcurementUsage(BaseModel):
-    quantity: int
-
-
-class ProcurementUtilization(BaseModel):
-    procurement_id: int
-    item_name: str
-    total_quantity: int
-    used_quantity: int
-    available_quantity: int
-    utilization_percentage: float
-    status: str
+    model_config = ConfigDict(from_attributes=True)
