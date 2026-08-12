@@ -15,9 +15,7 @@
                 Dashboard
             </a>
 
-            <a
-                routerLink="/site-engineer-projects"
-                class="active">
+            <a routerLink="/site-engineer-projects" class="active">
 
                 Assigned Projects
 
@@ -57,21 +55,13 @@
 
                 <h1>Assigned Projects</h1>
 
-<<<<<<< HEAD
                 <p>Projects loaded from the existing project API.</p>
 
             </div>
 
-        </header><p *ngIf="error" class="error">{{error}}</p><p *ngIf="loading">Loading projects...</p>
-=======
-                <p>
-                    Projects assigned to the Site Engineer.
-                </p>
-
-            </div>
-
         </header>
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
+        <p *ngIf="error" class="error">{{error}}</p>
+        <p *ngIf="loading">Loading projects...</p>
 
         <!-- Statistics -->
 
@@ -85,11 +75,7 @@
 
                 <div>
 
-<<<<<<< HEAD
                     <h3>{{ projects.length }}</h3>
-=======
-                    <h3>3</h3>
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                     <span>Total Projects</span>
 
@@ -105,11 +91,7 @@
 
                 <div>
 
-<<<<<<< HEAD
                     <h3>{{ getCount('Completed') }}</h3>
-=======
-                    <h3>1</h3>
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                     <span>Completed</span>
 
@@ -125,11 +107,7 @@
 
                 <div>
 
-<<<<<<< HEAD
                     <h3>{{ getCount('In Progress') }}</h3>
-=======
-                    <h3>1</h3>
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                     <span>In Progress</span>
 
@@ -145,11 +123,7 @@
 
                 <div>
 
-<<<<<<< HEAD
                     <h3>{{ getCount('Planning') }}</h3>
-=======
-                    <h3>1</h3>
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                     <span>Pending</span>
 
@@ -160,47 +134,45 @@
         </section>
         <!-- Assigned Projects -->
 
-<section class="projects-section">
+        <section class="projects-section">
 
-    <h2>📁 My Assigned Projects</h2>
+            <h2>📁 My Assigned Projects</h2>
 
-    <div class="project-grid">
+            <div class="project-grid">
 
-        <div class="project-card" *ngFor="let project of projects">
+                <div class="project-card" *ngFor="let project of projects">
 
-    <h3>{{ project.name }}</h3>
+                    <h3>{{ project.name }}</h3>
 
-    <p>
-        <strong>Project ID:</strong>
-        {{ project.id }}
-    </p>
+                    <p>
+                        <strong>Project ID:</strong>
+                        {{ project.id }}
+                    </p>
 
-    <p>
-        <strong>Location:</strong>
-        {{ project.location }}
-    </p>
+                    <p>
+                        <strong>Location:</strong>
+                        {{ project.location }}
+                    </p>
 
-    <p>
-        <strong>Status:</strong>
-        {{ project.status }}
-    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        {{ project.status }}
+                    </p>
 
-    <p>{{ project.description }}</p>
+                    <p>{{ project.description }}</p>
 
-    <a
-        class="view-btn"
-        [routerLink]="['/projects/project-details', project.id]">
+                    <a class="view-btn" [routerLink]="['/projects/project-details', project.id]">
 
-        View Details
+                        View Details
 
-    </a>
+                    </a>
 
-</div>
+                </div>
 
-</div>
+            </div>
 
-</section>
+        </section>
 
-</main>
+    </main>
 
 </div>

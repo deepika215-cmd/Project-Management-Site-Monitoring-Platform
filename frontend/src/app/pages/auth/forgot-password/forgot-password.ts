@@ -2,10 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
-<<<<<<< HEAD
 import { Api } from '../../../services/api';
-=======
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 @Component({
   selector: 'app-forgot-password',
@@ -20,12 +17,9 @@ import { Api } from '../../../services/api';
 export class ForgotPassword {
 
   email = '';
-<<<<<<< HEAD
   submitting = false;
 
-  constructor(private api: Api) {}
-=======
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
+  constructor(private api: Api) { }
 
   resetPassword(): void {
 
@@ -53,7 +47,6 @@ export class ForgotPassword {
       return;
     }
 
-<<<<<<< HEAD
     this.submitting = true;
 
     this.api.forgotPassword(this.email).subscribe({
@@ -87,16 +80,6 @@ export class ForgotPassword {
         });
       }
     });
-=======
-    Swal.fire({
-      icon: 'success',
-      title: 'Reset Link Sent!',
-      text: 'Please check your email to reset your password.',
-      confirmButtonColor: '#2563eb'
-    });
-
-    this.email = '';
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   }
 
   isValidEmail(email: string): boolean {
@@ -105,8 +88,4 @@ export class ForgotPassword {
 
   }
 
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

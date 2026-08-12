@@ -1,22 +1,15 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-<<<<<<< HEAD
 import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
-=======
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 @Component({
   selector: 'app-project-manager-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-<<<<<<< HEAD
     RouterLink,
     AppSidebarComponent
-=======
-    RouterLink
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   ],
   templateUrl: './project-manager-dashboard.html',
   styleUrls: ['./project-manager-dashboard.css']

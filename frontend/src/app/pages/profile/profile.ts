@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -312,14 +311,3 @@ export class Profile implements OnInit {
     });
   }
 }
-=======
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-profile',
-  imports: [],
-  templateUrl: './profile.html',
-  styleUrl: './profile.css',
-})
-export class Profile {}
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../services/api';
-<<<<<<< HEAD
 import { AppSidebarComponent } from '../../shared/app-sidebar.component';
 
 interface User {
@@ -33,76 +32,72 @@ const EMPTY_FORM: UserFormModel = {
   selector: 'app-user-management',
   standalone: true,
   imports: [FormsModule, AppSidebarComponent],
-=======
-
-interface User {
-  name: string;
-  email: string;
-  role: string;
-  is_active?: boolean;
-  status: 'Active' | 'Inactive';
-}
-
-@Component({
-  selector: 'app-user-management',
-  standalone: true,
-  imports: [FormsModule],
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   templateUrl: './user-management.html',
   styleUrl: './user-management.css'
 })
 export class UserManagement implements OnInit {
 
-<<<<<<< HEAD
   // All users loaded from the backend
   users: User[] = [];
 
-  // Users after search/role filtering, what the table actually renders
+  // Selected user for View modal
   selectedUser: User | null = null;
   showView = false;
 
+  // Loading/error state
   loading = false;
   errorMessage = '';
 
+  // Add/Edit form state
   showForm = false;
   editingUser: User | null = null;
 
+  // Search/filter
   searchTerm = '';
   roleFilter = '';
 
+  // Form model
   formModel: UserFormModel = { ...EMPTY_FORM };
 
+  // Available roles
   roles = [
-    { value: 'ADMIN', label: 'Administrator' },
-    { value: 'PROJECT_MANAGER', label: 'Project Manager' },
-    { value: 'SITE_ENGINEER', label: 'Site Engineer' },
-    { value: 'CONTRACTOR', label: 'Contractor' },
-    { value: 'WORKER', label: 'Worker' },
-    { value: 'CLIENT', label: 'Client' }
+    {
+      value: 'ADMIN',
+      label: 'Administrator'
+    },
+    {
+      value: 'PROJECT_MANAGER',
+      label: 'Project Manager'
+    },
+    {
+      value: 'SITE_ENGINEER',
+      label: 'Site Engineer'
+    },
+    {
+      value: 'CONTRACTOR',
+      label: 'Contractor'
+    },
+    {
+      value: 'WORKER',
+      label: 'Worker'
+    },
+    {
+      value: 'CLIENT',
+      label: 'Client'
+    }
   ];
 
   constructor(private api: Api) { }
-=======
-  showForm = false;
-
-  users: User[] = [];
-
-  newUser = {
-    name: '',
-    email: '',
-    role: ''
-  };
-
-  constructor(private api: Api) {}
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
   ngOnInit(): void {
     this.loadUsers();
   }
 
-  // Load users from backend
+  // ============================================================
+  // LOAD USERS
+  // ============================================================
+
   loadUsers(): void {
-<<<<<<< HEAD
     this.loading = true;
     this.errorMessage = '';
 
@@ -132,9 +127,11 @@ export class UserManagement implements OnInit {
         this.loading = false;
 
         if (error?.status === 401) {
-          this.errorMessage = 'You are not authorized. Please log in again.';
+          this.errorMessage =
+            'You are not authorized. Please log in again.';
         } else if (error?.status === 403) {
-          this.errorMessage = 'You do not have permission to view users.';
+          this.errorMessage =
+            'You do not have permission to view users.';
         } else if (error?.status === 0) {
           this.errorMessage =
             'Cannot connect to the backend. Make sure the backend server is running.';
@@ -144,27 +141,14 @@ export class UserManagement implements OnInit {
             error?.error?.message ||
             'Unable to load users from the backend.';
         }
-=======
-    this.api.getUsers().subscribe({
-      next: (data: any) => {
-        console.log('Users received from backend:', data);
-
-        this.users = data;
-
-        console.log('Number of users:', this.users.length);
-      },
-
-      error: (error: any) => {
-        console.error('Failed to load users:', error);
-        alert('Unable to load users from the backend.');
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       }
     });
   }
 
-<<<<<<< HEAD
-  // Always derive the displayed list from the current users + filters.
-  // This prevents the table from appearing empty until a filter is changed.
+  // ============================================================
+  // FILTERED USERS
+  // ============================================================
+
   get filteredUsers(): User[] {
     const term = this.searchTerm.trim().toLowerCase();
 
@@ -174,14 +158,25 @@ export class UserManagement implements OnInit {
         user.name?.toLowerCase().includes(term) ||
         user.email?.toLowerCase().includes(term);
 
-      const matchesRole = !this.roleFilter || user.role === this.roleFilter;
+      const matchesRole =
+        !this.roleFilter ||
+        user.role === this.roleFilter;
+
       return matchesTerm && matchesRole;
     });
   }
 
-  onSearchChange(): void { }
+  onSearchChange(): void {
+    // filteredUsers automatically updates
+  }
 
-  onRoleFilterChange(): void { }
+  onRoleFilterChange(): void {
+    // filteredUsers automatically updates
+  }
+
+  // ============================================================
+  // VIEW USER
+  // ============================================================
 
   openView(user: User): void {
     this.selectedUser = user;
@@ -204,16 +199,23 @@ export class UserManagement implements OnInit {
     this.openEditForm(user);
   }
 
-  // Open the form to add a brand-new user
+  // ============================================================
+  // ADD USER
+  // ============================================================
+
   openForm(): void {
     this.editingUser = null;
     this.formModel = { ...EMPTY_FORM };
     this.showForm = true;
   }
 
-  // Open the form pre-filled to edit an existing user
+  // ============================================================
+  // EDIT USER
+  // ============================================================
+
   openEditForm(user: User): void {
     this.editingUser = user;
+
     this.formModel = {
       name: user.name,
       email: user.email,
@@ -221,8 +223,13 @@ export class UserManagement implements OnInit {
       role: user.role,
       password: ''
     };
+
     this.showForm = true;
   }
+
+  // ============================================================
+  // CANCEL FORM
+  // ============================================================
 
   cancel(): void {
     this.showForm = false;
@@ -230,52 +237,42 @@ export class UserManagement implements OnInit {
     this.formModel = { ...EMPTY_FORM };
   }
 
+  // ============================================================
+  // CHECK IF EDITING
+  // ============================================================
+
   get isEditing(): boolean {
     return this.editingUser !== null;
   }
 
-  // Add or update, depending on whether we're editing
+  // ============================================================
+  // ADD / UPDATE USER
+  // ============================================================
+
   saveUser(): void {
 
-    if (!this.formModel.name || !this.formModel.email || !this.formModel.role) {
-=======
-  // Open add-user form
-  openForm(): void {
-    this.showForm = true;
-  }
-
-  // Cancel add-user form
-  cancel(): void {
-    this.showForm = false;
-
-    this.newUser = {
-      name: '',
-      email: '',
-      role: ''
-    };
-  }
-
-  // Add new user
-  addUser(): void {
-
+    // Validate required fields
     if (
-      !this.newUser.name ||
-      !this.newUser.email ||
-      !this.newUser.role
+      !this.formModel.name ||
+      !this.formModel.email ||
+      !this.formModel.role
     ) {
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       alert('Please fill in all required fields.');
       return;
     }
 
-<<<<<<< HEAD
+    // Password is required only when creating a new user
     if (!this.isEditing && !this.formModel.password) {
       alert('Please set a password for the new user.');
       return;
     }
 
+    // ==========================================================
+    // UPDATE EXISTING USER
+    // ==========================================================
+
     if (this.isEditing) {
-      // Only send a password if the admin actually typed a new one
+
       const payload: any = {
         name: this.formModel.name,
         email: this.formModel.email,
@@ -283,111 +280,249 @@ export class UserManagement implements OnInit {
         role: this.formModel.role
       };
 
+      // Only send password when admin entered a new password
       if (this.formModel.password) {
         payload.password = this.formModel.password;
       }
 
-      this.api.updateUser(this.editingUser!.id, payload).subscribe({
-        next: () => {
+      this.api.updateUser(
+        this.editingUser!.id,
+        payload
+      ).subscribe({
+
+        next: (updatedUser: any) => {
+
+          console.log('User updated:', updatedUser);
+
+          /*
+           * Update the user immediately in the current UI.
+           * This prevents the table from showing old information
+           * until a page reload.
+           */
+          if (updatedUser) {
+            this.users = this.users.map(user =>
+              user.id === updatedUser.id
+                ? updatedUser
+                : user
+            );
+
+            /*
+             * If the backend response does not contain the full
+             * user object, update the existing object manually.
+             */
+          } else {
+            this.users = this.users.map(user =>
+              user.id === this.editingUser!.id
+                ? {
+                  ...user,
+                  name: this.formModel.name,
+                  email: this.formModel.email,
+                  phone: this.formModel.phone,
+                  role: this.formModel.role
+                }
+                : user
+            );
+          }
+
+          // Close form
           this.cancel();
+
+          // Refresh backend data
           this.loadUsers();
         },
+
         error: (error: any) => {
-          console.error('Failed to update user:', error);
-          alert(error?.error?.detail || 'Failed to update user.');
+
+          console.error(
+            'Failed to update user:',
+            error
+          );
+
+          alert(
+            error?.error?.detail ||
+            error?.error?.message ||
+            'Failed to update user.'
+          );
         }
+
       });
 
-    } else {
-
-      this.api.createUser(this.formModel).subscribe({
-        next: () => {
-          this.cancel();
-          this.loadUsers();
-        },
-        error: (error: any) => {
-          console.error('Failed to create user:', error);
-          alert(error?.error?.detail || 'Failed to add user.');
-        }
-      });
+      return;
     }
-  }
 
-  // Toggle active/inactive from the table without opening the full form
-  toggleStatus(user: User): void {
-    this.api.updateUser(user.id, { is_active: !user.is_active }).subscribe({
-      next: () => this.loadUsers(),
-      error: (error: any) => {
-        console.error('Failed to update user status:', error);
-        alert('Failed to update user status.');
-=======
-    this.api.createUser(this.newUser).subscribe({
+    // ==========================================================
+    // CREATE NEW USER
+    // ==========================================================
 
-      next: () => {
-        alert('User added successfully.');
+    this.api.createUser(this.formModel).subscribe({
 
+      next: (createdUser: any) => {
+
+        console.log('User created:', createdUser);
+
+        /*
+         * Add the new user immediately to the table.
+         */
+        if (createdUser) {
+          this.users = [
+            ...this.users,
+            createdUser
+          ];
+        }
+
+        // Close form
         this.cancel();
 
+        // Refresh from backend
         this.loadUsers();
       },
 
       error: (error: any) => {
-        console.error('Failed to create user:', error);
-        alert('Failed to add user.');
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
+
+        console.error(
+          'Failed to create user:',
+          error
+        );
+
+        alert(
+          error?.error?.detail ||
+          error?.error?.message ||
+          'Failed to add user.'
+        );
       }
+
     });
   }
 
-  // Delete user
-<<<<<<< HEAD
+  // ============================================================
+  // TOGGLE ACTIVE / INACTIVE
+  // ============================================================
+
+  toggleStatus(user: User): void {
+
+    const newStatus = !user.is_active;
+
+    this.api.updateUser(
+      user.id,
+      {
+        is_active: newStatus
+      }
+    ).subscribe({
+
+      next: (updatedUser: any) => {
+
+        console.log(
+          'User status updated:',
+          updatedUser
+        );
+
+        /*
+         * Update the status immediately in the UI.
+         */
+        this.users = this.users.map(existingUser =>
+          existingUser.id === user.id
+            ? {
+              ...existingUser,
+              is_active:
+                updatedUser?.is_active ??
+                newStatus
+            }
+            : existingUser
+        );
+
+        /*
+         * If the user is currently open in the View modal,
+         * update that object too.
+         */
+        if (
+          this.selectedUser &&
+          this.selectedUser.id === user.id
+        ) {
+          this.selectedUser = {
+            ...this.selectedUser,
+            is_active:
+              updatedUser?.is_active ??
+              newStatus
+          };
+        }
+
+        // Synchronize with backend
+        this.loadUsers();
+      },
+
+      error: (error: any) => {
+
+        console.error(
+          'Failed to update user status:',
+          error
+        );
+
+        alert(
+          error?.error?.detail ||
+          error?.error?.message ||
+          'Failed to update user status.'
+        );
+      }
+
+    });
+  }
+
+  // ============================================================
+  // DELETE USER
+  // ============================================================
+
   removeUser(user: User): void {
-    const confirmed = confirm(
-      `Are you sure you want to delete ${user.name}?`
-=======
-  removeUser(email: string): void {
 
     const confirmed = confirm(
-      'Are you sure you want to delete this user?'
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
+      `Are you sure you want to delete ${user.name}?`
     );
 
     if (!confirmed) {
       return;
     }
 
-<<<<<<< HEAD
     this.api.deleteUser(user.id).subscribe({
-      next: () => {
-        // Remove the user immediately from the current UI
-        this.users = this.users.filter(u => u.id !== user.id);
 
-        // If this user was being viewed, close the view
-        if (this.selectedUser?.id === user.id) {
+      next: () => {
+
+        console.log(
+          'User deleted:',
+          user.id
+        );
+
+        /*
+         * Remove immediately from the UI.
+         */
+        this.users = this.users.filter(
+          existingUser =>
+            existingUser.id !== user.id
+        );
+
+        /*
+         * If this user is currently being viewed,
+         * close the View modal.
+         */
+        if (
+          this.selectedUser?.id === user.id
+        ) {
           this.closeView();
         }
-=======
-    this.api.deleteUser(email).subscribe({
-
-      next: () => {
-        alert('User deleted successfully.');
-
-        this.loadUsers();
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       },
 
       error: (error: any) => {
-        console.error('Failed to delete user:', error);
-<<<<<<< HEAD
-        alert(error?.error?.detail || 'Failed to delete user.');
-=======
-        alert('Failed to delete user.');
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
+
+        console.error(
+          'Failed to delete user:',
+          error
+        );
+
+        alert(
+          error?.error?.detail ||
+          error?.error?.message ||
+          'Failed to delete user.'
+        );
       }
+
     });
   }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

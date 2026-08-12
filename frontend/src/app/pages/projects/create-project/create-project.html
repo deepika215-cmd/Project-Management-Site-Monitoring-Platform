@@ -1,572 +1,101 @@
 <div class="page-container">
-<<<<<<< HEAD
-  <app-sidebar active="create"></app-sidebar>
-
-  <main class="main-content">
-    <header class="page-header">
-      <div>
-        <span class="eyebrow">PROJECT MANAGEMENT</span>
-        <h1>Create Project</h1>
-        <p>Create a project and persist it in the existing FastAPI database.</p>
-      </div>
-      <a class="back-btn" routerLink="/projects">← Back to Projects</a>
-    </header>
-
-    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
-    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
-
-    <form class="project-form" (ngSubmit)="createProject()" #projectForm="ngForm">
-      <section class="form-card">
-        <div class="card-heading">
-          <div><h2>Project Information</h2><p>Enter the information required by the backend project schema.</p></div>
-          <span class="required-note"><span>*</span> Required</span>
-        </div>
-
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="name">Project Name <span>*</span></label>
-            <input id="name" name="name" [(ngModel)]="project.name" required placeholder="e.g. Green Valley Apartments">
-          </div>
-          <div class="form-group">
-            <label for="location">Location <span>*</span></label>
-            <input id="location" name="location" [(ngModel)]="project.location" required placeholder="e.g. Chennai, Tamil Nadu">
-          </div>
-          <div class="form-group">
-            <label for="start">Start Date <span>*</span></label>
-            <input id="start" type="date" name="start" [(ngModel)]="project.startDate" required>
-          </div>
-          <div class="form-group">
-            <label for="end">End Date <span>*</span></label>
-            <input id="end" type="date" name="end" [(ngModel)]="project.completionDate" required>
-          </div>
-          <div class="form-group">
-            <label for="budget">Budget (₹) <span>*</span></label>
-            <input id="budget" type="number" name="budget" [(ngModel)]="project.budget" min="0" step="1" required placeholder="Enter project budget">
-          </div>
-          <div class="form-group">
-            <label for="status">Initial Status</label>
-            <select id="status" name="status" [(ngModel)]="project.status">
-              <option value="Planning">Planning</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Completed">Completed</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </div>
-        </div>
-      </section>
-
-      <section class="form-card">
-        <div class="card-heading">
-          <div><h2>Project Description</h2><p>Add useful context for the project team.</p></div>
-        </div>
-        <div class="form-group">
-          <label for="description">Description</label>
-          <textarea id="description" name="description" [(ngModel)]="project.description" rows="5" placeholder="Describe the construction scope, objectives and key information..."></textarea>
-        </div>
-      </section>
-
-      <section class="manager-card">
-        <div class="manager-icon">👤</div>
-        <div class="manager-copy">
-          <h2>Project Manager</h2>
-          <p>The manager is taken from the authenticated account so the foreign-key relationship is valid.</p>
-          <strong *ngIf="project.manager">{{ project.manager }} · User #{{ project.managerId }}</strong>
-          <span class="muted" *ngIf="loadingManager">Loading authenticated user...</span>
-        </div>
-        <div class="manager-status" [class.ready]="!loadingManager && project.managerId > 0">
-          <span class="status-dot"></span>
-          {{ loadingManager ? 'Loading' : (project.managerId > 0 ? 'Ready to save' : 'Unavailable') }}
-        </div>
-      </section>
-
-      <div class="form-actions">
-        <a class="secondary-btn" routerLink="/projects">Cancel</a>
-        <button class="primary-btn" type="submit" [disabled]="loading || loadingManager || projectForm.invalid || !project.managerId">
-          <span class="spinner" *ngIf="loading"></span>
-          {{ loading ? 'Saving Project...' : 'Create Project' }}
-        </button>
-      </div>
-    </form>
-  </main>
-</div>
-=======
-
-    <!-- ================= Sidebar ================= -->
-
-    <aside class="sidebar">
-
-        <div class="logo">
-            <h2>BuildTrack</h2>
-            <span>Construction Management</span>
-        </div>
-
-        <nav>
-            <a routerLink="/project-manager-dashboard">Dashboard</a>
-            <a routerLink="/projects">My Projects</a>
-            <a routerLink="/projects/create-project" class="active">Create Project</a>
-            <a routerLink="/projects/milestones">Milestones</a>
-            <a routerLink="/projects/schedule">Schedule</a>
-        </nav>
-
-        <div class="sidebar-bottom">
-            <a routerLink="/notifications">Notifications</a>
-            <a routerLink="/profile">Profile</a>
-            <a routerLink="/login">Logout</a>
-        </div>
-
-    </aside>
-
-    <!-- ================= Main Content ================= -->
+    <app-sidebar active="create"></app-sidebar>
 
     <main class="main-content">
-
-        <!-- ================= Header ================= -->
-
         <header class="page-header">
-
             <div>
-
+                <span class="eyebrow">PROJECT MANAGEMENT</span>
                 <h1>Create Project</h1>
-
-                <p>Register and manage a new construction project.</p>
-
+                <p>Create a project and persist it in the existing FastAPI database.</p>
             </div>
-
-            <button
-                class="back-btn"
-                routerLink="/projects">
-
-                ← Back to Projects
-
-            </button>
-
+            <a class="back-btn" routerLink="/projects">← Back to Projects</a>
         </header>
 
-        <!-- ================= Statistics ================= -->
+        <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
 
-        <section class="stats-row">
-
-            <div class="stat-card">
-
-                <div class="stat-icon blue">📁</div>
-
-                <div>
-                    <h3>New</h3>
-                    <span>Project</span>
-                </div>
-
-            </div>
-
-            <div class="stat-card">
-
-                <div class="stat-icon orange">📋</div>
-
-                <div>
-                    <h3>Planning</h3>
-                    <span>Default Status</span>
-                </div>
-
-            </div>
-
-            <div class="stat-card">
-
-                <div class="stat-icon green">🚧</div>
-
-                <div>
-                    <h3>Medium</h3>
-                    <span>Priority</span>
-                </div>
-
-            </div>
-
-            <div class="stat-card">
-
-                <div class="stat-icon purple">📅</div>
-
-                <div>
-                    <h3>Today</h3>
-                    <span>Created</span>
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- ================= Project Card ================= -->
-
-        <section class="project-section">
-
-            <div class="section-header">
-
-                <div>
-
-                    <h2>Create Project</h2>
-
-                    <p>Fill in the project details below.</p>
-
-                </div>
-
-            </div>
-
-            <form
-                class="project-form"
-                (ngSubmit)="createProject()">
-
-                <!-- ================= Project Information ================= -->
-
-                <section class="form-section">
-
-                    <h2>📁 Project Information</h2>
-
-                    <div class="form-grid">
-
-                        <div class="form-group">
-
-                            <label>Project Name *</label>
-
-                            <input
-                                type="text"
-                                name="projectName"
-                                [(ngModel)]="project.name"
-                                placeholder="Enter project name"
-                                required>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Project Code *</label>
-
-                            <input
-                                type="text"
-                                name="projectCode"
-                                [(ngModel)]="project.code"
-                                placeholder="BT-008"
-                                required>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Project Category *</label>
-
-                            <select
-                                name="category"
-                                [(ngModel)]="project.category"
-                                required>
-
-                                <option value="">Select Category</option>
-                                <option>Residential</option>
-                                <option>Commercial</option>
-                                <option>Industrial</option>
-                                <option>Infrastructure</option>
-                                <option>Government</option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="form-group">
-
-                            <label>Priority *</label>
-
-                            <select
-                                name="priority"
-                                [(ngModel)]="project.priority"
-                                required>
-
-                                <option value="">Select Priority</option>
-                                <option>Low</option>
-                                <option>Medium</option>
-                                <option>High</option>
-                                <option>Critical</option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="form-group full-width">
-
-                            <label>Project Description</label>
-
-                            <textarea
-                                rows="5"
-                                name="description"
-                                [(ngModel)]="project.description"
-                                placeholder="Describe the project..."></textarea>
-
-                        </div>
-
+        <form class="project-form" (ngSubmit)="createProject()" #projectForm="ngForm">
+            <section class="form-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>Project Information</h2>
+                        <p>Enter the information required by the backend project schema.</p>
                     </div>
-
-                </section>
-                <!-- ================= Client Information ================= -->
-
-<section class="form-section">
-
-    <h2>👤 Client Information</h2>
-
-    <div class="form-grid">
-
-        <div class="form-group">
-
-            <label>Client Name *</label>
-
-            <input
-                type="text"
-                name="clientName"
-                [(ngModel)]="project.clientName"
-                placeholder="Enter client name"
-                required>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Client Email *</label>
-
-            <input
-                type="email"
-                name="clientEmail"
-                [(ngModel)]="project.clientEmail"
-                placeholder="client@example.com"
-                required>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Client Phone</label>
-
-            <input
-                type="tel"
-                name="clientPhone"
-                [(ngModel)]="project.clientPhone"
-                placeholder="+91 XXXXX XXXXX">
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Company Name</label>
-
-            <input
-                type="text"
-                name="companyName"
-                [(ngModel)]="project.companyName"
-                placeholder="Client Company">
-
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= Project Location ================= -->
-
-<section class="form-section">
-
-    <h2>📍 Project Location</h2>
-
-    <div class="form-grid">
-
-        <div class="form-group full-width">
-
-            <label>Project Address *</label>
-
-            <textarea
-                rows="4"
-                name="location"
-                [(ngModel)]="project.location"
-                placeholder="Enter complete project address"
-                required></textarea>
-
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= Budget & Schedule ================= -->
-
-<section class="form-section">
-
-    <h2>💰 Budget & Schedule</h2>
-
-    <div class="form-grid">
-
-        <div class="form-group">
-
-            <label>Estimated Budget (₹) *</label>
-
-            <input
-                type="number"
-                name="budget"
-                [(ngModel)]="project.budget"
-                placeholder="Enter estimated budget"
-                min="0"
-                required>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Start Date *</label>
-
-            <input
-                type="date"
-                name="startDate"
-                [(ngModel)]="project.startDate"
-                required>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Expected Completion Date *</label>
-
-            <input
-                type="date"
-                name="completionDate"
-                [(ngModel)]="project.completionDate"
-                required>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Project Duration</label>
-
-            <input
-                type="text"
-                name="duration"
-                [(ngModel)]="project.duration"
-                placeholder="Example: 18 Months">
-
-        </div>
-
-    </div>
-
-</section>
-<!-- ================= Project Assignment ================= -->
-
-<section class="form-section">
-
-    <h2>👷 Project Assignment</h2>
-
-    <div class="form-grid">
-
-        <div class="form-group">
-
-            <label>Project Manager</label>
-
-            <select
-                name="manager"
-                [(ngModel)]="project.manager">
-
-                <option value="">Select Project Manager</option>
-                <option>Raj Kumar</option>
-                <option>Arun Kumar</option>
-                <option>Vijay Kumar</option>
-                <option>Suresh Kumar</option>
-
-            </select>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Initial Project Status</label>
-
-            <select
-                name="status"
-                [(ngModel)]="project.status">
-
-                <option>Planning</option>
-                <option>In Progress</option>
-                <option>On Hold</option>
-
-            </select>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Project Phase</label>
-
-            <select
-                name="phase"
-                [(ngModel)]="project.phase">
-
-                <option>Initiation</option>
-                <option>Planning</option>
-                <option>Execution</option>
-                <option>Monitoring</option>
-                <option>Closing</option>
-
-            </select>
-
-        </div>
-
-        <div class="form-group">
-
-            <label>Project Visibility</label>
-
-            <select
-                name="visibility"
-                [(ngModel)]="project.visibility">
-
-                <option>Internal</option>
-                <option>Client Access</option>
-
-            </select>
-
-        </div>
-
-    </div>
-
-</section>
-
-<!-- ================= Action Buttons ================= -->
-
-<section class="form-section action-card">
-
-    <div class="form-actions">
-
-        <button
-            type="button"
-            class="cancel-btn"
-            routerLink="/projects">
-
-            Cancel
-
-        </button>
-
-        <button
-            type="button"
-            class="draft-btn">
-
-            Save Draft
-
-        </button>
-
-        <button
-            type="submit"
-            class="submit-btn">
-
-            Create Project
-
-        </button>
-
-    </div>
-
-</section>
-
-</form>
-
-</section>
-
-</main>
-
+                    <span class="required-note"><span>*</span> Required</span>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Project Name <span>*</span></label>
+                        <input id="name" name="name" [(ngModel)]="project.name" required
+                            placeholder="e.g. Green Valley Apartments">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location <span>*</span></label>
+                        <input id="location" name="location" [(ngModel)]="project.location" required
+                            placeholder="e.g. Chennai, Tamil Nadu">
+                    </div>
+                    <div class="form-group">
+                        <label for="start">Start Date <span>*</span></label>
+                        <input id="start" type="date" name="start" [(ngModel)]="project.startDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end">End Date <span>*</span></label>
+                        <input id="end" type="date" name="end" [(ngModel)]="project.completionDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="budget">Budget (₹) <span>*</span></label>
+                        <input id="budget" type="number" name="budget" [(ngModel)]="project.budget" min="0" step="1"
+                            required placeholder="Enter project budget">
+                    </div>
+                    <div class="form-group">
+                        <label for="status">Initial Status</label>
+                        <select id="status" name="status" [(ngModel)]="project.status">
+                            <option value="Planning">Planning</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-card">
+                <div class="card-heading">
+                    <div>
+                        <h2>Project Description</h2>
+                        <p>Add useful context for the project team.</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" [(ngModel)]="project.description" rows="5"
+                        placeholder="Describe the construction scope, objectives and key information..."></textarea>
+                </div>
+            </section>
+
+            <section class="manager-card">
+                <div class="manager-icon">👤</div>
+                <div class="manager-copy">
+                    <h2>Project Manager</h2>
+                    <p>The manager is taken from the authenticated account so the foreign-key relationship is valid.</p>
+                    <strong *ngIf="project.manager">{{ project.manager }} · User #{{ project.managerId }}</strong>
+                    <span class="muted" *ngIf="loadingManager">Loading authenticated user...</span>
+                </div>
+                <div class="manager-status" [class.ready]="!loadingManager && project.managerId > 0">
+                    <span class="status-dot"></span>
+                    {{ loadingManager ? 'Loading' : (project.managerId > 0 ? 'Ready to save' : 'Unavailable') }}
+                </div>
+            </section>
+
+            <div class="form-actions">
+                <a class="secondary-btn" routerLink="/projects">Cancel</a>
+                <button class="primary-btn" type="submit"
+                    [disabled]="loading || loadingManager || projectForm.invalid || !project.managerId">
+                    <span class="spinner" *ngIf="loading"></span>
+                    {{ loading ? 'Saving Project...' : 'Create Project' }}
+                </button>
+            </div>
+        </form>
+    </main>
 </div>
->>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
