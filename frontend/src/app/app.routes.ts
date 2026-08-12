@@ -1,10 +1,17 @@
 import { Routes } from '@angular/router';
+<<<<<<< HEAD
 import { authGuard, roleGuard } from './guards/auth-guard';
+=======
+import { authGuard } from './guards/auth-guard';
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 import { Login } from './pages/auth/login/login';
 import { Register } from './pages/auth/register/register';
 import { ForgotPassword } from './pages/auth/forgot-password/forgot-password';
+<<<<<<< HEAD
 import { ResetPassword } from './pages/auth/reset-password/reset-password';
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 import { AdminDashboard } from './pages/dashboards/admin-dashboard/admin-dashboard';
 import { ProjectManagerDashboard } from './pages/dashboards/project-manager-dashboard/project-manager-dashboard';
@@ -34,10 +41,13 @@ import { SiteEngineerProjects } from './pages/site-engineer-projects/site-engine
 import { SiteEngineerMilestones } from './pages/site-engineer-milestones/site-engineer-milestones';
 
 import { Notifications } from './pages/notifications/notifications';
+<<<<<<< HEAD
 import { Profile } from './pages/profile/profile';
 import { Inventory } from './pages/inventory/inventory';
 import { Workforce } from './pages/workforce/workforce';
 import { Attendance } from './pages/attendance/attendance';
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 
 export const routes: Routes = [
@@ -65,29 +75,41 @@ export const routes: Routes = [
     component: ForgotPassword
   },
 
+<<<<<<< HEAD
   {
     path: 'reset-password',
     component: ResetPassword
   },
 
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
   // Dashboards
 
   {
     path: 'admin-dashboard',
     component: AdminDashboard,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['ADMIN'])]
+=======
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
   {
     path: 'project-manager-dashboard',
     component: ProjectManagerDashboard,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['PROJECT_MANAGER'])]
+=======
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
   {
     path: 'site-engineer-dashboard',
     component: SiteEngineerDashboard,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])]
   },
 
@@ -108,6 +130,28 @@ export const routes: Routes = [
     component: ClientDashboard,
     canActivate: [authGuard, roleGuard(['CLIENT'])]
   },
+=======
+    canActivate: [authGuard]
+  },
+
+  {
+  path: 'contractor-dashboard',
+  component: ContractorDashboard,
+  canActivate: [authGuard]
+},
+
+{
+  path: 'worker-dashboard',
+  component: WorkerDashboard,
+  canActivate: [authGuard]
+},
+
+{
+  path: 'client-dashboard',
+  component: ClientDashboard,
+  canActivate: [authGuard]
+},
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 
   // User Management
@@ -115,6 +159,7 @@ export const routes: Routes = [
   {
     path: 'user-management',
     component: UserManagement,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['ADMIN'])]
   },
 
@@ -124,6 +169,8 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: Profile,
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
     canActivate: [authGuard]
   },
 
@@ -155,13 +202,21 @@ export const routes: Routes = [
   {
     path: 'projects/create-project',
     component: CreateProject,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
+=======
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
   {
     path: 'projects/milestones',
     component: Milestones,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
+=======
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
   {
@@ -173,7 +228,11 @@ export const routes: Routes = [
   {
     path: 'projects/project-status',
     component: ProjectStatus,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
+=======
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
   {
@@ -183,9 +242,15 @@ export const routes: Routes = [
   },
 
   {
+<<<<<<< HEAD
     path: 'projects/update-project/:id',
     component: UpdateProject,
     canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
+=======
+    path: 'projects/update-project',
+    component: UpdateProject,
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
 
@@ -194,12 +259,17 @@ export const routes: Routes = [
   {
     path: 'site-engineer-projects',
     component: SiteEngineerProjects,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])]
+=======
+    canActivate: [authGuard]
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   },
 
   {
     path: 'site-engineer-milestones',
     component: SiteEngineerMilestones,
+<<<<<<< HEAD
     canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])]
   },
 
@@ -209,6 +279,12 @@ export const routes: Routes = [
   { path: 'workforce', component: Workforce, canActivate: [authGuard] },
   { path: 'attendance', component: Attendance, canActivate: [authGuard] },
 
+=======
+    canActivate: [authGuard]
+  },
+
+
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   // Notifications
 
   {
@@ -245,6 +321,7 @@ export const routes: Routes = [
     path: 'site-engineer-notifications',
     component: SiteEngineerNotifications,
     canActivate: [authGuard]
+<<<<<<< HEAD
   },
 
 
@@ -255,5 +332,8 @@ export const routes: Routes = [
   { path: 'resources', redirectTo: 'resource-allocation', pathMatch: 'full' },
   { path: 'resources/equipment-tracking', redirectTo: 'resource-allocation', pathMatch: 'full' },
   { path: 'resources/resource-utilization', redirectTo: 'resource-allocation', pathMatch: 'full' },
+=======
+  }
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 ];

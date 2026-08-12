@@ -1,5 +1,8 @@
 from pydantic import BaseModel, EmailStr
+<<<<<<< HEAD
 from typing import Optional
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 
 class UserCreate(BaseModel):
@@ -10,6 +13,7 @@ class UserCreate(BaseModel):
     role: str
 
 
+<<<<<<< HEAD
 # Used for editing an existing user. Password is intentionally optional:
 # an admin editing a user's role/status shouldn't have to re-supply a
 # password every time. If provided, it is re-hashed and updated.
@@ -22,6 +26,8 @@ class UserUpdate(BaseModel):
     password: Optional[str] = None
 
 
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 class UserResponse(BaseModel):
     id: int
     name: str
@@ -36,6 +42,7 @@ class UserResponse(BaseModel):
 
 class UserLogin(BaseModel):
     email: EmailStr
+<<<<<<< HEAD
     password: str
 
 
@@ -60,3 +67,6 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+=======
+    password: str
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

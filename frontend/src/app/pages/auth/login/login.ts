@@ -51,7 +51,10 @@ export class Login {
 
           next: (user: any) => {
 
+<<<<<<< HEAD
             localStorage.setItem('currentUser', JSON.stringify(user));
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
             console.log('Logged-in user:', user);
             console.log('User role:', user.role);
 

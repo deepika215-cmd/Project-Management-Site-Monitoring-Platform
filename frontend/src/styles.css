@@ -2,6 +2,7 @@
 body {
   margin: 0;
   background: #f4f6f9;
+<<<<<<< HEAD
 }
 
 /* BuildTrack shared layout: every page using app-sidebar reserves the same sidebar width. */
@@ -9,3 +10,6 @@ app-sidebar { display: block; width: 235px; flex: 0 0 235px; min-width: 235px; }
 @media (max-width: 850px) {
   app-sidebar { width: 100%; min-width: 0; flex: 0 0 auto; }
 }
+=======
+}
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

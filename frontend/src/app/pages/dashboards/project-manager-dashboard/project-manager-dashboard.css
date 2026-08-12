@@ -421,8 +421,12 @@ grid-template-columns:1fr;
 grid-template-columns:1fr;
 }
 
+<<<<<<< HEAD
 }
 
 /* Shared fixed BuildTrack sidebar */
 .main-content{min-height:100vh}
 @media(max-width:850px){.main-content{margin-left:0}.page-container{display:block}.sidebar{position:static;width:100%;height:auto}}
+=======
+}
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

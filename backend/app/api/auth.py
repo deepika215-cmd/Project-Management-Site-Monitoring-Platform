@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.user import User
+<<<<<<< HEAD
 from app.schemas.user_schema import (
     UserCreate,
     UserResponse,
@@ -12,13 +13,20 @@ from app.schemas.user_schema import (
     ForgotPasswordRequest,
     ResetPasswordRequest
 )
+=======
+from app.schemas.user_schema import UserCreate, UserResponse
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 from app.core.security import (
     hash_password,
     verify_password,
+<<<<<<< HEAD
     create_access_token,
     create_password_reset_token,
     verify_password_reset_token
+=======
+    create_access_token
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 )
 
 from app.core.auth import get_current_user
@@ -108,6 +116,7 @@ def get_me(
 
 
 # -----------------------------
+<<<<<<< HEAD
 # Update My Profile
 # -----------------------------
 @router.put("/me", response_model=UserResponse)
@@ -223,6 +232,8 @@ def reset_password(
 
 
 # -----------------------------
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 # Admin Dashboard
 # -----------------------------
 @router.get("/admin")

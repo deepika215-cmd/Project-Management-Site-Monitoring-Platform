@@ -1,5 +1,9 @@
 from datetime import datetime, timedelta
+<<<<<<< HEAD
 from jose import jwt, JWTError
+=======
+from jose import jwt
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 from passlib.context import CryptContext
 
 from app.core.config import (
@@ -13,11 +17,14 @@ pwd_context = CryptContext(
     deprecated="auto"
 )
 
+<<<<<<< HEAD
 # Password reset tokens are short-lived and carry a "purpose" claim so
 # they can never be replayed as a normal login/access token.
 PASSWORD_RESET_EXPIRE_MINUTES = 15
 PASSWORD_RESET_PURPOSE = "password_reset"
 
+=======
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
 def hash_password(password):
     return pwd_context.hash(password)
@@ -40,6 +47,7 @@ def create_access_token(data: dict):
         to_encode,
         SECRET_KEY,
         algorithm=ALGORITHM
+<<<<<<< HEAD
     )
 
 
@@ -71,3 +79,6 @@ def verify_password_reset_token(token: str) -> str | None:
         return None
 
     return payload.get("sub")
+=======
+    )
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

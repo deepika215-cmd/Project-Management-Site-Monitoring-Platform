@@ -1,4 +1,5 @@
 <div class="page-container">
+<<<<<<< HEAD
   <app-sidebar active="projects"></app-sidebar>
 
   <main class="main-content">
@@ -26,3 +27,340 @@
     </div>
   </main>
 </div>
+=======
+
+  <aside class="sidebar">
+
+    <div class="logo">
+      <h2>BuildTrack</h2>
+      <span>Construction Management</span>
+    </div>
+
+    <nav>
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/projects" class="active">My Projects</a>
+      <a routerLink="/projects/create">Create Project</a>
+      <a routerLink="/projects/milestones">Milestones</a>
+      <a routerLink="/projects/schedule">Schedule</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a>Notifications</a>
+      <a>Profile</a>
+      <a routerLink="/login">Logout</a>
+    </div>
+
+  </aside>
+
+
+  <main class="main-content">
+
+    <div class="page-header">
+
+      <div>
+        <h1>{{ project.name }}</h1>
+        <p>Project Code: {{ project.id }}</p>
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          class="back-btn"
+          routerLink="/projects">
+
+          ← Back
+
+        </button>
+
+        <button
+  class="edit-btn"
+  routerLink="/projects/update-project">
+
+  Edit Project
+
+</button>
+
+      </div>
+
+    </div>
+
+
+    <!-- Project Overview -->
+
+    <section class="overview-grid">
+
+      <div class="info-card">
+
+        <span>Project Status</span>
+
+        <strong
+          class="status"
+          [ngClass]="getStatusClass(project.status)">
+
+          {{ project.status }}
+
+        </strong>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <span>Category</span>
+
+        <strong>{{ project.category }}</strong>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <span>Priority</span>
+
+        <strong>{{ project.priority }}</strong>
+
+      </div>
+
+
+      <div class="info-card">
+
+        <span>Project Manager</span>
+
+        <strong>{{ project.manager }}</strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- Progress -->
+
+    <section class="card">
+
+      <h2>Project Progress</h2>
+
+      <div class="progress-header">
+
+        <span>Overall Completion</span>
+
+        <strong>{{ project.progress }}%</strong>
+
+      </div>
+
+      <div class="large-progress-bar">
+
+        <div
+          class="large-progress"
+          [style.width.%]="project.progress">
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Project Information -->
+
+    <section class="card">
+
+      <h2>Project Information</h2>
+
+      <div class="details-grid">
+
+        <div>
+          <label>Project Name</label>
+          <p>{{ project.name }}</p>
+        </div>
+
+        <div>
+          <label>Project Code</label>
+          <p>{{ project.id }}</p>
+        </div>
+
+        <div>
+          <label>Category</label>
+          <p>{{ project.category }}</p>
+        </div>
+
+        <div>
+          <label>Priority</label>
+          <p>{{ project.priority }}</p>
+        </div>
+
+        <div class="full-width">
+          <label>Description</label>
+          <p>{{ project.description }}</p>
+        </div>
+
+        <div class="full-width">
+          <label>Project Location</label>
+          <p>{{ project.location }}</p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Client Information -->
+
+    <section class="card">
+
+      <h2>Client Information</h2>
+
+      <div class="details-grid">
+
+        <div>
+          <label>Client Name</label>
+          <p>{{ project.clientName }}</p>
+        </div>
+
+        <div>
+          <label>Client Email</label>
+          <p>{{ project.clientEmail }}</p>
+        </div>
+
+        <div>
+          <label>Client Phone</label>
+          <p>{{ project.clientPhone }}</p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Budget & Schedule -->
+
+    <section class="card">
+
+      <h2>Budget & Schedule</h2>
+
+      <div class="details-grid">
+
+        <div>
+          <label>Estimated Budget</label>
+          <p>${{ project.budget | number }}</p>
+        </div>
+
+        <div>
+          <label>Start Date</label>
+          <p>{{ project.startDate }}</p>
+        </div>
+
+        <div>
+          <label>Expected Completion</label>
+          <p>{{ project.completionDate }}</p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Milestone Summary -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <h2>Milestone Summary</h2>
+
+        <button
+          routerLink="/projects/milestones"
+          class="link-btn">
+
+          View All Milestones
+
+        </button>
+
+      </div>
+
+
+      <div class="milestone-list">
+
+        <div
+          class="milestone"
+          *ngFor="let milestone of milestones">
+
+          <div>
+
+            <strong>
+              {{ milestone.name }}
+            </strong>
+
+            <p>
+              Planned: {{ milestone.plannedDate }}
+            </p>
+
+          </div>
+
+          <span
+            class="milestone-status"
+            [ngClass]="milestone.status.toLowerCase().replace(' ', '-')">
+
+            {{ milestone.status }}
+
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- Workforce -->
+
+    <section class="two-column">
+
+      <div class="card">
+
+        <h2>Site Engineers</h2>
+
+        <div
+          class="person"
+          *ngFor="let engineer of siteEngineers">
+
+          <div class="avatar">
+            {{ engineer.name.charAt(0) }}
+          </div>
+
+          <div>
+            <strong>{{ engineer.name }}</strong>
+            <p>{{ engineer.zone }}</p>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h2>Contractors</h2>
+
+        <div
+          class="person"
+          *ngFor="let contractor of contractors">
+
+          <div class="avatar">
+            {{ contractor.name.charAt(0) }}
+          </div>
+
+          <div>
+            <strong>{{ contractor.name }}</strong>
+            <p>{{ contractor.specialization }}</p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+</div>
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

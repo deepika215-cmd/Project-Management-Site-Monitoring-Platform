@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 <div class="page-container">
 
     <!-- ================= Sidebar ================= -->
@@ -27,7 +31,13 @@
                 Milestones
             </a>
 
+<<<<<<< HEAD
             <a routerLink="/projects/schedule" class="active">
+=======
+            <a
+                routerLink="/projects/schedule"
+                class="active">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                 Schedule
 
@@ -42,7 +52,11 @@
             <a>Profile</a>
 
             <a routerLink="/login">
+<<<<<<< HEAD
                 Logout
+=======
+            Logout
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
             </a>
 
         </div>
@@ -67,7 +81,13 @@
 
             </div>
 
+<<<<<<< HEAD
             <button class="back-btn" (click)="openAddActivity()">
+=======
+            <button
+                class="back-btn"
+                (click)="openAddActivity()">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                 + Add Activity
 
@@ -209,7 +229,13 @@
 
                 <div class="progress-bar">
 
+<<<<<<< HEAD
                     <div class="progress" [style.width.%]="completedPercentage">
+=======
+                    <div
+                        class="progress"
+                        [style.width.%]="completedPercentage">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                     </div>
 
@@ -255,7 +281,12 @@
 
                     <tbody>
 
+<<<<<<< HEAD
                         <tr *ngFor="let activity of activities; let i=index">
+=======
+                        <tr
+                            *ngFor="let activity of activities; let i=index">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                             <td>{{ i+1 }}</td>
 
@@ -293,7 +324,13 @@
 
                                 </span>
 
+<<<<<<< HEAD
                                 <span *ngIf="!activity.dependency" class="text-muted">
+=======
+                                <span
+                                    *ngIf="!activity.dependency"
+                                    class="text-muted">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                                     None
 
@@ -303,7 +340,13 @@
 
                             <td>
 
+<<<<<<< HEAD
                                 <span class="status-badge" [ngClass]="getStatusClass(activity.status)">
+=======
+                                <span
+                                    class="status-badge"
+                                    [ngClass]="getStatusClass(activity.status)">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                                     {{ activity.status }}
 
@@ -315,13 +358,25 @@
 
                                 <div class="actions">
 
+<<<<<<< HEAD
                                     <button class="edit-btn" (click)="editActivity(activity)">
+=======
+                                    <button
+                                        class="edit-btn"
+                                        (click)="editActivity(activity)">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                                         Edit
 
                                     </button>
 
+<<<<<<< HEAD
                                     <button class="delete-btn" (click)="deleteActivity(activity.id)">
+=======
+                                    <button
+                                        class="delete-btn"
+                                        (click)="deleteActivity(activity.id)">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                                         Delete
 
@@ -335,7 +390,13 @@
 
                         <tr *ngIf="activities.length===0">
 
+<<<<<<< HEAD
                             <td colspan="8" class="no-data">
+=======
+                            <td
+                                colspan="8"
+                                class="no-data">
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
                                 No activities found.
 
@@ -350,6 +411,7 @@
             </div>
 
         </section>
+<<<<<<< HEAD
         <!-- Add/Edit Activity Modal -->
         <!-- ================= ADD / EDIT ACTIVITY MODAL ================= -->
 
@@ -519,3 +581,207 @@
             </div>
 
         </div>
+=======
+    <!-- Add/Edit Activity Modal -->
+    <!-- ================= ADD / EDIT ACTIVITY MODAL ================= -->
+
+<div
+    class="modal-overlay"
+    *ngIf="showModal">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    {{ editingActivity ? 'Edit Activity' : 'Add New Activity' }}
+                </h2>
+
+                <p>
+                    {{
+                    editingActivity
+                    ? 'Update the selected construction activity.'
+                    : 'Create a new construction activity for the project.'
+                    }}
+                </p>
+
+            </div>
+
+            <button
+                class="close-btn"
+                (click)="closeModal()">
+
+                ×
+
+            </button>
+
+        </div>
+
+        <form (ngSubmit)="saveActivity()">
+
+            <!-- Activity Name -->
+
+            <div class="form-group">
+
+                <label>Activity Name</label>
+
+                <input
+                    type="text"
+                    [(ngModel)]="currentActivity.name"
+                    name="activityName"
+                    placeholder="Enter activity name"
+                    required>
+
+            </div>
+
+            <!-- Description -->
+
+            <div class="form-group">
+
+                <label>Description</label>
+
+                <textarea
+                    rows="4"
+                    [(ngModel)]="currentActivity.description"
+                    name="description"
+                    placeholder="Enter activity description">
+                </textarea>
+
+            </div>
+
+            <!-- Dates -->
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>Start Date</label>
+
+                    <input
+                        type="date"
+                        [(ngModel)]="currentActivity.startDate"
+                        name="startDate"
+                        (change)="calculateDuration()"
+                        required>
+
+                </div>
+
+                <div class="form-group">
+
+                    <label>End Date</label>
+
+                    <input
+                        type="date"
+                        [(ngModel)]="currentActivity.endDate"
+                        name="endDate"
+                        (change)="calculateDuration()"
+                        required>
+
+                </div>
+
+            </div>
+
+            <!-- Duration -->
+
+            <div class="form-group">
+
+                <label>Duration (Auto Calculated)</label>
+
+                <input
+                    type="number"
+                    [value]="currentActivity.duration"
+                    readonly>
+
+            </div>
+
+            <!-- Dependency -->
+
+            <div class="form-group">
+
+                <label>Dependency</label>
+
+                <select
+                    [(ngModel)]="currentActivity.dependency"
+                    name="dependency">
+
+                    <option value="">
+                        None
+                    </option>
+
+                    <option
+                        *ngFor="let activity of activities"
+                        [value]="activity.name">
+
+                        {{ activity.name }}
+
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- Status -->
+
+            <div class="form-group">
+
+                <label>Status</label>
+
+                <select
+                    [(ngModel)]="currentActivity.status"
+                    name="status">
+
+                    <option value="Not Started">
+                        Not Started
+                    </option>
+
+                    <option value="In Progress">
+                        In Progress
+                    </option>
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                    <option value="Delayed">
+                        Delayed
+                    </option>
+
+                </select>
+
+            </div>
+
+            <!-- Buttons -->
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    (click)="closeModal()">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="submit"
+                    class="submit-btn">
+
+                    {{
+                    editingActivity
+                    ? 'Save Changes' 
+                    : 'Add Activity' 
+                    }} 
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

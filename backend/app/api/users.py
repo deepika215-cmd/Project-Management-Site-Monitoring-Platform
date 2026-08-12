@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 from fastapi import APIRouter, Depends, HTTPException
+=======
+from fastapi import APIRouter, Depends
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
 from app.models.user import User
+<<<<<<< HEAD
 from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 
 from app.core.security import hash_password
@@ -41,6 +46,19 @@ def create_user(
         password=hash_password(user.password),
         phone=user.phone,
         role=user.role,
+=======
+
+router = APIRouter()
+
+@router.post("/users")
+def create_user(user: dict, db: Session = Depends(get_db)):
+    new_user = User(
+        name=user["name"],
+        email=user["email"],
+        role=user["role"],
+        phone="",
+        password="test123",
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
         is_active=True
     )
 
@@ -50,6 +68,7 @@ def create_user(
 
     return new_user
 
+<<<<<<< HEAD
 
 # Get All Users
 @router.get("/", response_model=list[UserResponse])
@@ -134,3 +153,19 @@ def delete_user(
     db.commit()
 
     return {"message": "User deleted"}
+=======
+@router.get("/users")
+def get_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
+
+@router.delete("/users/{email}")
+def delete_user(email: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == email).first()
+
+    if user:
+        db.delete(user)
+        db.commit()
+        return {"message": "User deleted"}
+
+    return {"message": "User not found"}
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946

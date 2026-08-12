@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../services/api';
+<<<<<<< HEAD
 import { AppSidebarComponent } from '../../shared/app-sidebar.component';
 
 interface User {
@@ -32,11 +33,27 @@ const EMPTY_FORM: UserFormModel = {
   selector: 'app-user-management',
   standalone: true,
   imports: [FormsModule, AppSidebarComponent],
+=======
+
+interface User {
+  name: string;
+  email: string;
+  role: string;
+  is_active?: boolean;
+  status: 'Active' | 'Inactive';
+}
+
+@Component({
+  selector: 'app-user-management',
+  standalone: true,
+  imports: [FormsModule],
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
   templateUrl: './user-management.html',
   styleUrl: './user-management.css'
 })
 export class UserManagement implements OnInit {
 
+<<<<<<< HEAD
   // All users loaded from the backend
   users: User[] = [];
 
@@ -65,6 +82,19 @@ export class UserManagement implements OnInit {
   ];
 
   constructor(private api: Api) { }
+=======
+  showForm = false;
+
+  users: User[] = [];
+
+  newUser = {
+    name: '',
+    email: '',
+    role: ''
+  };
+
+  constructor(private api: Api) {}
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
 
   ngOnInit(): void {
     this.loadUsers();
@@ -72,6 +102,7 @@ export class UserManagement implements OnInit {
 
   // Load users from backend
   loadUsers(): void {
+<<<<<<< HEAD
     this.loading = true;
     this.errorMessage = '';
 
@@ -113,10 +144,25 @@ export class UserManagement implements OnInit {
             error?.error?.message ||
             'Unable to load users from the backend.';
         }
+=======
+    this.api.getUsers().subscribe({
+      next: (data: any) => {
+        console.log('Users received from backend:', data);
+
+        this.users = data;
+
+        console.log('Number of users:', this.users.length);
+      },
+
+      error: (error: any) => {
+        console.error('Failed to load users:', error);
+        alert('Unable to load users from the backend.');
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       }
     });
   }
 
+<<<<<<< HEAD
   // Always derive the displayed list from the current users + filters.
   // This prevents the table from appearing empty until a filter is changed.
   get filteredUsers(): User[] {
@@ -192,10 +238,37 @@ export class UserManagement implements OnInit {
   saveUser(): void {
 
     if (!this.formModel.name || !this.formModel.email || !this.formModel.role) {
+=======
+  // Open add-user form
+  openForm(): void {
+    this.showForm = true;
+  }
+
+  // Cancel add-user form
+  cancel(): void {
+    this.showForm = false;
+
+    this.newUser = {
+      name: '',
+      email: '',
+      role: ''
+    };
+  }
+
+  // Add new user
+  addUser(): void {
+
+    if (
+      !this.newUser.name ||
+      !this.newUser.email ||
+      !this.newUser.role
+    ) {
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       alert('Please fill in all required fields.');
       return;
     }
 
+<<<<<<< HEAD
     if (!this.isEditing && !this.formModel.password) {
       alert('Please set a password for the new user.');
       return;
@@ -247,20 +320,43 @@ export class UserManagement implements OnInit {
       error: (error: any) => {
         console.error('Failed to update user status:', error);
         alert('Failed to update user status.');
+=======
+    this.api.createUser(this.newUser).subscribe({
+
+      next: () => {
+        alert('User added successfully.');
+
+        this.cancel();
+
+        this.loadUsers();
+      },
+
+      error: (error: any) => {
+        console.error('Failed to create user:', error);
+        alert('Failed to add user.');
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       }
     });
   }
 
   // Delete user
+<<<<<<< HEAD
   removeUser(user: User): void {
     const confirmed = confirm(
       `Are you sure you want to delete ${user.name}?`
+=======
+  removeUser(email: string): void {
+
+    const confirmed = confirm(
+      'Are you sure you want to delete this user?'
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
     );
 
     if (!confirmed) {
       return;
     }
 
+<<<<<<< HEAD
     this.api.deleteUser(user.id).subscribe({
       next: () => {
         // Remove the user immediately from the current UI
@@ -270,12 +366,28 @@ export class UserManagement implements OnInit {
         if (this.selectedUser?.id === user.id) {
           this.closeView();
         }
+=======
+    this.api.deleteUser(email).subscribe({
+
+      next: () => {
+        alert('User deleted successfully.');
+
+        this.loadUsers();
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       },
 
       error: (error: any) => {
         console.error('Failed to delete user:', error);
+<<<<<<< HEAD
         alert(error?.error?.detail || 'Failed to delete user.');
+=======
+        alert('Failed to delete user.');
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
       }
     });
   }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1e31d1d67e81291f6c9db31f9ee62378fa352946
