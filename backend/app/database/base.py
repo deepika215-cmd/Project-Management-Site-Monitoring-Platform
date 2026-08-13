@@ -13,3 +13,7 @@ from app.models.procurement import Procurement
 from app.models.project_milestone import ProjectMilestone
 from app.models.resource import Resource
 from app.models.worker import Worker
+from app.models.material import Material
+from app.models.material_request import MaterialRequest
+from app.models.material_allocation import MaterialAllocation
+from app.models.stock_movement import StockMovement
