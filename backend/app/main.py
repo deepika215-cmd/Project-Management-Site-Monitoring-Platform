@@ -9,6 +9,8 @@ from app.models.user import User
 from app.models.project import Project
 from app.models.project_milestone import ProjectMilestone
 from app.models.resource import Resource
+from app.models.machinery import Machinery
+from app.models.maintenance import Maintenance
 from app.models.inventory import Inventory
 from app.models.worker import Worker
 from app.models.attendance import Attendance
@@ -24,6 +26,8 @@ from app.api.auth import router as auth_router
 from app.api.project import router as project_router
 from app.api.milestone import router as milestone_router
 from app.api.resource import router as resource_router
+from app.api.machinery import router as machinery_router
+from app.api.maintenance import router as maintenance_router
 from app.api.inventory import router as inventory_router
 from app.api.worker import router as worker_router
 from app.api.attendance import router as attendance_router
@@ -61,6 +65,8 @@ app.include_router(auth_router)
 app.include_router(project_router)
 app.include_router(milestone_router)
 app.include_router(resource_router)
+app.include_router(machinery_router)
+app.include_router(maintenance_router)
 app.include_router(inventory_router)
 app.include_router(worker_router)
 app.include_router(attendance_router)
@@ -77,4 +83,3 @@ def home():
     return {
         "message": "BuildTrack Backend Running Successfully"
     }
-
