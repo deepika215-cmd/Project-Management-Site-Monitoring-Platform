@@ -4,20 +4,18 @@ from sqlalchemy.orm import relationship
 from app.database.database import Base
 
 
-class Inventory(Base):
-    __tablename__ = "inventory"
+class Resource(Base):
+    __tablename__ = "resources"
 
     id = Column(Integer, primary_key=True, index=True)
 
-    item_name = Column(String(100), nullable=False)
+    resource_name = Column(String(100), nullable=False)
 
-    category = Column(String(50), nullable=False)
+    resource_type = Column(String(50), nullable=False)
 
-    quantity = Column(Integer, default=0)
+    quantity = Column(Integer, default=1)
 
-    unit = Column(String(20))
-
-    supplier = Column(String(100))
+    status = Column(String(50), default="Available")
 
     project_id = Column(
         Integer,
