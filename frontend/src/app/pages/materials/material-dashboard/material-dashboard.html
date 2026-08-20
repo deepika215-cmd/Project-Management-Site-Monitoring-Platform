@@ -1,0 +1,171 @@
+<div class="material-page">
+    <aside>
+        <div class="brand"><b>⬡</b><strong>BuildTrack</strong></div>
+        <nav><a>⌂ <span>Dashboard</span></a>
+            <p>PROJECT MANAGEMENT</p><a>▣ <span>Projects</span></a><a>☷ <span>Tasks</span></a><a>◉ <span>Site
+                    Monitoring</span></a><a>▧ <span>Reports</span></a>
+            <p>RESOURCE MANAGEMENT</p><a>♧ <span>Resources</span></a><a>♧ <span>Resource Allocation</span></a><a>♧
+                <span>Machinery Tracking</span></a><a>♧ <span>Resource Utilization</span></a><a>♧ <span>Resource
+                    Availability</span></a><a>♧ <span>Maintenance Scheduling</span></a>
+            <p>MATERIAL &amp; INVENTORY</p><a class="active">▣ <span>Material Dashboard</span></a><a>▧ <span>Material
+                    Procurement</span></a><a>▧ <span>Inventory Monitoring</span></a><a>▧ <span>Material
+                    Requests</span></a><a>♢ <span>Material Allocation</span></a><a>♢ <span>Stock Management</span></a>
+            <p>USER MANAGEMENT</p><a>♙ <span>Users</span></a><a>♙ <span>Roles &amp; Permissions</span></a>
+        </nav>
+    </aside>
+    <main>
+        <header><button class="hamburger">☰</button>
+            <div class="right"><span>♧<b>5</b></span><span>✉<b>3</b></span><i>👨🏻</i><small>Site Engineer　⌄</small>
+            </div>
+        </header>
+        <section class="dashboard">
+            <div class="heading">
+                <div>
+                    <h1>Material &amp; Inventory Management</h1>
+                    <p>Overview of material stock, requests, allocation and procurement</p>
+                </div>
+                <div><button class="date">▣　09 Aug 2026 - 16 Aug 2026　⌄</button><button class="export">⇩　Export
+                        Report</button></div>
+            </div>
+            <section class="stats">
+                <article class="blue"><i>⬡</i>
+                    <div><small>Total Materials</small><b>125</b><em>↑ 8 this week</em></div>
+                </article>
+                <article class="green"><i>▰</i>
+                    <div><small>Total Stock (Qty)</small><b>8,450</b><em>↑ 1,230 this week</em></div>
+                </article>
+                <article class="yellow"><i>⚠</i>
+                    <div><small>Low Stock Items</small><b>12</b><em>View details</em></div>
+                </article>
+                <article class="red"><i>▣</i>
+                    <div><small>Pending Requests</small><b>18</b><em>View details</em></div>
+                </article>
+            </section>
+            <section class="top-grid">
+                <article class="panel stock">
+                    <h2>Stock Overview by Category</h2>
+                    <div class="stock-body">
+                        <div class="donut"></div>
+                        <ul>
+                            <li *ngFor="let item of categories"><i [style.background]="item.color"></i>{{item.name}}
+                            </li>
+                        </ul>
+                    </div>
+                </article>
+                <article class="panel trend">
+                    <div class="panel-head">
+                        <h2>Stock Trend (Top 5 Materials)</h2><button>This Week　⌄</button>
+                    </div>
+                    <div class="line-chart"><span class="y y1">5K</span><span class="y y2">4K</span><span
+                            class="y y3">3K</span><span class="y y4">2K</span><span class="y y5">1K</span><svg
+                            viewBox="0 0 760 210" preserveAspectRatio="none">
+                            <polyline class="bricks" points="0,28 108,40 216,45 324,53 432,59 540,61 648,91 760,88" />
+                            <polyline class="steel"
+                                points="0,106 108,112 216,102 324,114 432,115 540,108 648,119 760,120" />
+                            <polyline class="cement"
+                                points="0,132 108,132 216,119 324,130 432,129 540,124 648,128 760,139" />
+                            <polyline class="sand"
+                                points="0,146 108,149 216,140 324,145 432,141 540,139 648,139 760,149" />
+                            <polyline class="concrete"
+                                points="0,140 108,137 216,131 324,139 432,137 540,134 648,133 760,142" />
+                        </svg>
+                        <div class="x-axis"><span
+                                *ngFor="let date of ['09 Aug','10 Aug','11 Aug','12 Aug','13 Aug','14 Aug','15 Aug','16 Aug']">{{date}}</span>
+                        </div>
+                    </div>
+                    <div class="legend"><span class="cement">Cement</span><span class="steel">Steel</span><span
+                            class="bricks">Bricks</span><span class="sand">Sand</span><span
+                            class="concrete">Concrete</span></div>
+                </article>
+            </section>
+            <section class="mid-grid">
+                <article class="panel table-panel">
+                    <h2>Recent Material Requests</h2>
+                    <div class="scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Material</th>
+                                    <th>Project</th>
+                                    <th>Requested By</th>
+                                    <th>Quantity</th>
+                                    <th>Required Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let row of requests">
+                                    <td class="link">{{row[0]}}</td>
+                                    <td>{{row[1]}}</td>
+                                    <td>{{row[2]}}</td>
+                                    <td>{{row[3]}}</td>
+                                    <td>{{row[4]}}</td>
+                                    <td>{{row[5]}}</td>
+                                    <td><span class="status"
+                                            [class]="'status '+row[6].toLowerCase().replace(' ','-')">{{row[6]}}</span>
+                                    </td>
+                                    <td><button class="view">View</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div><a class="more">View All Requests</a>
+                </article>
+                <article class="panel alerts">
+                    <h2>Low Stock Alerts</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Current Stock</th>
+                                <th>Min. Stock Level</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of lowStock">
+                                <td>{{row[0]}}</td>
+                                <td>{{row[1]}}</td>
+                                <td>{{row[2]}}</td>
+                                <td><span class="status low">Low</span></td>
+                            </tr>
+                        </tbody>
+                    </table><a class="more">View All Materials</a>
+                </article>
+            </section>
+            <article class="panel procurement">
+                <h2>Recent Procurement</h2>
+                <div class="scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PO ID</th>
+                                <th>Material</th>
+                                <th>Supplier</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Amount</th>
+                                <th>Purchase Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of procurement">
+                                <td class="link">{{row[0]}}</td>
+                                <td>{{row[1]}}</td>
+                                <td>{{row[2]}}</td>
+                                <td>{{row[3]}}</td>
+                                <td>{{row[4]}}</td>
+                                <td>{{row[5]}}</td>
+                                <td>{{row[6]}}</td>
+                                <td><span class="status"
+                                        [class]="'status '+row[7].toLowerCase().replace(' ','-')">{{row[7]}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div><a class="more">View All Procurement</a>
+            </article>
+        </section>
+    </main>
+</div>

@@ -1,0 +1,78 @@
+<main class="page">
+    <header>
+        <div>
+            <p class="crumb">Resources / Resource Utilization</p>
+            <h1>Resource Utilization</h1><span>Analyze working hours and efficiency across your active resources.</span>
+        </div><button class="primary">⇩ Export Report</button>
+    </header>
+    <section class="stats">
+        <article><small>Overall Utilization</small><b>{{average}}%</b><em class="green">↑ 5% from last week</em>
+        </article>
+        <article><small>Total Working Hours</small><b>2,546</b><em>Hours logged this week</em></article>
+        <article><small>Idle Hours</small><b>1,254</b><em class="orange">32.9% of capacity</em></article>
+        <article><small>Top Performer</small><b>92%</b><em class="blue">CAT 320 Excavator</em></article>
+    </section>
+    <section class="grid">
+        <article class="panel chart-panel">
+            <div class="toolbar">
+                <div>
+                    <h2>Weekly Utilization Trend</h2>
+                    <p>Resource utilization by day</p>
+                </div><select [(ngModel)]="period">
+                    <option>This Week</option>
+                    <option>Last Week</option>
+                    <option>This Month</option>
+                </select>
+            </div>
+            <div class="bars">
+                <div *ngFor="let day of ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; let i=index"><i
+                        [style.height.%]="[62,73,68,80,91,58,45][i]"></i><b>{{[62,73,68,80,91,58,45][i]}}%</b><span>{{day}}</span>
+                </div>
+            </div>
+        </article>
+        <article class="panel insight">
+            <h2>Utilization Summary</h2>
+            <div class="ring"><b>{{average}}%</b></div>
+            <p>Average resource usage this week</p>
+            <hr>
+            <p><b>5</b> resources above 80% utilization</p>
+            <p><b>3</b> resources need allocation review</p>
+        </article>
+    </section>
+    <section class="panel">
+        <div class="toolbar">
+            <div>
+                <h2>Resource Performance</h2>
+                <p>Working time against planned allocation</p>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Resource</th>
+                        <th>Category</th>
+                        <th>Project</th>
+                        <th>Planned Hours</th>
+                        <th>Actual Hours</th>
+                        <th>Utilization</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let resource of resources">
+                        <td><b>{{resource.name}}</b></td>
+                        <td>{{resource.category}}</td>
+                        <td>{{resource.project}}</td>
+                        <td>{{resource.planned}} hrs</td>
+                        <td>{{resource.actual}} hrs</td>
+                        <td><b>{{resource.utilization}}%</b></td>
+                        <td>
+                            <div class="fuel"><i [style.width.%]="resource.utilization"></i></div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
