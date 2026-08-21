@@ -1,0 +1,28 @@
+<div class="page-container">
+  <app-sidebar active="projects"></app-sidebar>
+
+  <main class="main-content">
+    <div *ngIf="errorMessage" class="error-panel"><strong>Unable to load this project</strong><span>{{ errorMessage }}</span><button type="button" (click)="loadProject()">Retry</button><a routerLink="/projects">Back to Projects</a></div>
+    <div *ngIf="loading" class="loading-card"><div class="spinner"></div><p>Loading the persisted project...</p></div>
+
+    <div *ngIf="project && !loading">
+      <header class="page-header">
+        <div><span class="eyebrow">PROJECT DETAILS</span><h1>{{ project.name }}</h1><p>Project #{{ project.id }} · {{ project.location }}</p></div>
+        <div class="header-actions"><a class="back-btn" routerLink="/projects">← Projects</a><a class="edit-btn" [routerLink]="['/projects/update-project', project.id]">Edit Project</a><button class="delete-btn" type="button" (click)="deleteProject()" [disabled]="deleting">{{ deleting ? 'Deleting...' : 'Delete' }}</button></div>
+      </header>
+
+      <section class="overview-grid">
+        <div class="info-card"><span>Status</span><strong class="status" [ngClass]="getStatusClass(project.status)">{{ project.status }}</strong></div>
+        <div class="info-card"><span>Manager</span><strong>{{ project.manager }}</strong><small>User #{{ project.managerId }}</small></div>
+        <div class="info-card"><span>Budget</span><strong>₹ {{ project.budget | number }}</strong></div>
+        <div class="info-card"><span>Progress</span><strong>{{ project.progress }}%</strong><div class="detail-progress"><div [style.width.%]="project.progress"></div></div></div>
+      </section>
+
+      <section class="card"><div class="section-header"><div><h2>Project Information</h2><p>Loaded from the persisted backend record.</p></div></div><div class="details-grid"><div><label>Project Name</label><p>{{ project.name }}</p></div><div><label>Location</label><p>{{ project.location }}</p></div><div><label>Start Date</label><p>{{ project.startDate }}</p></div><div><label>End Date</label><p>{{ project.completionDate }}</p></div><div><label>Manager ID</label><p>{{ project.managerId }}</p></div><div><label>Budget</label><p>₹ {{ project.budget | number }}</p></div><div class="full-width"><label>Description</label><p>{{ project.description || 'No description provided.' }}</p></div></div></section>
+
+      <section class="card"><div class="section-header"><div><h2>Project Tracking</h2><p>Live progress calculated from milestones stored for this project.</p></div><a [routerLink]="['/projects/project-status']" [queryParams]="{projectId: project.id}">Open Status →</a></div><div class="tracking-grid" *ngIf="tracking; else noTracking"><div><span>Total milestones</span><strong>{{ tracking.total_milestones }}</strong></div><div><span>Completed</span><strong>{{ tracking.completed_milestones }}</strong></div><div><span>Pending</span><strong>{{ tracking.pending_milestones }}</strong></div><div><span>Progress</span><strong>{{ tracking.progress }}%</strong></div></div><ng-template #noTracking><div class="empty-inline">No tracking data is available yet. Add a milestone to start project progress tracking.</div></ng-template></section>
+
+      <section class="card"><div class="section-header"><div><h2>Milestones</h2><p>{{ milestones.length }} milestone{{ milestones.length === 1 ? '' : 's' }} for this project.</p></div><a [routerLink]="['/projects/milestones']" [queryParams]="{projectId: project.id}">Manage Milestones →</a></div><div class="milestone-list" *ngIf="milestones.length; else noMilestones"><div class="milestone" *ngFor="let m of milestones"><div><strong>{{ m.name }}</strong><p>Due: {{ m.plannedDate }}</p></div><span [class]="getStatusClass(m.status)">{{ m.status }}</span></div></div><ng-template #noMilestones><div class="empty-inline">No milestones are recorded for this project yet.</div></ng-template></section>
+    </div>
+  </main>
+</div>

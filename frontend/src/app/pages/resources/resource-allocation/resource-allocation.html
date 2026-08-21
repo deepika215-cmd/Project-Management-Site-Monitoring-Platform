@@ -24,7 +24,7 @@
         Resource Allocation
       </a>
 
-      <a routerLink="/resources/machinery-tracking">
+      <a routerLink="/resources/equipment-tracking">
         Equipment Tracking
       </a>
 
@@ -62,7 +62,7 @@
         <p>Manage construction equipment and resources.</p>
       </div>
 
-      <button class="assign-btn" (click)="loadResources()">
+      <button class="assign-btn">
         + Assign Resource
       </button>
 
@@ -223,12 +223,12 @@
 
               <div class="actions">
 
-                <button class="view-btn" (click)="allocate(resource)" [disabled]="resource.quantity-resource.allocatedQuantity <= 0">
-                  Allocate
+                <button class="view-btn">
+                  View
                 </button>
 
-                <button class="edit-btn" (click)="release(resource)" [disabled]="resource.allocatedQuantity <= 0">
-                  Release
+                <button class="edit-btn">
+                  Edit
                 </button>
 
               </div>
