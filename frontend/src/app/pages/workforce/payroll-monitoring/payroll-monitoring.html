@@ -1,0 +1,70 @@
+<section class="module">
+    <div class="crumb">Workforce / <b>Payroll Monitoring</b></div>
+    <div class="top">
+        <div>
+            <h1>Payroll Monitoring</h1>
+            <p>Track monthly payroll processing, payments and pending amounts.</p>
+        </div><button class="primary" (click)="open('New payroll processing cycle opened.')">+ Process Payroll</button>
+    </div>
+    <div class="stats">
+        <article><i>₹</i>
+            <div><small>Total Payroll</small><b>₹18.75L</b><em>This month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Paid Amount</small><b>₹12.45L</b><em>180 employees</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Amount</small><b>₹6.30L</b><em>25 employees</em></div>
+        </article>
+        <article><i>!</i>
+            <div><small>Overdue Payments</small><b>4</b><em>Needs review</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search employee or project"><select
+                [(ngModel)]="status">
+                <option>All Status</option>
+                <option>Paid</option>
+                <option>Pending</option>
+                <option>Partial</option>
+            </select></div><button class="secondary" (click)="open('Payroll report exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Payroll Register — August 2026</h2><span>{{filtered.length}} payments</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Payroll ID</th>
+                    <th>Employee</th>
+                    <th>Project</th>
+                    <th>Payable Amount</th>
+                    <th>Paid Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view"
+                            (click)="open(r[1]+' payroll is '+r[5].toLowerCase()+'. Payable amount: '+r[3])">View</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty" *ngIf="!filtered.length">No payroll records match your filters.</p>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="close" (click)="modal=''">×</button>
+        <h2>Payroll Monitoring</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

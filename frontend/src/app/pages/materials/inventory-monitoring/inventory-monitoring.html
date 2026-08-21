@@ -1,0 +1,69 @@
+<section class="module">
+    <div class="crumb">Materials / <b>Inventory Monitoring</b></div>
+    <div class="title-row">
+        <div>
+            <h1>Inventory Monitoring</h1>
+            <p>Track live inventory quantities, thresholds and stock health.</p>
+        </div><button class="primary" (click)="open('Inventory adjustment form opened.')">+ Adjust Inventory</button>
+    </div>
+    <div class="summary">
+        <article><i>▤</i>
+            <div><small>Total Materials</small><b>125</b><em>Across 8 categories</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Healthy Stock</small><b>98</b><em>Above minimum level</em></div>
+        </article>
+        <article><i>!</i>
+            <div><small>Low Stock</small><b>12</b><em>Reorder recommended</em></div>
+        </article>
+        <article><i>×</i>
+            <div><small>Critical Items</small><b>3</b><em>Immediate action</em></div>
+        </article>
+    </div>
+    <div class="tool-row">
+        <div class="filter-group"><input [(ngModel)]="query" placeholder="Search material or category"><select
+                [(ngModel)]="level">
+                <option>All Levels</option>
+                <option>Available</option>
+                <option>Low</option>
+                <option>Critical</option>
+            </select></div><button class="outline" (click)="open('Inventory snapshot exported successfully.')">⇩ Export
+            Snapshot</button>
+    </div>
+    <section class="panel">
+        <div class="card-head">
+            <h2>Current Inventory</h2><span>Updated today, 10:30 AM</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Material</th>
+                    <th>Category</th>
+                    <th>Current Stock</th>
+                    <th>Minimum Level</th>
+                    <th>Stock Health</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td><span [class]="'status '+r[4].toLowerCase().replace(' ','-')">{{r[4]}}</span></td>
+                    <td><button class="view"
+                            (click)="open(r[0]+' has '+r[2]+' available against a minimum requirement of '+r[3]+'.')">Details</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty-note" *ngIf="!filtered.length">No inventory items match these filters.</p>
+    </section>
+</section>
+<div class="modal-backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="modal-close" (click)="modal=''">×</button>
+        <h2>Inventory Monitoring</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

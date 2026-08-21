@@ -1,0 +1,68 @@
+<section class="module">
+    <div class="crumb">Procurement / <b>Vendor Management</b></div>
+    <div class="top">
+        <div>
+            <h1>Vendor Management</h1>
+            <p>Manage approved vendors, their performance and procurement relationships.</p>
+        </div><button class="primary" (click)="open('New vendor registration form opened.')">+ Add Vendor</button>
+    </div>
+    <div class="stats">
+        <article><i>♙</i>
+            <div><small>Total Vendors</small><b>58</b><em>+6 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Active Vendors</small><b>49</b><em>Approved suppliers</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Approval</small><b>6</b><em>Under verification</em></div>
+        </article>
+        <article><i>★</i>
+            <div><small>Average Rating</small><b>4.5</b><em>Supplier performance</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search vendor, category or city"><select
+                [(ngModel)]="status">
+                <option>All Vendors</option>
+                <option>Active</option>
+                <option>Pending</option>
+            </select></div><button class="secondary" (click)="open('Vendor directory exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Vendor Directory</h2><span>{{filtered.length}} vendors</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Vendor ID</th>
+                    <th>Vendor Name</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>Orders</th>
+                    <th>Rating</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td>★★★★★ {{r[5]}}</td>
+                    <td><span [class]="'badge '+r[6].toLowerCase()">{{r[6]}}</span></td>
+                    <td><button class="view" (click)="open(r[1]+' vendor profile opened.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal"><button class="close" (click)="modal=''">×</button>
+        <h2>Vendor Management</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

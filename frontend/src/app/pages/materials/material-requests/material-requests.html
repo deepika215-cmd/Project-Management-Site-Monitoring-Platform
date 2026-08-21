@@ -1,0 +1,70 @@
+<section class="module">
+    <div class="crumb">Materials / <b>Material Requests</b></div>
+    <div class="title-row">
+        <div>
+            <h1>Material Requests</h1>
+            <p>Review material requirements from project teams and track approvals.</p>
+        </div><button class="primary" (click)="open('New material request form opened.')">+ New Request</button>
+    </div>
+    <div class="summary">
+        <article><i>▣</i>
+            <div><small>Total Requests</small><b>86</b><em>+12 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Approved</small><b>53</b><em>61.6% approved</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Review</small><b>18</b><em>Needs action</em></div>
+        </article>
+        <article><i>⇄</i>
+            <div><small>Delivered</small><b>15</b><em>Completed requests</em></div>
+        </article>
+    </div>
+    <div class="tool-row">
+        <div class="filter-group"><input [(ngModel)]="query" placeholder="Search request, material or project"><select
+                [(ngModel)]="status">
+                <option>All Requests</option>
+                <option>Pending</option>
+                <option>Approved</option>
+                <option>Delivered</option>
+            </select></div><button class="outline" (click)="open('Request list exported successfully.')">⇩
+            Export</button>
+    </div>
+    <section class="panel">
+        <div class="card-head">
+            <h2>Request Register</h2><span>{{filtered.length}} records</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Material</th>
+                    <th>Project</th>
+                    <th>Requested By</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'status '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view"
+                            (click)="open(r[0]+' - '+r[1]+' request is '+r[5].toLowerCase()+'.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty-note" *ngIf="!filtered.length">No material requests match these filters.</p>
+    </section>
+</section>
+<div class="modal-backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="modal-close" (click)="modal=''">×</button>
+        <h2>Material Request</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

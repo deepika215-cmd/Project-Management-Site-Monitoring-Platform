@@ -1,0 +1,67 @@
+<section class="module">
+    <div class="crumb">Workforce / <b>Attendance Tracking</b></div>
+    <div class="top">
+        <div>
+            <h1>Attendance Tracking</h1>
+            <p>Monitor daily worker attendance and check-in activity.</p>
+        </div><button class="primary" (click)="open('Manual attendance entry form opened.')">+ Mark Attendance</button>
+    </div>
+    <div class="stats">
+        <article><i>✓</i>
+            <div><small>Present Today</small><b>218</b><em>87.2% workforce</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>On Leave</small><b>15</b><em>6.0% workforce</em></div>
+        </article>
+        <article><i>×</i>
+            <div><small>Absent Today</small><b>17</b><em>6.8% workforce</em></div>
+        </article>
+        <article><i>◉</i>
+            <div><small>Late Check-ins</small><b>9</b><em>After 08:15 AM</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search worker or project"><select [(ngModel)]="status">
+                <option>All Status</option>
+                <option>Present</option>
+                <option>Absent</option>
+                <option>Leave</option>
+            </select></div><button class="secondary" (click)="open('Attendance report exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Today's Attendance Register</h2><span>{{filtered.length}} records</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Worker ID</th>
+                    <th>Name</th>
+                    <th>Project</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[1]+' attendance status: '+r[5]+'.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty" *ngIf="!filtered.length">No attendance records match your filters.</p>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="close" (click)="modal=''">×</button>
+        <h2>Attendance Tracking</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

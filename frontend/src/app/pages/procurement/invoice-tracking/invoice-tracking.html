@@ -1,0 +1,67 @@
+<section class="module">
+    <div class="crumb">Procurement / <b>Invoice Tracking</b></div>
+    <div class="top">
+        <div>
+            <h1>Invoice Tracking</h1>
+            <p>Monitor invoice submissions, payment status and due dates.</p>
+        </div><button class="primary" (click)="open('New invoice entry form opened.')">+ Add Invoice</button>
+    </div>
+    <div class="stats">
+        <article><i>▤</i>
+            <div><small>Total Invoices</small><b>86</b><em>This month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Paid Invoices</small><b>62</b><em>₹ 28.4L paid</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Payment</small><b>18</b><em>₹ 9.45L due</em></div>
+        </article>
+        <article><i>!</i>
+            <div><small>Overdue</small><b>6</b><em>Needs attention</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search invoice, vendor or PO"><select
+                [(ngModel)]="status">
+                <option>All Status</option>
+                <option>Pending</option>
+                <option>Paid</option>
+                <option>Overdue</option>
+            </select></div><button class="secondary" (click)="open('Invoice report exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Invoice Register</h2><span>{{filtered.length}} invoices</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Invoice No</th>
+                    <th>Vendor</th>
+                    <th>PO Number</th>
+                    <th>Amount</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[0]+' invoice details opened.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal"><button class="close" (click)="modal=''">×</button>
+        <h2>Invoice Tracking</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

@@ -1,0 +1,70 @@
+<section class="module">
+    <div class="crumb">Workforce / <b>Worker Registration</b></div>
+    <div class="top">
+        <div>
+            <h1>Worker Registration</h1>
+            <p>Register, review and manage the workforce directory.</p>
+        </div><button class="primary" (click)="open('New worker registration form opened.')">+ Register Worker</button>
+    </div>
+    <div class="stats">
+        <article><i>♙</i>
+            <div><small>Total Workers</small><b>250</b><em>+12 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Active Workers</small><b>232</b><em>92.8% active</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Verification</small><b>8</b><em>Awaiting documents</em></div>
+        </article>
+        <article><i>⊘</i>
+            <div><small>Inactive Workers</small><b>10</b><em>Not assigned</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search worker, role or project"><select
+                [(ngModel)]="type">
+                <option>All Categories</option>
+                <option>Skilled Worker</option>
+                <option>Unskilled Worker</option>
+                <option>Engineer</option>
+                <option>Supervisor</option>
+            </select></div><button class="secondary" (click)="open('Worker directory exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Worker Directory</h2><span>{{filtered.length}} workers</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Worker ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Skill / Role</th>
+                    <th>Project</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span class="badge active">{{r[5]}}</span></td>
+                    <td><button class="view"
+                            (click)="open(r[1]+' is registered as '+r[3]+' for '+r[4]+'.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty" *ngIf="!filtered.length">No workers match your filters.</p>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="close" (click)="modal=''">×</button>
+        <h2>Worker Registration</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

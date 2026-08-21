@@ -1,0 +1,66 @@
+<section class="module">
+    <div class="crumb">Procurement / <b>Supplier Management</b></div>
+    <div class="top">
+        <div>
+            <h1>Supplier Management</h1>
+            <p>Maintain supplier profiles, categories and delivery performance.</p>
+        </div><button class="primary" (click)="open('New supplier registration form opened.')">+ Add Supplier</button>
+    </div>
+    <div class="stats">
+        <article><i>♙</i>
+            <div><small>Total Suppliers</small><b>42</b><em>+4 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Active Suppliers</small><b>36</b><em>Verified suppliers</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Review</small><b>4</b><em>Documentation check</em></div>
+        </article>
+        <article><i>★</i>
+            <div><small>On-Time Delivery</small><b>93%</b><em>Overall performance</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search supplier, category or city"><select
+                [(ngModel)]="status">
+                <option>All Suppliers</option>
+                <option>Active</option>
+                <option>Pending</option>
+            </select></div><button class="secondary" (click)="open('Supplier list exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Supplier Directory</h2><span>{{filtered.length}} suppliers</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Supplier ID</th>
+                    <th>Supplier Name</th>
+                    <th>Category</th>
+                    <th>Location</th>
+                    <th>On-Time Delivery</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[1]+' supplier profile opened.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal"><button class="close" (click)="modal=''">×</button>
+        <h2>Supplier Management</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+<section class="module">
+    <div class="crumb">Procurement / <b>Purchase Orders</b></div>
+    <div class="top">
+        <div>
+            <h1>Purchase Orders</h1>
+            <p>Create, track and manage purchase orders across projects.</p>
+        </div><button class="primary" (click)="open('New purchase order form opened.')">+ Create Purchase Order</button>
+    </div>
+    <div class="stats">
+        <article><i>▣</i>
+            <div><small>Total Orders</small><b>124</b><em>+18 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Delivered</small><b>72</b><em>58% completed</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>In Transit</small><b>28</b><em>Expected this week</em></div>
+        </article>
+        <article><i>!</i>
+            <div><small>Pending Orders</small><b>14</b><em>Needs action</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search PO, vendor or project"><select
+                [(ngModel)]="status">
+                <option>All Orders</option>
+                <option>Approved</option>
+                <option>In Transit</option>
+                <option>Delivered</option>
+            </select></div><button class="secondary" (click)="open('Purchase order register exported.')">⇩
+            Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Purchase Order Register</h2><span>{{filtered.length}} orders</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>PO Number</th>
+                    <th>Vendor</th>
+                    <th>Project</th>
+                    <th>Item</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase().replace(' ','-')">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[0]+' order details opened.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal"><button class="close" (click)="modal=''">×</button>
+        <h2>Purchase Orders</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

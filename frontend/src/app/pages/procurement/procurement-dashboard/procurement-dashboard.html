@@ -1,0 +1,255 @@
+<div class="procure">
+    <aside>
+        <div class="brand">▣ <b>BuildTrack</b><small>Construction Management</small></div>
+        <nav>
+            <p>MAIN</p><a>⌂ Dashboard</a><a>▣ Projects</a><a>◉ Site Monitoring</a><a>☷ Tasks</a><a>▧ Reports</a>
+            <p>RESOURCE MANAGEMENT</p><a>♧ Resources</a><a>♧ Resource Allocation</a><a>⚙ Machinery Tracking</a><a>▣
+                Maintenance Scheduling</a>
+            <p>MATERIAL MANAGEMENT</p><a>▣ Material Dashboard</a><a>▧ Inventory Monitoring</a><a>▧ Material
+                Requests</a><a>♢ Material Allocation</a><a>▥ Stock Management</a>
+            <p>PROCUREMENT MANAGEMENT</p><a class="active">▣ Procurement Dashboard</a><a>♙ Vendor Management</a><a>▧
+                Purchase Orders</a><a>▧ Invoice Tracking</a><a>▧ Procurement Requests</a><a>♙ Supplier Management</a>
+        </nav>
+    </aside>
+    <main>
+        <header><button>☰</button>
+            <div>
+                <h1>Procurement Dashboard</h1>
+                <p>Dashboard　/　Procurement Dashboard</p>
+            </div>
+            <div class="search">Search here...　⌕</div>
+            <div class="top-icons">♧ <b>8</b>　✉ <b>3</b>　<span>SM</span> Site Manager⌄</div>
+        </header>
+        <section class="content">
+            <div class="actions"><label>▣　<select [(ngModel)]="period" (change)="changePeriod()">
+                        <option>This Week</option>
+                        <option>Last Week</option>
+                        <option>This Month</option>
+                    </select></label><button (click)="exportReport()">⇩ Export Report</button></div>
+            <section class="stats">
+                <article><i>♙</i>
+                    <div><small>Total Vendors</small><b>58</b><em>↑ 6 this month</em></div>
+                </article>
+                <article><i>▣</i>
+                    <div><small>Total Purchase Orders</small><b>124</b><em>↑ 18 this month</em></div>
+                </article>
+                <article><i>₹</i>
+                    <div><small>Total Spend (This Month)</small><b>₹ 38,75,620</b><em>↑ 12.5% vs last month</em></div>
+                </article>
+                <article><i>▧</i>
+                    <div><small>Procurement Requests</small><b>32</b><em class="orange">6 Pending</em></div>
+                </article>
+                <article><i>▤</i>
+                    <div><small>Invoices Pending</small><b>18</b><em class="red">₹ 9,45,230</em></div>
+                </article>
+            </section>
+            <section class="top-grid">
+                <article class="panel category">
+                    <h2>Procurement by Category</h2>
+                    <div>
+                        <div class="donut"><span><b>₹ 38,75,620</b><br>Total Spend</span></div>
+                        <ul>
+                            <li><i></i>Raw Materials <b>40%</b></li>
+                            <li><i></i>Equipment <b>25%</b></li>
+                            <li><i></i>Machinery <b>15%</b></li>
+                            <li><i></i>Safety Equipment <b>10%</b></li>
+                            <li><i></i>Office Supplies <b>10%</b></li>
+                        </ul>
+                    </div>
+                </article>
+                <article class="panel po-chart">
+                    <h2>Purchase Orders Status</h2>
+                    <div class="bars"><span><i class="draft"
+                                style="height:25%"></i><b>12</b><small>Draft</small></span><span><i class="approved"
+                                style="height:88%"></i><b>48</b><small>Approved</small></span><span><i class="transit"
+                                style="height:53%"></i><b>28</b><small>In Transit</small></span><span><i
+                                class="delivered"
+                                style="height:48%"></i><b>26</b><small>Delivered</small></span><span><i
+                                class="cancelled" style="height:19%"></i><b>10</b><small>Cancelled</small></span></div>
+                </article>
+                <article class="panel requests">
+                    <div class="panel-head">
+                        <h2>Recent Procurement Requests</h2><button
+                            (click)="open('Procurement requests','All procurement requests are ready to review.')">View
+                            All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Request ID</th>
+                                <th>Category</th>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Required Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of requests">
+                                <td class="link">{{r[0]}}</td>
+                                <td>{{r[1]}}</td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td>{{r[4]}}</td>
+                                <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+            </section>
+            <section class="mid-grid">
+                <article class="panel">
+                    <div class="panel-head">
+                        <h2>Recent Purchase Orders</h2><button
+                            (click)="open('Purchase orders','Complete purchase order register is available.')">View
+                            All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>PO Number</th>
+                                <th>Vendor</th>
+                                <th>Project</th>
+                                <th>Category</th>
+                                <th>Order Date</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of orders">
+                                <td class="link">{{r[0]}}</td>
+                                <td>{{r[1]}}</td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td>{{r[4]}}</td>
+                                <td>{{r[5]}}</td>
+                                <td><span [class]="'badge '+r[6].toLowerCase().replace(' ','-')">{{r[6]}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+                <article class="panel">
+                    <div class="panel-head">
+                        <h2>Invoices Pending Payment</h2><button
+                            (click)="open('Invoices','Invoice tracking list is available.')">View All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Invoice No</th>
+                                <th>Vendor</th>
+                                <th>PO Number</th>
+                                <th>Invoice Date</th>
+                                <th>Amount</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of invoices">
+                                <td class="link">{{r[0]}}</td>
+                                <td>{{r[1]}}</td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td>{{r[4]}}</td>
+                                <td>{{r[5]}}</td>
+                                <td><span [class]="'badge '+r[6].toLowerCase()">{{r[6]}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+            </section>
+            <section class="bottom-grid">
+                <article class="panel">
+                    <div class="panel-head">
+                        <h2>Top Vendors (By Spend)</h2><button
+                            (click)="open('Top Vendors','Vendor performance report is ready.')">View All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Vendor</th>
+                                <th>Total Spend</th>
+                                <th>Orders</th>
+                                <th>On Time Delivery</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of vendors">
+                                <td>{{r[0]}}</td>
+                                <td>{{r[1]}}</td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td class="stars">★★★★★ {{r[4]}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+                <article class="panel goods">
+                    <div class="panel-head">
+                        <h2>Recent Goods Received</h2><button
+                            (click)="open('Goods received','GRN history is ready to review.')">View All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>GRN No</th>
+                                <th>PO Number</th>
+                                <th>Item</th>
+                                <th>Qty Received</th>
+                                <th>Received Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>GRN-2026-089</td>
+                                <td>PO-2026-124</td>
+                                <td>Cement (50kg)</td>
+                                <td>500 Bags</td>
+                                <td>10 Aug 2026</td>
+                            </tr>
+                            <tr>
+                                <td>GRN-2026-088</td>
+                                <td>PO-2026-122</td>
+                                <td>Safety Helmets</td>
+                                <td>100 Nos</td>
+                                <td>09 Aug 2026</td>
+                            </tr>
+                            <tr>
+                                <td>GRN-2026-087</td>
+                                <td>PO-2026-121</td>
+                                <td>TMT Steel Bars</td>
+                                <td>5 Ton</td>
+                                <td>08 Aug 2026</td>
+                            </tr>
+                            <tr>
+                                <td>GRN-2026-086</td>
+                                <td>PO-2026-123</td>
+                                <td>Excavator Parts</td>
+                                <td>10 Nos</td>
+                                <td>07 Aug 2026</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+                <article class="panel category-cards">
+                    <h2>Procurement Categories</h2>
+                    <div><span>▣<b>Raw Materials</b><small>₹ 15,50,250
+                                (40%)</small></span><span>♧<b>Equipment</b><small>₹ 9,68,905
+                                (25%)</small></span><span>⚙<b>Machinery</b><small>₹ 5,81,300
+                                (15%)</small></span><span>♟<b>Safety Equipment</b><small>₹ 3,87,820
+                                (10%)</small></span><span>▧<b>Office Supplies</b><small>₹ 3,87,345 (10%)</small></span>
+                    </div>
+                </article>
+            </section>
+        </section>
+    </main>
+</div>
+<div class="modal-bg" *ngIf="modalTitle" (click)="close()">
+    <section class="modal" (click)="$event.stopPropagation()"><button (click)="close()">×</button>
+        <h2>{{modalTitle}}</h2>
+        <p>{{modalMessage}}</p><button (click)="close()">Got it</button>
+    </section>
+</div>

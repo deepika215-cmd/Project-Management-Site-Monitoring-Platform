@@ -1,0 +1,70 @@
+<section class="module">
+    <div class="crumb">Workforce / <b>Shift Scheduling</b></div>
+    <div class="top">
+        <div>
+            <h1>Shift Scheduling</h1>
+            <p>Plan project shifts and ensure workforce coverage.</p>
+        </div><button class="primary" (click)="open('New shift schedule form opened.')">+ Create Shift</button>
+    </div>
+    <div class="stats">
+        <article><i>◷</i>
+            <div><small>Scheduled Shifts</small><b>24</b><em>This week</em></div>
+        </article>
+        <article><i>♙</i>
+            <div><small>Workers Scheduled</small><b>195</b><em>Across 12 projects</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Covered Shifts</small><b>21</b><em>87.5% covered</em></div>
+        </article>
+        <article><i>!</i>
+            <div><small>Open Shifts</small><b>3</b><em>Need assignment</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search project or supervisor"><select
+                [(ngModel)]="shift">
+                <option>All Shifts</option>
+                <option>Morning Shift</option>
+                <option>General Shift</option>
+                <option>Evening Shift</option>
+                <option>Night Shift</option>
+            </select></div><button class="secondary" (click)="open('Shift schedule exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Upcoming Shift Schedule</h2><span>{{filtered.length}} shifts</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Shift</th>
+                    <th>Time</th>
+                    <th>Project</th>
+                    <th>Workers Assigned</th>
+                    <th>Supervisor</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td>{{r[0]}}</td>
+                    <td><span class="badge scheduled">{{r[1]}}</span></td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td>{{r[5]}}</td>
+                    <td><button class="view"
+                            (click)="open(r[1]+' scheduled for '+r[3]+' under '+r[5]+'.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty" *ngIf="!filtered.length">No shifts match your filters.</p>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="close" (click)="modal=''">×</button>
+        <h2>Shift Scheduling</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

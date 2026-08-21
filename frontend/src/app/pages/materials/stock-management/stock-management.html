@@ -1,0 +1,73 @@
+<section class="module">
+    <div class="crumb">Materials / <b>Stock Management</b></div>
+    <div class="title-row">
+        <div>
+            <h1>Stock Management</h1>
+            <p>Record material receipts, issues and adjustments in the stock ledger.</p>
+        </div><button class="primary" (click)="open('New stock transaction form opened.')">+ Add Stock
+            Transaction</button>
+    </div>
+    <div class="summary">
+        <article><i>↓</i>
+            <div><small>Stock In This Month</small><b>8,450</b><em>Quantity received</em></div>
+        </article>
+        <article><i>↑</i>
+            <div><small>Stock Out This Month</small><b>5,620</b><em>Quantity issued</em></div>
+        </article>
+        <article><i>⇄</i>
+            <div><small>Adjustments</small><b>14</b><em>Recorded this month</em></div>
+        </article>
+        <article><i>!</i>
+            <div><small>Reorder Required</small><b>12</b><em>Low stock materials</em></div>
+        </article>
+    </div>
+    <div class="tool-row">
+        <div class="filter-group"><input [(ngModel)]="query" placeholder="Search transaction or material"><select
+                [(ngModel)]="movement">
+                <option>All Movements</option>
+                <option>Stock In</option>
+                <option>Stock Out</option>
+                <option>Adjustment</option>
+            </select></div><button class="outline" (click)="open('Stock ledger exported successfully.')">⇩ Export
+            Ledger</button>
+    </div>
+    <section class="panel">
+        <div class="card-head">
+            <h2>Stock Transaction Ledger</h2><span>{{filtered.length}} transactions</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Date</th>
+                    <th>Material</th>
+                    <th>Movement</th>
+                    <th>Quantity</th>
+                    <th>Reference</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td><span
+                            [class]="'status '+(r[3]==='Stock In'?'received':r[3]==='Stock Out'?'pending':'in-transit')">{{r[3]}}</span>
+                    </td>
+                    <td>{{r[4]}}</td>
+                    <td class="link">{{r[5]}}</td>
+                    <td><button class="view"
+                            (click)="open(r[0]+' - '+r[3]+' of '+r[4]+' '+r[2]+'. Reference: '+r[5])">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty-note" *ngIf="!filtered.length">No stock transactions match these filters.</p>
+    </section>
+</section>
+<div class="modal-backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="modal-close" (click)="modal=''">×</button>
+        <h2>Stock Management</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

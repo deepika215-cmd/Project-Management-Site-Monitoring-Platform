@@ -42,6 +42,24 @@ import { Profile } from './pages/profile/profile';
 import { Inventory } from './pages/inventory/inventory';
 import { Workforce } from './pages/workforce/workforce';
 import { Attendance } from './pages/attendance/attendance';
+import { MaterialDashboard } from './pages/materials/material-dashboard/material-dashboard';
+import { MaterialProcurement } from './pages/materials/material-procurement/material-procurement';
+import { InventoryMonitoring } from './pages/materials/inventory-monitoring/inventory-monitoring';
+import { MaterialRequests } from './pages/materials/material-requests/material-requests';
+import { MaterialAllocation } from './pages/materials/material-allocation/material-allocation';
+import { StockManagement } from './pages/materials/stock-management/stock-management';
+import { WorkforceDashboard } from './pages/workforce/workforce-dashboard/workforce-dashboard';
+import { WorkerRegistration } from './pages/workforce/worker-registration/worker-registration';
+import { AttendanceTracking } from './pages/workforce/attendance-tracking/attendance-tracking';
+import { WorkforceAllocation } from './pages/workforce/workforce-allocation/workforce-allocation';
+import { ShiftScheduling } from './pages/workforce/shift-scheduling/shift-scheduling';
+import { PayrollMonitoring } from './pages/workforce/payroll-monitoring/payroll-monitoring';
+import { ProcurementDashboard } from './pages/procurement/procurement-dashboard/procurement-dashboard';
+import { VendorManagement } from './pages/procurement/vendor-management/vendor-management';
+import { PurchaseOrders } from './pages/procurement/purchase-orders/purchase-orders';
+import { InvoiceTracking } from './pages/procurement/invoice-tracking/invoice-tracking';
+import { ProcurementRequests } from './pages/procurement/procurement-requests/procurement-requests';
+import { SupplierManagement } from './pages/procurement/supplier-management/supplier-management';
 
 
 export const routes: Routes = [
@@ -221,6 +239,24 @@ export const routes: Routes = [
   { path: 'inventory', component: Inventory, canActivate: [authGuard] },
   { path: 'workforce', component: Workforce, canActivate: [authGuard] },
   { path: 'attendance', component: Attendance, canActivate: [authGuard] },
+  { path: 'materials/material-dashboard', component: MaterialDashboard, canActivate: [authGuard] },
+  { path: 'materials/material-procurement', component: MaterialProcurement, canActivate: [authGuard] },
+  { path: 'materials/inventory-monitoring', component: InventoryMonitoring, canActivate: [authGuard] },
+  { path: 'materials/material-requests', component: MaterialRequests, canActivate: [authGuard] },
+  { path: 'materials/material-allocation', component: MaterialAllocation, canActivate: [authGuard] },
+  { path: 'materials/stock-management', component: StockManagement, canActivate: [authGuard] },
+  { path: 'workforce/workforce-dashboard', component: WorkforceDashboard, canActivate: [authGuard] },
+  { path: 'workforce/worker-registration', component: WorkerRegistration, canActivate: [authGuard] },
+  { path: 'workforce/attendance-tracking', component: AttendanceTracking, canActivate: [authGuard] },
+  { path: 'workforce/workforce-allocation', component: WorkforceAllocation, canActivate: [authGuard] },
+  { path: 'workforce/shift-scheduling', component: ShiftScheduling, canActivate: [authGuard] },
+  { path: 'workforce/payroll-monitoring', component: PayrollMonitoring, canActivate: [authGuard] },
+  { path: 'procurement/procurement-dashboard', component: ProcurementDashboard, canActivate: [authGuard] },
+  { path: 'procurement/vendor-management', component: VendorManagement, canActivate: [authGuard] },
+  { path: 'procurement/purchase-orders', component: PurchaseOrders, canActivate: [authGuard] },
+  { path: 'procurement/invoice-tracking', component: InvoiceTracking, canActivate: [authGuard] },
+  { path: 'procurement/procurement-requests', component: ProcurementRequests, canActivate: [authGuard] },
+  { path: 'procurement/supplier-management', component: SupplierManagement, canActivate: [authGuard] },
 
   // Notifications
 

@@ -1,0 +1,203 @@
+<div class="wf" [class.menu-open]="menuOpen">
+    <aside>
+        <div class="brand">▥ <b>BuildTrack</b><button (click)="toggleMenu()">×</button></div>
+        <nav>
+            <p>MAIN</p><a>⌂ Dashboard</a><a>▣ Projects</a><a>◉ Site Monitoring</a><a>▧ Reports</a>
+            <p>RESOURCE MANAGEMENT</p><a>♧ Resources</a><a>♧ Resource Allocation</a><a>⚙ Machinery Tracking</a><a>▣
+                Maintenance Scheduling</a>
+            <p>MATERIAL &amp; INVENTORY</p><a>▣ Material Dashboard</a><a>▧ Material Procurement</a><a>▧ Inventory
+                Monitoring</a><a>▧ Material Requests</a><a>♢ Material Allocation</a><a>▥ Stock Management</a>
+            <p>WORKFORCE MANAGEMENT</p><a class="active">♙ Workforce Dashboard</a><a>♙ Worker Registration</a><a>▣
+                Attendance Tracking</a><a>♧ Workforce Allocation</a><a>◷ Shift Scheduling</a><a>▧ Payroll Monitoring</a>
+            <p>USER MANAGEMENT</p><a>♙ Users</a><a>♙ Roles &amp; Permissions</a>
+        </nav>
+    </aside>
+    <div class="overlay" (click)="toggleMenu()"></div>
+    <main>
+        <header><button class="hamburger" (click)="toggleMenu()">☰</button>
+            <div><button class="notice">♧<b>5</b></button><button class="notice">✉<b>3</b></button><span
+                    class="avatar">SM</span><span>Site Manager⌄</span></div>
+        </header>
+        <section class="content">
+            <div class="heading">
+                <div>
+                    <h1>Workforce Management</h1>
+                    <p>Overview of workforce, attendance, allocation and payroll</p>
+                </div>
+                <div class="actions"><label><span>▣</span><select [(ngModel)]="period" (change)="periodChanged()">
+                            <option>This Week</option>
+                            <option>Last Week</option>
+                            <option>This Month</option>
+                        </select></label><button class="export" (click)="exportReport()">⇩ Export Report</button></div>
+            </div>
+            <section class="stats">
+                <article><i>♙</i>
+                    <div><small>Total Workforce</small><b>250</b><em>↑ 12 this month</em></div>
+                </article>
+                <article><i>♟</i>
+                    <div><small>Present Today</small><b>218</b><em>87.2% Present</em></div>
+                </article>
+                <article><i>♟</i>
+                    <div><small>On Leave</small><b>15</b><em class="orange">6.0%</em></div>
+                </article>
+                <article><i>♟</i>
+                    <div><small>Absent Today</small><b>17</b><em class="red">6.8%</em></div>
+                </article>
+                <article><i>♙</i>
+                    <div><small>Allocated Workers</small><b>195</b><em>78.0%</em></div>
+                </article>
+                <article><i>₹</i>
+                    <div><small>Pending Payroll</small><b>25</b><em class="red">This Month</em></div>
+                </article>
+            </section>
+            <section class="charts">
+                <article class="panel category">
+                    <h2>Workforce by Category</h2>
+                    <div class="category-body">
+                        <div class="donut">
+                            <div><b>250</b><br>Total</div>
+                        </div>
+                        <ul>
+                            <li *ngFor="let item of categories"><i [style.background]="item.color"></i>{{item.name}}
+                                <span>{{item.count}} ({{item.pct}}%)</span></li>
+                        </ul>
+                    </div>
+                </article>
+                <article class="panel attendance-chart">
+                    <h2>Attendance Overview (This Week)</h2>
+                    <div class="chart"><span class="y y1">250</span><span class="y y2">200</span><span
+                            class="y y3">150</span><span class="y y4">100</span><span class="y y5">50</span><svg
+                            viewBox="0 0 700 185" preserveAspectRatio="none">
+                            <polyline class="present" points="0,30 100,32 200,28 300,45 400,28 500,34 600,27 700,26" />
+                            <polyline class="absent"
+                                points="0,140 100,140 200,137 300,144 400,147 500,143 600,145 700,145" />
+                            <polyline class="leave"
+                                points="0,153 100,153 200,151 300,154 400,156 500,154 600,155 700,155" />
+                        </svg></div>
+                    <div class="x"><span *ngFor="let d of dates">{{d}}</span></div>
+                    <div class="legend"><span class="present">Present</span><span class="absent">Absent</span><span
+                            class="leave">Leave</span></div>
+                </article>
+                <article class="panel projects">
+                    <h2>Workforce by Project (Top 5)</h2>
+                    <div class="bar"
+                        *ngFor="let p of [['Residential Complex',85,'blue'],['Office Building',62,'green'],['Mall Construction',40,'orange'],['Highway Project',35,'purple'],['Hospital Project',28,'blue']]">
+                        <label>{{p[0]}}</label>
+                        <div><i [class]="p[2]" [style.width.%]="p[1]"></i></div><b>{{p[1]}}</b>
+                    </div><small class="axis">0　20　40　60　80　100　 Workers</small>
+                </article>
+            </section>
+            <section class="double">
+                <article class="panel table">
+                    <div class="table-head">
+                        <h2>Recent Worker Registrations</h2><button
+                            (click)="open('Worker registrations','All worker registrations are available in the workforce module.')">View
+                            All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Worker ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Skill / Role</th>
+                                <th>Project</th>
+                                <th>Joining Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of workers">
+                                <td class="link">{{r[0]}}</td>
+                                <td>{{r[1]}}</td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td>{{r[4]}}</td>
+                                <td>{{r[5]}}</td>
+                                <td><span class="badge green">Active</span></td>
+                                <td><button class="view" (click)="viewWorker(r)">◉</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+                <article class="panel table">
+                    <div class="table-head">
+                        <h2>Today's Attendance</h2><button
+                            (click)="open('Today’s attendance','Detailed attendance report is ready to review.')">View
+                            All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Worker ID</th>
+                                <th>Name</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of attendance">
+                                <td class="link">{{r[0]}}</td>
+                                <td>{{r[1]}}</td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td><span [class]="'badge '+(r[4]==='Present'?'green':'danger')">{{r[4]}}</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+            </section>
+            <section class="double bottom">
+                <article class="panel table">
+                    <div class="table-head">
+                        <h2>Upcoming Shift Schedule</h2><button
+                            (click)="open('Shift schedule','All upcoming shifts are available in the shift scheduling module.')">View
+                            All</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Shift</th>
+                                <th>Time</th>
+                                <th>Project</th>
+                                <th>Workers Assigned</th>
+                                <th>Supervisor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let r of shifts">
+                                <td>{{r[0]}}</td>
+                                <td><span class="badge shift">{{r[1]}}</span></td>
+                                <td>{{r[2]}}</td>
+                                <td>{{r[3]}}</td>
+                                <td>{{r[4]}}</td>
+                                <td>{{r[5]}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </article>
+                <article class="panel payroll">
+                    <div class="table-head">
+                        <h2>Payroll Summary (This Month)</h2><button
+                            (click)="open('Payroll Summary','Payroll totals and employee counts are up to date.')">View
+                            All</button>
+                    </div>
+                    <p><i>₹</i>Total Payroll <b>₹ 18,75,000</b></p>
+                    <p><i>✓</i>Paid Amount <b>₹ 12,45,000</b></p>
+                    <p><i>◷</i>Pending Amount <b>₹ 6,30,000</b></p>
+                    <p><i>♙</i>Paid Employees <b>180</b></p>
+                    <p><i>♙</i>Pending Employees <b>25</b></p>
+                </article>
+            </section>
+        </section>
+    </main>
+</div>
+<div class="modal-bg" *ngIf="modalTitle" (click)="close()">
+    <section class="modal" (click)="$event.stopPropagation()"><button (click)="close()">×</button>
+        <h2>{{modalTitle}}</h2>
+        <p>{{modalMessage}}</p><button class="export" (click)="close()">Got it</button>
+    </section>
+</div>

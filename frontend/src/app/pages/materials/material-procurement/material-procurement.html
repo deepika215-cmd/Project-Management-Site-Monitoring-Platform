@@ -1,0 +1,71 @@
+<section class="module">
+    <div class="crumb">Materials / <b>Material Procurement</b></div>
+    <div class="title-row">
+        <div>
+            <h1>Material Procurement</h1>
+            <p>Manage purchase orders, suppliers and incoming material deliveries.</p>
+        </div><button class="primary"
+            (click)="open('New purchase order form is ready for supplier and material details.')">+ Create Purchase
+            Order</button>
+    </div>
+    <div class="summary">
+        <article><i>▣</i>
+            <div><small>Total Purchase Orders</small><b>48</b><em>+6 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Received Orders</small><b>32</b><em>66.7% completed</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>In Transit</small><b>8</b><em>Expected this week</em></div>
+        </article>
+        <article><i>₹</i>
+            <div><small>Purchase Value</small><b>₹12.8L</b><em>Current month</em></div>
+        </article>
+    </div>
+    <div class="tool-row">
+        <div class="filter-group"><input [(ngModel)]="query" placeholder="Search PO, material or supplier"><select
+                [(ngModel)]="status">
+                <option>All Status</option>
+                <option>Received</option>
+                <option>In Transit</option>
+                <option>Pending</option>
+            </select></div><button class="outline" (click)="open('Procurement report downloaded successfully.')">⇩
+            Export</button>
+    </div>
+    <section class="panel">
+        <div class="card-head">
+            <h2>Purchase Orders</h2><span>{{filtered.length}} records</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>PO ID</th>
+                    <th>Material</th>
+                    <th>Supplier</th>
+                    <th>Quantity</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'status '+r[5].toLowerCase().replace(' ','-')">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[0]+' details: '+r[1]+' from '+r[2])">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty-note" *ngIf="!filtered.length">No purchase orders match these filters.</p>
+    </section>
+</section>
+<div class="modal-backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="modal-close" (click)="modal=''">×</button>
+        <h2>Material Procurement</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

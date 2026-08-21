@@ -1,0 +1,69 @@
+<section class="module">
+    <div class="crumb">Workforce / <b>Workforce Allocation</b></div>
+    <div class="top">
+        <div>
+            <h1>Workforce Allocation</h1>
+            <p>Assign workforce groups to projects and track deployment status.</p>
+        </div><button class="primary" (click)="open('New workforce allocation form opened.')">+ Create
+            Allocation</button>
+    </div>
+    <div class="stats">
+        <article><i>♙</i>
+            <div><small>Allocated Workers</small><b>195</b><em>78% workforce</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Active Projects</small><b>12</b><em>With allocations</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Allocation</small><b>16</b><em>Needs assignment</em></div>
+        </article>
+        <article><i>♧</i>
+            <div><small>Available Workers</small><b>40</b><em>Ready to allocate</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search project, trade or supervisor"><select
+                [(ngModel)]="status">
+                <option>All Allocations</option>
+                <option>Allocated</option>
+                <option>Partial</option>
+                <option>Pending</option>
+            </select></div><button class="secondary" (click)="open('Allocation register exported.')">⇩ Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Project Allocation Register</h2><span>{{filtered.length}} allocations</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Allocation ID</th>
+                    <th>Project</th>
+                    <th>Worker Group</th>
+                    <th>Workers</th>
+                    <th>Supervisor</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[3]+' '+r[2]+' allocated to '+r[1]+'.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty" *ngIf="!filtered.length">No allocations match your filters.</p>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="close" (click)="modal=''">×</button>
+        <h2>Workforce Allocation</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

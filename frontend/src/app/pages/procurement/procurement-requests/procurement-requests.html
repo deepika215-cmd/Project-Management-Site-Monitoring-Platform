@@ -1,0 +1,67 @@
+<section class="module">
+    <div class="crumb">Procurement / <b>Procurement Requests</b></div>
+    <div class="top">
+        <div>
+            <h1>Procurement Requests</h1>
+            <p>Review and process procurement requirements from project teams.</p>
+        </div><button class="primary" (click)="open('New procurement request form opened.')">+ New Request</button>
+    </div>
+    <div class="stats">
+        <article><i>▧</i>
+            <div><small>Total Requests</small><b>32</b><em>+8 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Approved</small><b>18</b><em>56% approved</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Review</small><b>6</b><em>Needs action</em></div>
+        </article>
+        <article><i>×</i>
+            <div><small>Rejected</small><b>3</b><em>Review notes</em></div>
+        </article>
+    </div>
+    <div class="tools">
+        <div class="filters"><input [(ngModel)]="q" placeholder="Search request, item or project"><select
+                [(ngModel)]="status">
+                <option>All Requests</option>
+                <option>Pending</option>
+                <option>Approved</option>
+            </select></div><button class="secondary" (click)="open('Procurement request report exported.')">⇩
+            Export</button>
+    </div>
+    <article class="panel">
+        <div class="panel-head">
+            <h2>Request Register</h2><span>{{filtered.length}} requests</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Category</th>
+                    <th>Item</th>
+                    <th>Project</th>
+                    <th>Quantity</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'badge '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view" (click)="open(r[0]+' request details opened.')">View</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </article>
+</section>
+<div class="backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal"><button class="close" (click)="modal=''">×</button>
+        <h2>Procurement Requests</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>

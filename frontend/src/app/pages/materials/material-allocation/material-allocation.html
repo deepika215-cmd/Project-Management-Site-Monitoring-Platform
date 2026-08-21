@@ -1,0 +1,71 @@
+<section class="module">
+    <div class="crumb">Materials / <b>Material Allocation</b></div>
+    <div class="title-row">
+        <div>
+            <h1>Material Allocation</h1>
+            <p>Allocate available stock to projects and monitor issue status.</p>
+        </div><button class="primary" (click)="open('New allocation form opened.')">+ Create Allocation</button>
+    </div>
+    <div class="summary">
+        <article><i>⇄</i>
+            <div><small>Total Allocations</small><b>64</b><em>+9 this month</em></div>
+        </article>
+        <article><i>✓</i>
+            <div><small>Completed</small><b>48</b><em>75% issued</em></div>
+        </article>
+        <article><i>◷</i>
+            <div><small>Pending Issue</small><b>11</b><em>Awaiting store action</em></div>
+        </article>
+        <article><i>▤</i>
+            <div><small>Allocated Value</small><b>₹8.4L</b><em>Current month</em></div>
+        </article>
+    </div>
+    <div class="tool-row">
+        <div class="filter-group"><input [(ngModel)]="query"
+                placeholder="Search allocation, material or project"><select [(ngModel)]="status">
+                <option>All Allocations</option>
+                <option>Allocated</option>
+                <option>Partial</option>
+                <option>Pending</option>
+            </select></div><button class="outline" (click)="open('Allocation register exported successfully.')">⇩
+            Export</button>
+    </div>
+    <section class="panel">
+        <div class="card-head">
+            <h2>Allocation Register</h2><span>{{filtered.length}} records</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Allocation ID</th>
+                    <th>Material</th>
+                    <th>Project</th>
+                    <th>Quantity</th>
+                    <th>Issued To</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let r of filtered">
+                    <td class="link">{{r[0]}}</td>
+                    <td>{{r[1]}}</td>
+                    <td>{{r[2]}}</td>
+                    <td>{{r[3]}}</td>
+                    <td>{{r[4]}}</td>
+                    <td><span [class]="'status '+r[5].toLowerCase()">{{r[5]}}</span></td>
+                    <td><button class="view"
+                            (click)="open(r[0]+' allocation of '+r[3]+' '+r[1]+' is '+r[5].toLowerCase()+'.')">View</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="empty-note" *ngIf="!filtered.length">No allocations match these filters.</p>
+    </section>
+</section>
+<div class="modal-backdrop" *ngIf="modal" (click)="modal=''">
+    <div class="modal" (click)="$event.stopPropagation()"><button class="modal-close" (click)="modal=''">×</button>
+        <h2>Material Allocation</h2>
+        <p>{{modal}}</p><button class="primary" (click)="modal=''">Got it</button>
+    </div>
+</div>
