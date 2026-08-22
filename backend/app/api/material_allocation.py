@@ -255,4 +255,22 @@ def consume_material(
 
     db.refresh(allocation)
 
+    # ============================================================
+# GET ALL MATERIAL ALLOCATIONS
+# ============================================================
+
+@router.get(
+    "/",
+    response_model=list[MaterialAllocationResponse]
+)
+def get_material_allocations(
+    db: Session = Depends(get_db)
+):
+
+    return db.query(
+        MaterialAllocation
+    ).order_by(
+        MaterialAllocation.id.desc()
+    ).all()
+
     return allocation

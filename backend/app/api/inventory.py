@@ -25,6 +25,10 @@ def get_db():
         db.close()
 
 
+# ============================================================
+# GET ALL INVENTORY
+# ============================================================
+
 @router.get(
     "/",
     response_model=list[InventoryResponse]
@@ -34,6 +38,10 @@ def get_inventory(
 ):
     return db.query(Inventory).all()
 
+
+# ============================================================
+# INVENTORY STATUS
+# ============================================================
 
 @router.get(
     "/status",
@@ -55,18 +63,36 @@ def get_inventory_status(
             Material.name == inventory.item_name
         ).first()
 
-        minimum_stock = material.minimum_stock if material else 0
+        if not material:
+            continue
 
-        # Total quantity currently present in central inventory
-        total_stock = inventory.quantity
+        minimum_stock = material.minimum_stock or 0
 
-        # Calculate allocated quantity that has not yet been consumed
+        # ----------------------------------------------------
+        # Current available central stock
+        # ----------------------------------------------------
+
+        available_stock = inventory.quantity
+
+        # ----------------------------------------------------
+        # Total allocated movements
+        # ----------------------------------------------------
+
         allocated_result = db.query(
             StockMovement
         ).filter(
             StockMovement.material_id == material.id,
             StockMovement.movement_type == "ALLOCATED"
         ).all()
+
+        total_allocated = sum(
+            movement.quantity
+            for movement in allocated_result
+        )
+
+        # ----------------------------------------------------
+        # Total consumed movements
+        # ----------------------------------------------------
 
         consumed_result = db.query(
             StockMovement
@@ -75,24 +101,33 @@ def get_inventory_status(
             StockMovement.movement_type == "CONSUMED"
         ).all()
 
-        total_allocated = sum(
-            movement.quantity
-            for movement in allocated_result
-        )
-
         total_consumed = sum(
             movement.quantity
             for movement in consumed_result
         )
 
-        # Allocated but not yet consumed
-        allocated_stock = total_allocated - total_consumed
+        # ----------------------------------------------------
+        # Allocated but not consumed
+        # ----------------------------------------------------
 
-        if allocated_stock < 0:
-            allocated_stock = 0
+        allocated_stock = max(
+            total_allocated - total_consumed,
+            0
+        )
 
-        # Central inventory quantity is already the available stock.
-        available_stock = total_stock
+        # ----------------------------------------------------
+        # Total stock handled by system
+        # ----------------------------------------------------
+
+        total_stock = (
+            available_stock
+            + allocated_stock
+            + total_consumed
+        )
+
+        # ----------------------------------------------------
+        # Stock status
+        # ----------------------------------------------------
 
         if available_stock == 0:
             status = "OUT_OF_STOCK"

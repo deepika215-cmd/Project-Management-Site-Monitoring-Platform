@@ -11,7 +11,6 @@ from app.schemas.stock_movement_schema import (
     StockMovementResponse
 )
 
-
 router = APIRouter(
     prefix="/stock-movements",
     tags=["Stock Movements"]
@@ -26,7 +25,14 @@ def get_db():
         db.close()
 
 
-@router.post("/", response_model=StockMovementResponse)
+# ============================================================
+# RECEIVE MATERIAL INTO INVENTORY
+# ============================================================
+
+@router.post(
+    "/",
+    response_model=StockMovementResponse
+)
 def create_stock_movement(
     movement: StockMovementCreate,
     db: Session = Depends(get_db)
@@ -48,6 +54,18 @@ def create_stock_movement(
             detail="Material not found"
         )
 
+    movement_type = movement.movement_type.upper()
+
+    if movement_type != "RECEIVED":
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Use RECEIVED for stock receipt. "
+                "Material consumption must be performed "
+                "through the material allocation endpoint."
+            )
+        )
+
     inventory = db.query(Inventory).filter(
         Inventory.item_name == material.name,
         Inventory.project_id.is_(None)
@@ -66,32 +84,12 @@ def create_stock_movement(
         db.add(inventory)
         db.flush()
 
-    movement_type = movement.movement_type.upper()
-
-    if movement_type == "RECEIVED":
-
-        inventory.quantity += movement.quantity
-
-    elif movement_type == "CONSUMED":
-
-        if inventory.quantity < movement.quantity:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Insufficient stock. Available: {inventory.quantity}"
-            )
-
-        inventory.quantity -= movement.quantity
-
-    else:
-        raise HTTPException(
-            status_code=400,
-            detail="movement_type must be RECEIVED or CONSUMED"
-        )
+    inventory.quantity += movement.quantity
 
     new_movement = StockMovement(
         material_id=movement.material_id,
         project_id=movement.project_id,
-        movement_type=movement_type,
+        movement_type="RECEIVED",
         quantity=movement.quantity,
         remarks=movement.remarks
     )
@@ -104,8 +102,19 @@ def create_stock_movement(
     return new_movement
 
 
-@router.get("/", response_model=list[StockMovementResponse])
+# ============================================================
+# GET STOCK MOVEMENT HISTORY
+# ============================================================
+
+@router.get(
+    "/",
+    response_model=list[StockMovementResponse]
+)
 def get_stock_movements(
     db: Session = Depends(get_db)
 ):
-    return db.query(StockMovement).all()
+    return db.query(
+        StockMovement
+    ).order_by(
+        StockMovement.created_at.desc()
+    ).all()
