@@ -332,7 +332,7 @@ def manager_dashboard(
     current_user: User = Depends(
         role_required([
             "ADMIN",
-            "PROJECT_MANAGER",
+            "MANAGER",
         ])
     ),
 ):
@@ -353,8 +353,8 @@ def engineer_dashboard(
     current_user: User = Depends(
         role_required([
             "ADMIN",
-            "PROJECT_MANAGER",
-            "SITE_ENGINEER",
+            "MANAGER",
+            "ENGINEER",
         ])
     ),
 ):
@@ -375,8 +375,8 @@ def worker_dashboard(
     current_user: User = Depends(
         role_required([
             "ADMIN",
-            "PROJECT_MANAGER",
-            "SITE_ENGINEER",
+            "MANAGER",
+            "ENGINEER",
             "WORKER",
         ])
     ),
@@ -398,8 +398,8 @@ def client_dashboard(
     current_user: User = Depends(
         role_required([
             "ADMIN",
-            "PROJECT_MANAGER",
-            "SITE_ENGINEER",
+            "MANAGER",
+            "ENGINEER",
             "WORKER",
             "CLIENT",
         ])
