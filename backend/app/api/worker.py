@@ -6,6 +6,7 @@ from app.core.permissions import role_required
 
 from app.models.worker import Worker
 from app.models.contractor import Contractor
+from app.models.workforce_category import WorkforceCategory
 from app.models.user import User
 
 from app.schemas.worker_schema import (
@@ -50,6 +51,25 @@ def create_worker(
                 status_code=404,
                 detail="Contractor not found"
             )
+
+    # Validate workforce category
+    category = db.query(
+        WorkforceCategory
+    ).filter(
+        WorkforceCategory.name == worker.category
+    ).first()
+
+    if not category:
+        raise HTTPException(
+            status_code=404,
+            detail="Workforce category not found"
+        )
+
+    if category.status != "Active":
+        raise HTTPException(
+            status_code=400,
+            detail="Workforce category is inactive"
+        )
 
     new_worker = Worker(
         **worker.model_dump()
@@ -158,6 +178,25 @@ def update_worker(
                 status_code=404,
                 detail="Contractor not found"
             )
+
+    # Validate workforce category
+    category = db.query(
+        WorkforceCategory
+    ).filter(
+        WorkforceCategory.name == worker_data.category
+    ).first()
+
+    if not category:
+        raise HTTPException(
+            status_code=404,
+            detail="Workforce category not found"
+        )
+
+    if category.status != "Active":
+        raise HTTPException(
+            status_code=400,
+            detail="Workforce category is inactive"
+        )
 
     for key, value in worker_data.model_dump().items():
         setattr(worker, key, value)
