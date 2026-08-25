@@ -1,0 +1,29 @@
+<div class="page-container">
+  <aside class="sidebar">
+    <div class="logo"><h2>BuildTrack</h2><span>Construction Management</span></div>
+    <nav><a routerLink="/client-dashboard" class="active">Dashboard</a><a routerLink="/projects">Project Overview</a><a routerLink="/notifications">Notifications</a></nav>
+    <div class="sidebar-bottom"><a routerLink="/profile">Profile</a><a routerLink="/login">Logout</a></div>
+  </aside>
+  <main class="main-content">
+    <header class="page-header"><div><h1>Client Dashboard</h1><p>Track project status, progress and budgets using live backend data.</p></div></header>
+    <div class="error-banner" *ngIf="error">{{ error }}</div><div class="loading" *ngIf="loading">Loading project data...</div>
+    <section class="stats-row" *ngIf="!loading">
+      <div class="stat-card"><div class="stat-icon blue">📁</div><div><h3>{{ projects.length }}</h3><span>Projects Visible</span></div></div>
+      <div class="stat-card"><div class="stat-icon orange">🚧</div><div><h3>{{ activeProjects }}</h3><span>Active Projects</span></div></div>
+      <div class="stat-card"><div class="stat-icon green">✅</div><div><h3>{{ completedProjects }}</h3><span>Completed</span></div></div>
+      <div class="stat-card"><div class="stat-icon purple">📊</div><div><h3>{{ averageProgress }}%</h3><span>Average Progress</span></div></div>
+    </section>
+
+    <section class="dashboard-section" *ngIf="!loading">
+      <h2>Project Overview</h2>
+      <p class="note">The current backend does not expose a client-to-project ownership field, so this view shows projects returned by the project API rather than inventing client assignments.</p>
+      <div class="activity-item" *ngFor="let project of projects">
+        <div><strong>{{ project.project_name }}</strong><p>{{ project.location }} · Budget {{ project.budget | currency:'INR':'symbol':'1.0-0' }}</p><div class="progress-bar"><div class="progress" [style.width.%]="project.progress"></div></div><small>{{ project.progress }}% progress · Ends {{ project.end_date | date:'dd MMM yyyy' }}</small></div>
+        <span [ngClass]="statusClass(project.status)">{{ project.status }}</span>
+      </div>
+      <p *ngIf="!projects.length">No projects returned by the backend.</p>
+    </section>
+
+    <section class="dashboard-section" *ngIf="!loading"><h2>Budget Summary</h2><div class="activity-item"><strong>Total project budget returned by API</strong><span>{{ totalBudget | currency:'INR':'symbol':'1.0-0' }}</span></div></section>
+  </main>
+</div>

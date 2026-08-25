@@ -1,0 +1,130 @@
+<div class="page-shell">
+  <app-sidebar active="resources"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">RESOURCE MANAGEMENT</span>
+        <h1>Resource Allocation</h1>
+        <p>Allocate, release and monitor construction equipment and machinery.</p>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" type="button" (click)="loadResources()">↻ Refresh</button>
+        <button class="add-btn" type="button" (click)="openAddResource()">+ Add Resource</button>
+      </div>
+    </header>
+
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="notice">{{ notice }}</div>
+
+    <section class="stats">
+      <article class="stat-card"><span>Total Resources</span><strong>{{ resources.length }}</strong><small>{{ getTotalUnits() }} total units</small></article>
+      <article class="stat-card"><span>Allocated</span><strong>{{ getAllocatedCount() }}</strong><small>{{ getAllocatedUnits() }} units in use</small></article>
+      <article class="stat-card"><span>Available</span><strong>{{ getAvailableCount() }}</strong><small>Ready for allocation</small></article>
+      <article class="stat-card"><span>Utilization</span><strong>{{ getOverallUtilization() }}%</strong><small>Overall capacity usage</small></article>
+    </section>
+
+    <section class="filter-card">
+      <div class="search-wrap">
+        <label for="resource-search">Search</label>
+        <input id="resource-search" type="search" placeholder="Search equipment, code or category..." [(ngModel)]="searchText" (input)="filterResources()">
+      </div>
+      <div>
+        <label for="category">Category</label>
+        <select id="category" [(ngModel)]="selectedCategory" (change)="filterResources()">
+          <option value="">All categories</option>
+          <option *ngFor="let category of categories()" [value]="category">{{ category }}</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="resource-card">
+      <div class="section-heading">
+        <div><h2>Equipment &amp; Machinery</h2><p>{{ filteredResources.length }} resource(s) shown</p></div>
+        <span class="live-pill"><i></i> Backend connected</span>
+      </div>
+
+      <div class="loading" *ngIf="loading">Loading resources...</div>
+      <div class="table-wrap" *ngIf="!loading">
+        <table>
+          <thead><tr><th>Code</th><th>Resource</th><th>Category</th><th>Project</th><th>Units</th><th>Utilization</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let resource of filteredResources">
+              <td><span class="code">{{ resource.code }}</span></td>
+              <td><strong>{{ resource.name }}</strong><small class="muted">{{ resource.location }}</small></td>
+              <td>{{ resource.category }}</td>
+              <td>{{ resource.assignedProject }}</td>
+              <td>{{ resource.allocatedQuantity }} / {{ resource.quantity }}</td>
+              <td><div class="util"><div><span [style.width.%]="resource.utilization"></span></div><b>{{ resource.utilization }}%</b></div></td>
+              <td><span class="status" [ngClass]="getStatusClass(resource.availability)">{{ resource.availability }}</span></td>
+              <td><div class="actions"><button type="button" class="primary" (click)="allocate(resource)" [disabled]="resource.availability.toLowerCase().includes('maintenance')">Allocate</button><button type="button" class="secondary" (click)="release(resource)">Release</button><button type="button" class="edit" (click)="openEditResource(resource)">Edit</button></div></td>
+            </tr>
+            <tr *ngIf="!filteredResources.length"><td colspan="8" class="empty">No resources match the selected filters.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="category-strip">
+      <div><b>Equipment categories</b><span *ngFor="let type of resourceTypes">{{ type }}</span></div>
+      <div><b>Maintenance</b><span>{{ getMaintenanceCount() }} resource(s) currently in maintenance</span></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" *ngIf="showResourceForm" (click)="closeResourceForm()">
+    <section class="resource-modal" role="dialog" aria-modal="true" aria-labelledby="resource-form-title" (click)="$event.stopPropagation()">
+      <div class="modal-heading">
+        <div>
+          <span class="eyebrow">RESOURCE MANAGEMENT</span>
+          <h2 id="resource-form-title">{{ editingResourceId === null ? 'Add Resource' : 'Edit Resource' }}</h2>
+          <p>{{ editingResourceId === null ? 'Add construction equipment or machinery to the existing FastAPI database.' : 'Update the resource and save the changes to the existing FastAPI database.' }}</p>
+        </div>
+        <button type="button" class="close-btn" (click)="closeResourceForm()" aria-label="Close">×</button>
+      </div>
+
+      <div class="modal-alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <form (ngSubmit)="saveResource()" #resourceForm="ngForm">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="resource-name">Resource Name <span>*</span></label>
+            <input id="resource-name" name="resourceName" [(ngModel)]="form.name" required placeholder="e.g. Excavator, Crane, Generator">
+          </div>
+          <div class="form-group">
+            <label for="resource-type">Category <span>*</span></label>
+            <select id="resource-type" name="resourceType" [(ngModel)]="form.type" required>
+              <option *ngFor="let type of resourceTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="resource-quantity">Quantity <span>*</span></label>
+            <input id="resource-quantity" type="number" name="resourceQuantity" [(ngModel)]="form.quantity" min="1" step="1" required>
+          </div>
+          <div class="form-group">
+            <label for="resource-project">Project <span>*</span></label>
+            <select id="resource-project" name="resourceProject" [(ngModel)]="form.projectId" required [disabled]="loadingProjects">
+              <option [ngValue]="0">{{ loadingProjects ? 'Loading projects...' : 'Select a project' }}</option>
+              <option *ngFor="let project of projects" [ngValue]="project.id">{{ project.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="resource-status">Status</label>
+            <select id="resource-status" name="resourceStatus" [(ngModel)]="form.status">
+              <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-note">The resource is saved through the existing <strong>POST/PUT /resources/</strong> FastAPI endpoints. No mock data is used.</div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary-btn" (click)="closeResourceForm()" [disabled]="saving">Cancel</button>
+          <button type="submit" class="primary-btn" [disabled]="saving || loadingProjects || !resourceForm.valid || !form.projectId">
+            <span class="spinner" *ngIf="saving"></span>
+            {{ saving ? 'Saving...' : (editingResourceId === null ? 'Add Resource' : 'Save Changes') }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>

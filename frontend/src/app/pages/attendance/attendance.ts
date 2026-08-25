@@ -1,0 +1,20 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { Api } from '../../services/api';
+import { AppSidebarComponent } from '../../shared/app-sidebar.component';
+@Component({
+    selector: 'app-attendance',
+    standalone: true, imports: [CommonModule, FormsModule, RouterLink, AppSidebarComponent],
+    templateUrl: './attendance.html', styleUrl: './attendance.css'
+}) export class Attendance implements OnInit {
+    records: any[] = [];
+    workers: any[] = [];
+    loading = false; error = '';
+    form = {
+        worker_id: 0,
+        date: new Date().toISOString().slice(0, 10),
+        status: 'Present'
+    }; constructor(private api: Api) { } ngOnInit() { this.load() } load() { this.loading = true; this.api.getAttendance().subscribe({ next: a => { this.records = a || []; this.api.getWorkers().subscribe({ next: w => { this.workers = w || []; this.loading = false }, error: () => this.loading = false }) }, error: e => { this.loading = false; this.error = e?.error?.detail || 'Unable to load attendance.' } }) } save() { if (!this.form.worker_id || !this.form.date) return; this.api.createAttendance(this.form).subscribe({ next: () => this.load(), error: e => this.error = e?.error?.detail || 'Unable to save attendance.' }) } remove(id: number) { this.api.deleteAttendance(id).subscribe({ next: () => this.load(), error: e => this.error = e?.error?.detail || 'Unable to delete attendance.' }) }
+}

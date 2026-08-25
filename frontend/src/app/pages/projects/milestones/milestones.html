@@ -1,0 +1,111 @@
+<div class="page-container">
+  <app-sidebar active="milestones"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">PROJECT MANAGEMENT</span>
+        <h1>Project Milestones</h1>
+        <p>Create, update and track milestones persisted by the FastAPI backend.</p><small class="selected-note" *ngIf="selectedProject">Selected project: #{{ selectedProject }}</small>
+      </div>
+      <button class="primary-btn" type="button" (click)="openAddMilestone()" [disabled]="!selectedProject">+ Add Milestone</button>
+    </header>
+
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <section class="card selector-card">
+      <div>
+        <h2>Project</h2>
+        <p>Select the project whose milestones you want to manage.</p>
+      </div>
+      <select [(ngModel)]="selectedProject" (change)="onProjectChange()" [disabled]="loadingProjects || !projects.length">
+        <option [ngValue]="0">Select project</option>
+        <option *ngFor="let project of projects" [ngValue]="project.id">#{{ project.id }} · {{ project.project_name }}</option>
+      </select>
+    </section>
+
+    <section class="empty-state" *ngIf="!loadingProjects && !projects.length">
+      <div class="empty-icon">📁</div>
+      <h2>No projects available</h2>
+      <p>Create a project first. Milestones must belong to an existing project.</p>
+      <a routerLink="/projects/create-project" class="primary-link">Create Project</a>
+    </section>
+
+    <section class="stats-row" *ngIf="selectedProject">
+      <div class="stat-card"><span>Total</span><strong>{{ milestones.length }}</strong></div>
+      <div class="stat-card"><span>Completed</span><strong>{{ getStatusCount('Completed') }}</strong></div>
+      <div class="stat-card"><span>In Progress</span><strong>{{ getStatusCount('In Progress') }}</strong></div>
+      <div class="stat-card"><span>Delayed</span><strong>{{ getDelayedCount() }}</strong></div>
+    </section>
+
+    <div class="modal-backdrop" *ngIf="showAddModal" (click)="closeAddMilestone()">
+      <section class="modal-card" (click)="$event.stopPropagation()">
+      <div class="card-heading">
+        <div><h2>Add Milestone</h2><p>All fields are saved through the real milestone API.</p></div>
+        <button class="icon-btn" type="button" (click)="closeAddMilestone()">×</button>
+      </div>
+      <form (ngSubmit)="addMilestone()" #milestoneForm="ngForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="milestoneName">Milestone Title <span>*</span></label>
+            <input id="milestoneName" name="milestoneName" [(ngModel)]="newMilestone.name" required placeholder="e.g. Foundation complete">
+          </div>
+          <div class="form-group">
+            <label for="milestoneDate">Due Date <span>*</span></label>
+            <input id="milestoneDate" type="date" name="milestoneDate" [(ngModel)]="newMilestone.plannedDate" required>
+          </div>
+          <div class="form-group">
+            <label for="milestoneStatus">Status</label>
+            <select id="milestoneStatus" name="milestoneStatus" [(ngModel)]="newMilestone.status">
+              <option value="Pending">Pending</option><option value="In Progress">In Progress</option><option value="Completed">Completed</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="milestoneDescription">Description</label>
+            <textarea id="milestoneDescription" name="milestoneDescription" [(ngModel)]="newMilestone.description" rows="3" placeholder="Describe the milestone..." ></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="secondary-btn" type="button" (click)="closeAddMilestone()">Cancel</button>
+          <button class="primary-btn" type="submit" [disabled]="loading || milestoneForm.invalid">{{ loading ? 'Saving...' : 'Save Milestone' }}</button>
+        </div>
+      </form>
+      </section>
+    </div>
+
+    <section class="card" *ngIf="selectedProject">
+      <div class="card-heading">
+        <div><h2>Milestone List</h2><p>{{ milestones.length }} milestone{{ milestones.length === 1 ? '' : 's' }} for the selected project.</p></div>
+        <span class="progress-pill">{{ completedPercentage }}% complete</span>
+      </div>
+
+      <div class="table-wrap" *ngIf="milestones.length; else noMilestones">
+        <table>
+          <thead><tr><th>Milestone</th><th>Due Date</th><th>Status</th><th>Schedule</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of milestones">
+              <ng-container *ngIf="editingMilestoneId !== m.id; else editRow">
+                <td><strong>{{ m.name }}</strong><small>{{ m.description }}</small></td>
+                <td>{{ m.plannedDate }}</td>
+                <td><span class="status-badge" [ngClass]="getStatusClass(m.status)">{{ m.status }}</span></td>
+                <td><span [class.delayed]="isDelayed(m)">{{ isDelayed(m) ? 'Delayed' : 'On time' }}</span></td>
+                <td class="actions"><button type="button" class="small-btn" (click)="startEdit(m)">Edit</button><button type="button" class="small-btn danger" (click)="deleteMilestone(m.id)">Delete</button></td>
+              </ng-container>
+              <ng-template #editRow>
+                <td><input [(ngModel)]="editForm.name" class="inline-input"><textarea [(ngModel)]="editForm.description" class="inline-input"></textarea></td>
+                <td><input type="date" [(ngModel)]="editForm.plannedDate" class="inline-input"></td>
+                <td><select [(ngModel)]="editForm.status" class="inline-input"><option>Pending</option><option>In Progress</option><option>Completed</option></select></td>
+                <td>—</td>
+                <td class="actions"><button type="button" class="small-btn" (click)="saveEdit(m)">Save</button><button type="button" class="small-btn" (click)="cancelEdit()">Cancel</button></td>
+              </ng-template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noMilestones>
+        <div class="empty-inline"><span>✓</span><div><strong>No milestones yet</strong><p>Use <b>+ Add Milestone</b> to create the first milestone for this project.</p></div></div>
+      </ng-template>
+    </section>
+  </main>
+</div>

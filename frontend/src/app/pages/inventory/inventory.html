@@ -1,0 +1,199 @@
+<div class="page-container">
+  <app-sidebar active="inventory"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">MATERIAL &amp; INVENTORY MANAGEMENT</p>
+        <h1>Material Inventory</h1>
+        <p>Monitor stock, submit material requests, allocate materials and manage inventory using the existing FastAPI APIs.</p>
+      </div>
+      <div class="header-actions">
+        <a class="secondary" routerLink="/procurement">Open Procurement</a>
+        <button class="primary" type="button" (click)="openRequest()">+ Material Request</button>
+        <button class="primary" type="button" (click)="openCreate()">+ Add Material</button>
+      </div>
+    </header>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="loading-state" *ngIf="loading"><span class="loading-dot"></span>Loading inventory...</div>
+
+    <section class="stats" *ngIf="!loading">
+      <div class="stat-card"><span>Total Items</span><strong>{{ items.length }}</strong><small>Inventory records</small></div>
+      <div class="stat-card"><span>Units in Stock</span><strong>{{ availableUnits() }}</strong><small>Available for allocation</small></div>
+      <div class="stat-card"><span>Allocated</span><strong>{{ usedUnits() }}</strong><small>Currently allocated</small></div>
+      <div class="stat-card"><span>Low Stock</span><strong>{{ lowStockCount() }}</strong><small>At or below 20% available</small></div>
+      <div class="stat-card"><span>Open Requests</span><strong>{{ pendingRequests() }}</strong><small>Pending or ordered</small></div>
+    </section>
+
+    <section class="category-card">
+      <div>
+        <h2>Material Categories</h2>
+        <p>Categories required by the project outline.</p>
+      </div>
+      <div class="category-list">
+        <button type="button" [class.active]="categoryFilter === 'All'" (click)="categoryFilter='All';filter()">All</button>
+        <button type="button" *ngFor="let category of categories" [class.active]="categoryFilter === category" (click)="categoryFilter=category;filter()">{{ category }}</button>
+      </div>
+    </section>
+
+    <section class="form-card" *ngIf="showForm">
+      <div class="section-heading">
+        <div>
+          <h2>{{ editingId ? 'Edit Material' : 'Add Material' }}</h2>
+          <p>Create or update stock without changing the existing backend schema.</p>
+        </div>
+        <button type="button" class="text-button" (click)="cancel()">Close</button>
+      </div>
+      <div class="form-grid">
+        <label>Category
+          <select [(ngModel)]="form.category" (ngModelChange)="categoryChanged()">
+            <option *ngFor="let category of categories" [ngValue]="category">{{ category }}</option>
+          </select>
+        </label>
+        <label>Material
+          <input [(ngModel)]="form.material_name" placeholder="e.g. OPC 53 Grade" />
+        </label>
+        <label>Quantity
+          <input type="number" min="0" [(ngModel)]="form.quantity" />
+        </label>
+        <label>Unit
+          <input [(ngModel)]="form.unit" placeholder="bags, kg, m, pcs..." />
+        </label>
+        <label>Supplier
+          <input [(ngModel)]="form.supplier" placeholder="Supplier name" />
+        </label>
+        <label>Status
+          <select [(ngModel)]="form.status">
+            <option>Available</option>
+            <option>Out of Stock</option>
+          </select>
+        </label>
+      </div>
+      <div class="suggestions">
+        <span>Examples:</span>
+        <button type="button" *ngFor="let material of categoryMaterials[form.category]" (click)="form.material_name = material">{{ material }}</button>
+      </div>
+      <div class="actions">
+        <button class="primary" type="button" [disabled]="saving" (click)="save()">{{ saving ? 'Saving...' : (editingId ? 'Update Material' : 'Save Material') }}</button>
+        <button type="button" (click)="cancel()">Cancel</button>
+      </div>
+    </section>
+
+    <section class="form-card" *ngIf="showRequestForm">
+      <div class="section-heading">
+        <div>
+          <h2>Material Request</h2>
+          <p>Submit a request through the existing procurement endpoint. It is saved with <strong>Pending</strong> status.</p>
+        </div>
+        <button type="button" class="text-button" (click)="cancelRequest()">Close</button>
+      </div>
+      <div class="form-grid">
+        <label>Category
+          <select [(ngModel)]="requestForm.category" (ngModelChange)="requestCategoryChanged()">
+            <option *ngFor="let category of categories" [ngValue]="category">{{ category }}</option>
+          </select>
+        </label>
+        <label>Material
+          <input [(ngModel)]="requestForm.material_name" placeholder="Requested material" />
+        </label>
+        <label>Quantity
+          <input type="number" min="1" [(ngModel)]="requestForm.quantity" />
+        </label>
+        <label>Supplier
+          <input [(ngModel)]="requestForm.supplier" placeholder="Supplier name" />
+        </label>
+        <label>Project
+          <select [(ngModel)]="requestForm.project_id">
+            <option [ngValue]="0">Select project</option>
+            <option *ngFor="let project of projects" [ngValue]="project.id">{{ project.project_name }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="actions">
+        <button class="primary" type="button" [disabled]="saving" (click)="submitRequest()">{{ saving ? 'Submitting...' : 'Submit Request' }}</button>
+        <button type="button" (click)="cancelRequest()">Cancel</button>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="section-heading table-heading">
+        <div>
+          <h2>Stock Management</h2>
+          <p>{{ filtered.length }} material record(s) shown</p>
+        </div>
+        <div class="search-area">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input [(ngModel)]="search" (input)="filter()" placeholder="Search material, supplier or category..." aria-label="Search inventory" />
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Material</th>
+              <th>Supplier</th>
+              <th>Quantity</th>
+              <th>Allocated</th>
+              <th>Available</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of filtered">
+              <td><span class="category-badge">{{ getCategory(item) }}</span></td>
+              <td><strong>{{ item.material_name }}</strong></td>
+              <td>{{ item.supplier }}</td>
+              <td>{{ item.quantity }} {{ item.unit }}</td>
+              <td>{{ item.used || 0 }}</td>
+              <td>{{ (item.quantity || 0) - (item.used || 0) }} {{ item.unit }}</td>
+              <td><span class="status-badge" [class.out]="item.status === 'Out of Stock'">{{ item.status }}</span></td>
+              <td class="actions-cell">
+                <div class="row-actions">
+                  <button class="primary small" type="button" (click)="allocate(item)">Allocate</button>
+                  <button class="small" type="button" (click)="release(item)" [disabled]="!item.used">Release</button>
+                  <button class="small" type="button" (click)="edit(item)">Edit</button>
+                  <button class="danger-btn small" type="button" (click)="remove(item)">Delete</button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!filtered.length">
+              <td colspan="8" class="empty"><div class="empty-state"><span class="empty-icon">▦</span><strong>No inventory records found</strong><small>Add your first material to start tracking stock.</small></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="section-heading table-heading">
+        <div>
+          <h2>Material Requests</h2>
+          <p>Requests are persisted through the existing procurement service.</p>
+        </div>
+        <a class="secondary" routerLink="/procurement">Manage Procurement</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Material</th><th>Supplier</th><th>Quantity</th><th>Project</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let request of requests">
+              <td>{{ request.item_name }}</td>
+              <td>{{ request.supplier }}</td>
+              <td>{{ request.quantity }}</td>
+              <td>{{ request.project_id }}</td>
+              <td><span class="status-badge">{{ request.status }}</span></td>
+            </tr>
+            <tr *ngIf="!loadingRequests && !requests.length"><td colspan="5" class="empty"><div class="empty-state"><span class="empty-icon">↗</span><strong>No material requests found</strong><small>Material requests will appear here after submission.</small></div></td></tr>
+            <tr *ngIf="loadingRequests"><td colspan="5" class="empty"><div class="loading-state inline"><span class="loading-dot"></span>Loading requests...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>

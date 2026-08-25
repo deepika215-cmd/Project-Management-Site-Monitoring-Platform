@@ -1,0 +1,60 @@
+<div class="page-container">
+  <app-sidebar active="dashboard"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <h1>Project Manager Dashboard</h1>
+        <p>Live project, resource and workforce overview from BuildTrack.</p>
+      </div>
+      <button class="create-project-btn" routerLink="/projects/create-project">+ Create Project</button>
+    </header>
+
+    <div class="error-banner" *ngIf="error">{{ error }}</div>
+    <div class="loading" *ngIf="loading">Loading dashboard data...</div>
+
+    <section class="stats-grid" *ngIf="!loading">
+      <div class="stat-card"><div class="card-icon blue">📁</div><div><h2>{{ totalProjects }}</h2><span>Projects</span></div></div>
+      <div class="stat-card"><div class="card-icon green">✅</div><div><h2>{{ milestoneCompletion }}%</h2><span>Milestone Progress</span></div></div>
+      <div class="stat-card"><div class="card-icon orange">⏰</div><div><h2>{{ upcomingDeadlines.length }}</h2><span>Upcoming Deadlines</span></div></div>
+      <div class="stat-card"><div class="card-icon red">⚠️</div><div><h2>{{ delayedProjects }}</h2><span>Overdue Projects</span></div></div>
+    </section>
+
+    <section class="dashboard-card" *ngIf="!loading">
+      <div class="section-title"><h2>Projects</h2><a routerLink="/projects">View all</a></div>
+      <div class="table-wrap" *ngIf="projects.length; else noProjects">
+        <table>
+          <thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Deadline</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let project of projects">
+              <td><a [routerLink]="['/projects/project-details', project.id]">{{ project.project_name }}</a></td>
+              <td><span class="status" [ngClass]="statusClass(project.status)">{{ project.status }}</span></td>
+              <td><div class="progress-bar"><div class="progress" [style.width.%]="project.progress"></div></div>{{ project.progress }}%</td>
+              <td [class.overdue]="isOverdue(project)">{{ project.end_date | date:'dd MMM yyyy' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noProjects><p>No projects are available from the backend.</p></ng-template>
+    </section>
+
+    <div class="dashboard-grid" *ngIf="!loading">
+      <section class="dashboard-card">
+        <h2>Upcoming Deadlines</h2>
+        <div class="list-item" *ngFor="let project of upcomingDeadlines">
+          <div><strong>{{ project.project_name }}</strong><p>{{ project.end_date | date:'dd MMM yyyy' }}</p></div>
+          <span class="badge" [class.danger]="isOverdue(project)" [class.warning]="!isOverdue(project)">{{ deadlineLabel(project) }}</span>
+        </div>
+        <p *ngIf="!upcomingDeadlines.length">No upcoming deadlines are available.</p>
+      </section>
+
+      <section class="dashboard-card">
+        <h2>Live Workforce & Resources</h2>
+        <div class="metric-row"><span>Workers in analytics</span><strong>{{ totalWorkers }}</strong></div>
+        <div class="metric-row"><span>Engineers identified</span><strong>{{ totalEngineers }}</strong></div>
+        <div class="metric-row"><span>Contractors identified</span><strong>{{ totalContractors }}</strong></div>
+        <div class="metric-row"><span>Resource utilization</span><strong>{{ resourceUtilization }}%</strong></div>
+      </section>
+    </div>
+  </main>
+</div>
