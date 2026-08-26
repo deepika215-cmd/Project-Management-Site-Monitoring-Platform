@@ -15,9 +15,14 @@ from app.models.inventory import Inventory
 from app.models.worker import Worker
 from app.models.attendance import Attendance
 from app.models.procurement import Procurement
+from app.models.vendor import Vendor
+from app.models.procurement_request import ProcurementRequest
+from app.models.purchase_order import PurchaseOrder
+from app.models.purchase_order_item import PurchaseOrderItem
+from app.models.invoice import Invoice
 from app.models.notification import Notification
 from app.models.report import Report
-
+from app.models.procurement_request_item import ProcurementRequestItem
 # Import Routers
 
 from app.api.users import router as users_router
@@ -42,7 +47,12 @@ from app.api.material import router as material_router
 from app.api.material_request import router as material_request_router
 from app.api.material_allocation import router as material_allocation_router
 from app.api.stock_movement import router as stock_movement_router
-
+from app.api.vendor import router as vendor_router
+from app.api.procurement_request import router as procurement_request_router
+from app.api.purchase_order import router as purchase_order_router
+from app.api.purchase_order_item import router as purchase_order_item_router
+from app.api.invoice import router as invoice_router
+from app.api.procurement_request_item import router as procurement_request_item_router
 
 # Create all database tables
 
@@ -89,8 +99,12 @@ app.include_router(material_router)
 app.include_router(material_request_router)
 app.include_router(material_allocation_router)
 app.include_router(stock_movement_router)
-
-
+app.include_router(vendor_router)
+app.include_router(procurement_request_router)
+app.include_router(purchase_order_router)
+app.include_router(purchase_order_item_router)
+app.include_router(invoice_router)
+app.include_router(procurement_request_item_router)
 # Home Route
 
 @app.get("/")
