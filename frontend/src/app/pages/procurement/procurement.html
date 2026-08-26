@@ -1,0 +1,652 @@
+<!-- <div class="page-container"><app-sidebar active="procurement"></app-sidebar>
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Procurement Management</h1>
+                <p>Manage procurement records through the existing FastAPI endpoints.</p>
+            </div><button class="primary" (click)="openCreate()">+ New Procurement</button>
+        </header>
+        <div class="error" *ngIf="error">{{ error }}</div>
+        <div class="loading" *ngIf="loading">Loading procurement...</div>
+        <section class="form-card" *ngIf="showForm">
+            <h2>{{ editingId ? 'Edit Procurement' : 'Create Procurement' }}</h2>
+            <div class="form-grid"><label>Item<input [(ngModel)]="form.item_name" /></label><label>Quantity<input
+                        type="number" min="1" [(ngModel)]="form.quantity" /></label><label>Supplier<input
+                        [(ngModel)]="form.supplier" /></label><label>Status<select [(ngModel)]="form.status">
+                        <option>Pending</option>
+                        <option>Ordered</option>
+                        <option>Received</option>
+                        <option>Completed</option>
+                    </select></label><label>Project<select [(ngModel)]="form.project_id">
+                        <option [ngValue]="0">Select project</option>
+                        <option *ngFor="let project of projects" [ngValue]="project.id">{{ project.project_name }}
+                        </option>
+                    </select></label></div>
+            <div class="actions"><button class="primary" (click)="save()" [disabled]="saving">{{ saving ? 'Saving...' :
+                    'Save' }}</button><button (click)="cancel()">Cancel</button></div>
+        </section>
+        <section class="table-card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Supplier</th>
+                            <th>Quantity</th>
+                            <th>Project</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of items">
+                            <td>{{ item.item_name }}</td>
+                            <td>{{ item.supplier }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.project_id }}</td>
+                            <td>{{ item.status }}</td>
+                            <td><button (click)="edit(item)">Edit</button><button class="danger-btn"
+                                    (click)="remove(item)">Delete</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p *ngIf="!loading && !items.length">No procurement records found.</p>
+            </div>
+        </section>
+    </main>
+</div> -->
+
+<div class="page-container">
+
+    <app-sidebar active="procurement"></app-sidebar>
+
+    <main class="main-content">
+
+        <!-- HEADER -->
+        <header class="page-header">
+
+            <div class="header-left">
+                
+                <h1>Procurement Management</h1>
+
+                <p>
+                    Manage materials, suppliers, quantities and procurement
+                    records for your construction projects.
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <button class="refresh-btn"
+                        type="button"
+                        (click)="load()"
+                        [disabled]="loading">
+                    ↻ Refresh
+                </button>
+
+                <button class="primary-btn"
+                        type="button"
+                        (click)="openCreate()">
+                    <span>＋</span>
+                    New Procurement
+                </button>
+            </div>
+
+        </header>
+
+
+        <!-- ERROR -->
+        <div class="alert error-alert" *ngIf="error">
+            <span class="alert-icon">!</span>
+
+            <div>
+                <strong>Something went wrong</strong>
+                <p>{{ error }}</p>
+            </div>
+
+            <button type="button"
+                    class="alert-close"
+                    (click)="error = ''">
+                ×
+            </button>
+        </div>
+
+
+        <!-- LOADING -->
+        <div class="loading-card" *ngIf="loading">
+
+            <div class="spinner"></div>
+
+            <div>
+                <strong>Loading procurement records...</strong>
+                <span>Please wait</span>
+            </div>
+
+        </div>
+
+
+        <!-- STATISTICS -->
+        <section class="stats-grid" *ngIf="!loading">
+
+            <!-- TOTAL -->
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    📦
+                </div>
+
+                <div class="stat-content">
+                    <span>Total Procurement</span>
+                    <strong>{{ items.length }}</strong>
+                    <small>All procurement records</small>
+                </div>
+
+            </div>
+
+
+            <!-- PENDING -->
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    ⏳
+                </div>
+
+                <div class="stat-content">
+                    <span>Pending</span>
+                    <strong>{{ pendingCount }}</strong>
+                    <small>Awaiting processing</small>
+                </div>
+
+            </div>
+
+
+            <!-- ORDERED -->
+            <div class="stat-card">
+
+                <div class="stat-icon purple">
+                    🚚
+                </div>
+
+                <div class="stat-content">
+                    <span>Ordered</span>
+                    <strong>{{ orderedCount }}</strong>
+                    <small>Currently ordered</small>
+                </div>
+
+            </div>
+
+
+            <!-- RECEIVED -->
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ✓
+                </div>
+
+                <div class="stat-content">
+                    <span>Received</span>
+                    <strong>{{ receivedCount }}</strong>
+                    <small>Materials received</small>
+                </div>
+
+            </div>
+
+
+            <!-- COMPLETED -->
+            <div class="stat-card">
+
+                <div class="stat-icon dark">
+                    ✓
+                </div>
+
+                <div class="stat-content">
+                    <span>Completed</span>
+                    <strong>{{ completedCount }}</strong>
+                    <small>Completed procurement</small>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CREATE / EDIT FORM -->
+        <section class="form-card" *ngIf="showForm">
+
+            <div class="form-header">
+
+                <div>
+                    <span class="form-label">
+                        {{ editingId ? 'UPDATE RECORD' : 'NEW PROCUREMENT' }}
+                    </span>
+
+                    <h2>
+                        {{ editingId
+                            ? 'Edit Procurement'
+                            : 'Create Procurement' }}
+                    </h2>
+
+                    <p>
+                        Enter the procurement information below.
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="close-form"
+                        (click)="cancel()">
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="form-body">
+
+                <!-- ITEM -->
+                <div class="form-group">
+
+                    <label>
+                        Item Name
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        [(ngModel)]="form.item_name"
+                        placeholder="e.g. Cement, Steel, Bricks"
+                        maxlength="200"
+                    />
+
+                    <small>
+                        Enter the material or item required.
+                    </small>
+
+                </div>
+
+
+                <!-- QUANTITY -->
+                <div class="form-group">
+
+                    <label>
+                        Quantity
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        [(ngModel)]="form.quantity"
+                        min="1"
+                        placeholder="Enter quantity"
+                    />
+
+                    <small>
+                        Quantity must be greater than 0.
+                    </small>
+
+                </div>
+
+
+                <!-- SUPPLIER -->
+                <div class="form-group">
+
+                    <label>
+                        Supplier
+                        <span>*</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        [(ngModel)]="form.supplier"
+                        placeholder="Enter supplier name"
+                        maxlength="200"
+                    />
+
+                    <small>
+                        Supplier or vendor providing the item.
+                    </small>
+
+                </div>
+
+
+                <!-- STATUS -->
+                <div class="form-group">
+
+                    <label>
+                        Status
+                    </label>
+
+                    <select [(ngModel)]="form.status">
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="Ordered">
+                            Ordered
+                        </option>
+
+                        <option value="Received">
+                            Received
+                        </option>
+
+                        <option value="Completed">
+                            Completed
+                        </option>
+
+                    </select>
+
+                    <small>
+                        Current procurement status.
+                    </small>
+
+                </div>
+
+
+                <!-- PROJECT -->
+                <div class="form-group full-width">
+
+                    <label>
+                        Project
+                        <span>*</span>
+                    </label>
+
+                    <select [(ngModel)]="form.project_id">
+
+                        <option [ngValue]="0">
+                            Select project
+                        </option>
+
+                        <option
+                            *ngFor="let project of projects"
+                            [ngValue]="project.id">
+
+                            {{ project.project_name }}
+
+                        </option>
+
+                    </select>
+
+                    <small>
+                        Select the project associated with this procurement.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- FORM ACTIONS -->
+            <div class="form-footer">
+
+                <button
+                    type="button"
+                    class="secondary-btn"
+                    (click)="cancel()"
+                    [disabled]="saving">
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="button"
+                    class="primary-btn save-btn"
+                    (click)="save()"
+                    [disabled]="saving">
+
+                    <span *ngIf="!saving">
+                        {{ editingId ? '✓ Update Procurement' : '✓ Save Procurement' }}
+                    </span>
+
+                    <span *ngIf="saving">
+                        <span class="mini-spinner"></span>
+                        Saving...
+                    </span>
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- TABLE CARD -->
+        <section class="table-card">
+
+            <!-- TABLE HEADER -->
+            <div class="table-header">
+
+                <div>
+                    <span class="section-label">
+                        PROCUREMENT RECORDS
+                    </span>
+
+                    <h2>All Procurements</h2>
+
+                    <p>
+                        View and manage all procurement records.
+                    </p>
+                </div>
+
+                <div class="table-summary">
+                    {{ items.length }} Records
+                </div>
+
+            </div>
+
+
+            <!-- TABLE -->
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ITEM</th>
+
+                            <th>SUPPLIER</th>
+
+                            <th>QUANTITY</th>
+
+                            <th>USED</th>
+
+                            <th>PROJECT</th>
+
+                            <th>STATUS</th>
+
+                            <th class="actions-column">
+                                ACTIONS
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        <tr *ngFor="let item of items">
+
+                            <!-- ITEM -->
+                            <td>
+
+                                <div class="item-cell">
+
+                                    <div class="item-avatar">
+                                        {{ getInitial(item.item_name) }}
+                                    </div>
+
+                                    <div>
+                                        <strong>
+                                            {{ item.item_name }}
+                                        </strong>
+
+                                        <small>
+                                            Procurement #{{ item.id }}
+                                        </small>
+                                    </div>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- SUPPLIER -->
+                            <td>
+
+                                <div class="supplier-cell">
+
+                                    <span class="supplier-icon">
+                                        🏢
+                                    </span>
+
+                                    <span>
+                                        {{ item.supplier || 'Not specified' }}
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- QUANTITY -->
+                            <td>
+
+                                <strong class="quantity">
+                                    {{ item.quantity }}
+                                </strong>
+
+                            </td>
+
+
+                            <!-- USED -->
+                            <td>
+
+                                <div class="usage-cell">
+
+                                    <strong>
+                                        {{ item.used || 0 }}
+                                    </strong>
+
+                                    <div class="usage-bar">
+
+                                        <div
+                                            class="usage-progress"
+                                            [style.width.%]="getUsagePercent(item)">
+                                        </div>
+
+                                    </div>
+
+                                    <small>
+                                        {{ getUsagePercent(item) }}% used
+                                    </small>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- PROJECT -->
+                            <td>
+
+                                <span class="project-badge">
+                                    {{ getProjectName(item.project_id) }}
+                                </span>
+
+                            </td>
+
+
+                            <!-- STATUS -->
+                            <td>
+
+                                <span
+                                    class="status-badge"
+                                    [ngClass]="getStatusClass(item.status)">
+
+                                    <span class="status-dot"></span>
+
+                                    {{ item.status || 'Pending' }}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- ACTIONS -->
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    <button
+                                        type="button"
+                                        class="icon-btn edit"
+                                        title="Edit"
+                                        (click)="edit(item)">
+
+                                        ✎
+
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        class="icon-btn delete"
+                                        title="Delete"
+                                        (click)="remove(item)">
+
+                                        🗑
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                        <!-- EMPTY -->
+                        <tr *ngIf="!loading && !items.length">
+
+                            <td colspan="7">
+
+                                <div class="empty-state">
+
+                                    <div class="empty-icon">
+                                        📦
+                                    </div>
+
+                                    <h3>
+                                        No procurement records found
+                                    </h3>
+
+                                    <p>
+                                        Start by creating your first procurement record.
+                                    </p>
+
+                                    <button
+                                        type="button"
+                                        class="primary-btn"
+                                        (click)="openCreate()">
+
+                                        ＋ New Procurement
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
