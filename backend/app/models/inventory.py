@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.database.database import Base
 
@@ -8,15 +9,19 @@ class Inventory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    material_name = Column(String(200), nullable=False)
+    item_name = Column(String(100), nullable=False)
 
-    quantity = Column(Integer)
+    category = Column(String(50), nullable=False)
 
-    # Quantity that has been used
-    used = Column(Integer, default=0)
+    quantity = Column(Integer, default=0)
 
-    unit = Column(String(50))
+    unit = Column(String(20))
 
-    supplier = Column(String(200))
+    supplier = Column(String(100))
 
-    status = Column(String(100))
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id")
+    )
+
+    project = relationship("Project")

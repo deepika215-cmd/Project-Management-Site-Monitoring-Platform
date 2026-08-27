@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.database.database import get_db
+from app.database.database import SessionLocal
 from app.models.inventory import Inventory
-from app.schemas.inventory_schema import (
-    InventoryCreate,
-    InventoryResponse,
-    InventoryUsage,
-    InventoryUtilization
-)
+from app.models.material import Material
+from app.models.stock_movement import StockMovement
 
+from app.schemas.inventory_schema import (
+    InventoryResponse,
+    InventoryStatusResponse
+)
 
 router = APIRouter(
     prefix="/inventory",
@@ -17,29 +17,22 @@ router = APIRouter(
 )
 
 
-# ============================================================
-# Create Inventory
-# ============================================================
-
-@router.post("/", response_model=InventoryResponse)
-def create_inventory(
-    inventory: InventoryCreate,
-    db: Session = Depends(get_db)
-):
-    new_inventory = Inventory(**inventory.model_dump())
-
-    db.add(new_inventory)
-    db.commit()
-    db.refresh(new_inventory)
-
-    return new_inventory
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 # ============================================================
-# Get All Inventory
+# GET ALL INVENTORY
 # ============================================================
 
-@router.get("/", response_model=list[InventoryResponse])
+@router.get(
+    "/",
+    response_model=list[InventoryResponse]
+)
 def get_inventory(
     db: Session = Depends(get_db)
 ):
@@ -47,202 +40,117 @@ def get_inventory(
 
 
 # ============================================================
-# Get Inventory By ID
-# ============================================================
-
-@router.get("/{inventory_id}", response_model=InventoryResponse)
-def get_inventory_by_id(
-    inventory_id: int,
-    db: Session = Depends(get_db)
-):
-    inventory = db.query(Inventory).filter(
-        Inventory.id == inventory_id
-    ).first()
-
-    if not inventory:
-        raise HTTPException(
-            status_code=404,
-            detail="Inventory not found"
-        )
-
-    return inventory
-
-
-# ============================================================
-# Update Inventory
-# ============================================================
-
-@router.put("/{inventory_id}", response_model=InventoryResponse)
-def update_inventory(
-    inventory_id: int,
-    inventory_data: InventoryCreate,
-    db: Session = Depends(get_db)
-):
-    inventory = db.query(Inventory).filter(
-        Inventory.id == inventory_id
-    ).first()
-
-    if not inventory:
-        raise HTTPException(
-            status_code=404,
-            detail="Inventory not found"
-        )
-
-    for key, value in inventory_data.model_dump().items():
-        setattr(inventory, key, value)
-
-    db.commit()
-    db.refresh(inventory)
-
-    return inventory
-
-
-# ============================================================
-# Delete Inventory
-# ============================================================
-
-@router.delete("/{inventory_id}")
-def delete_inventory(
-    inventory_id: int,
-    db: Session = Depends(get_db)
-):
-    inventory = db.query(Inventory).filter(
-        Inventory.id == inventory_id
-    ).first()
-
-    if not inventory:
-        raise HTTPException(
-            status_code=404,
-            detail="Inventory not found"
-        )
-
-    db.delete(inventory)
-    db.commit()
-
-    return {
-        "message": "Inventory deleted successfully"
-    }
-
-
-# ============================================================
-# Use Inventory
-# ============================================================
-
-@router.put("/{inventory_id}/use", response_model=InventoryResponse)
-def use_inventory(
-    inventory_id: int,
-    usage: InventoryUsage,
-    db: Session = Depends(get_db)
-):
-    inventory = db.query(Inventory).filter(
-        Inventory.id == inventory_id
-    ).first()
-
-    if not inventory:
-        raise HTTPException(
-            status_code=404,
-            detail="Inventory not found"
-        )
-
-    available_quantity = inventory.quantity - inventory.used
-
-    if usage.quantity > available_quantity:
-        raise HTTPException(
-            status_code=400,
-            detail="Not enough inventory available"
-        )
-
-    inventory.used += usage.quantity
-
-    if inventory.used == inventory.quantity:
-        inventory.status = "Out of Stock"
-    else:
-        inventory.status = "Available"
-
-    db.commit()
-    db.refresh(inventory)
-
-    return inventory
-
-
-# ============================================================
-# Release Inventory
-# ============================================================
-
-@router.put("/{inventory_id}/release", response_model=InventoryResponse)
-def release_inventory(
-    inventory_id: int,
-    usage: InventoryUsage,
-    db: Session = Depends(get_db)
-):
-    inventory = db.query(Inventory).filter(
-        Inventory.id == inventory_id
-    ).first()
-
-    if not inventory:
-        raise HTTPException(
-            status_code=404,
-            detail="Inventory not found"
-        )
-
-    if usage.quantity > inventory.used:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot release more inventory than currently used"
-        )
-
-    inventory.used -= usage.quantity
-
-    if inventory.used < inventory.quantity:
-        inventory.status = "Available"
-
-    db.commit()
-    db.refresh(inventory)
-
-    return inventory
-
-
-# ============================================================
-# Get Inventory Utilization
+# INVENTORY STATUS
 # ============================================================
 
 @router.get(
-    "/{inventory_id}/utilization",
-    response_model=InventoryUtilization
+    "/status",
+    response_model=list[InventoryStatusResponse]
 )
-def get_inventory_utilization(
-    inventory_id: int,
+def get_inventory_status(
     db: Session = Depends(get_db)
 ):
-    inventory = db.query(Inventory).filter(
-        Inventory.id == inventory_id
-    ).first()
 
-    if not inventory:
-        raise HTTPException(
-            status_code=404,
-            detail="Inventory not found"
+    inventory_items = db.query(Inventory).filter(
+        Inventory.project_id.is_(None)
+    ).all()
+
+    result = []
+
+    for inventory in inventory_items:
+
+        material = db.query(Material).filter(
+            Material.name == inventory.item_name
+        ).first()
+
+        if not material:
+            continue
+
+        minimum_stock = material.minimum_stock or 0
+
+        # ----------------------------------------------------
+        # Current available central stock
+        # ----------------------------------------------------
+
+        available_stock = inventory.quantity
+
+        # ----------------------------------------------------
+        # Total allocated movements
+        # ----------------------------------------------------
+
+        allocated_result = db.query(
+            StockMovement
+        ).filter(
+            StockMovement.material_id == material.id,
+            StockMovement.movement_type == "ALLOCATED"
+        ).all()
+
+        total_allocated = sum(
+            movement.quantity
+            for movement in allocated_result
         )
 
-    available_quantity = inventory.quantity - inventory.used
+        # ----------------------------------------------------
+        # Total consumed movements
+        # ----------------------------------------------------
 
-    if inventory.quantity > 0:
-        utilization_percentage = (
-            inventory.used / inventory.quantity
-        ) * 100
-    else:
-        utilization_percentage = 0
+        consumed_result = db.query(
+            StockMovement
+        ).filter(
+            StockMovement.material_id == material.id,
+            StockMovement.movement_type == "CONSUMED"
+        ).all()
 
-    return {
-        "inventory_id": inventory.id,
-        "material_name": inventory.material_name,
-        "total_quantity": inventory.quantity,
-        "used_quantity": inventory.used,
-        "available_quantity": available_quantity,
-        "utilization_percentage": round(
-            utilization_percentage,
-            2
-        ),
-        "status": inventory.status
-    }
+        total_consumed = sum(
+            movement.quantity
+            for movement in consumed_result
+        )
 
+        # ----------------------------------------------------
+        # Allocated but not consumed
+        # ----------------------------------------------------
+
+        allocated_stock = max(
+            total_allocated - total_consumed,
+            0
+        )
+
+        # ----------------------------------------------------
+        # Total stock handled by system
+        # ----------------------------------------------------
+
+        total_stock = (
+            available_stock
+            + allocated_stock
+            + total_consumed
+        )
+
+        # ----------------------------------------------------
+        # Stock status
+        # ----------------------------------------------------
+
+        if available_stock == 0:
+            status = "OUT_OF_STOCK"
+
+        elif available_stock <= minimum_stock:
+            status = "LOW_STOCK"
+
+        else:
+            status = "AVAILABLE"
+
+        result.append(
+            InventoryStatusResponse(
+                id=inventory.id,
+                item_name=inventory.item_name,
+                category=inventory.category,
+                total_stock=total_stock,
+                allocated_stock=allocated_stock,
+                consumed_stock=total_consumed,
+                available_stock=available_stock,
+                unit=inventory.unit,
+                minimum_stock=minimum_stock,
+                available_status=status
+            )
+        )
+
+    return result

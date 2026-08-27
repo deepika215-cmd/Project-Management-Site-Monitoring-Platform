@@ -38,7 +38,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-
 # Self-service profile update: a logged-in user editing their own
 # name/phone/email. Role and is_active are deliberately excluded here —
 # those stay admin-only via UserUpdate / the /users endpoints.
@@ -60,3 +59,4 @@ class ForgotPasswordRequest(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+

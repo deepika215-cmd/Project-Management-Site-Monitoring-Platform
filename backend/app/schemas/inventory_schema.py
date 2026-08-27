@@ -1,31 +1,27 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
-class InventoryCreate(BaseModel):
-    material_name: str
-    quantity: int = Field(ge=0)
-    unit: str
-    supplier: str
-    status: str
-
-
-class InventoryResponse(InventoryCreate):
+class InventoryResponse(BaseModel):
     id: int
-    used: int
+    item_name: str
+    category: str
+    quantity: int
+    unit: str | None = None
+    supplier: str | None = None
+    project_id: int | None = None
 
     class Config:
         from_attributes = True
 
 
-class InventoryUsage(BaseModel):
-    quantity: int = Field(gt=0)
-
-
-class InventoryUtilization(BaseModel):
-    inventory_id: int
-    material_name: str
-    total_quantity: int
-    used_quantity: int
-    available_quantity: int
-    utilization_percentage: float
-    status: str
+class InventoryStatusResponse(BaseModel):
+    id: int
+    item_name: str
+    category: str
+    total_stock: int
+    allocated_stock: int
+    consumed_stock: int
+    available_stock: int
+    unit: str | None = None
+    minimum_stock: int
+    available_status: str

@@ -15,19 +15,25 @@ router = APIRouter(
 )
 
 
-# Only admins manage the user list. If your project needs Project
-# Managers to also manage users, add "PROJECT_MANAGER" to this list.
+# Only admins manage the user list.
 ADMIN_ONLY = role_required(["ADMIN"])
 
 
+# ============================================================
 # Create User
+# ============================================================
+
 @router.post("/", response_model=UserResponse)
 def create_user(
     user: UserCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(ADMIN_ONLY)
 ):
-    existing_user = db.query(User).filter(User.email == user.email).first()
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email)
+        .first()
+    )
 
     if existing_user:
         raise HTTPException(
@@ -51,7 +57,10 @@ def create_user(
     return new_user
 
 
+# ============================================================
 # Get All Users
+# ============================================================
+
 @router.get("/", response_model=list[UserResponse])
 def get_users(
     db: Session = Depends(get_db),
@@ -60,22 +69,35 @@ def get_users(
     return db.query(User).all()
 
 
+# ============================================================
 # Get User By ID
+# ============================================================
+
 @router.get("/{user_id}", response_model=UserResponse)
 def get_user(
     user_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(ADMIN_ONLY)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
     return user
 
 
+# ============================================================
 # Update User
+# ============================================================
+
 @router.put("/{user_id}", response_model=UserResponse)
 def update_user(
     user_id: int,
@@ -83,31 +105,53 @@ def update_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(ADMIN_ONLY)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
     update_data = user_data.model_dump(exclude_unset=True)
+
+    # --------------------------------------------------------
+    # Prevent duplicate email addresses
+    # --------------------------------------------------------
 
     if "email" in update_data:
         duplicate = (
             db.query(User)
-            .filter(User.email == update_data["email"], User.id != user_id)
+            .filter(
+                User.email == update_data["email"],
+                User.id != user_id
+            )
             .first()
         )
+
         if duplicate:
             raise HTTPException(
                 status_code=400,
                 detail="Email already exists"
             )
 
+    # --------------------------------------------------------
+    # Handle password separately
+    # --------------------------------------------------------
+
     if "password" in update_data:
         password = update_data.pop("password")
+
         if password:
             user.password = hash_password(password)
-        else:
-            update_data.pop("password", None)
+
+    # --------------------------------------------------------
+    # Update remaining fields
+    # --------------------------------------------------------
 
     for key, value in update_data.items():
         setattr(user, key, value)
@@ -118,19 +162,31 @@ def update_user(
     return user
 
 
+# ============================================================
 # Delete User
+# ============================================================
+
 @router.delete("/{user_id}")
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(ADMIN_ONLY)
 ):
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
 
     db.delete(user)
     db.commit()
 
-    return {"message": "User deleted"}
+    return {
+        "message": "User deleted"
+    }
