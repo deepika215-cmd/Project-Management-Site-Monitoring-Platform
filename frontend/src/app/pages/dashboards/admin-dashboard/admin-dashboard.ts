@@ -9,7 +9,7 @@ import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, AppSidebarComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })

@@ -5,7 +5,7 @@ import { forkJoin } from 'rxjs';
 import { Api } from '../../../services/api';
 import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
-@Component({ selector: 'app-site-engineer-dashboard', standalone: true, imports: [CommonModule, RouterLink, AppSidebarComponent], templateUrl: './site-engineer-dashboard.html', styleUrl: './site-engineer-dashboard.css' })
+@Component({ selector: 'app-site-engineer-dashboard', standalone: true, imports: [CommonModule, RouterLink], templateUrl: './site-engineer-dashboard.html', styleUrl: './site-engineer-dashboard.css' })
 export class SiteEngineerDashboard implements OnInit {
   projects: any[] = []; progress: any[] = []; resources: any[] = []; loading = true; error = '';
   constructor(private api: Api) { }

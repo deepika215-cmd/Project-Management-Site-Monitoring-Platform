@@ -6,7 +6,7 @@ import { Api } from '../../../services/api';
 import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
 @Component({
-  selector: 'app-client-dashboard', standalone: true, imports: [CommonModule, RouterLink, AppSidebarComponent],
+  selector: 'app-client-dashboard', standalone: true, imports: [CommonModule, RouterLink],
   templateUrl: './client-dashboard.html', styleUrl: './client-dashboard.css'
 })
 export class ClientDashboard implements OnInit {
