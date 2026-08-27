@@ -35,7 +35,6 @@ export class ResourceAllocation implements OnInit {
   selectedCategory = '';
   resources: Resource[] = [];
   filteredResources: Resource[] = [];
-  projects: ProjectOption[] = [];
   loading = false;
   loadingProjects = false;
   saving = false;
@@ -64,7 +63,9 @@ export class ResourceAllocation implements OnInit {
 
   readonly statusOptions = ['Available', 'Maintenance'];
 
-  constructor(private api: Api) {}
+  constructor(private api: Api) { }
+
+  projects: ProjectOption[] = [];
 
   ngOnInit(): void {
     this.loadResources();
@@ -83,42 +84,41 @@ export class ResourceAllocation implements OnInit {
       error: (err: any) => {
         this.loading = false;
         this.errorMessage = err?.error?.detail || 'Unable to load resources. Start the backend on port 8000.';
+        const s = this.searchText.toLowerCase().trim();
+        this.filteredResources = this.resources.filter(r =>
+          (!s || r.name.toLowerCase().includes(s) || r.code.toLowerCase().includes(s) || r.category.toLowerCase().includes(s)) &&
+          (!this.selectedCategory || r.category.toLowerCase() === this.selectedCategory.toLowerCase())
+        );
       }
     });
   }
 
-  private loadProjects(): void {
+  loadProjects(): void {
     this.loadingProjects = true;
     this.api.getProjects().subscribe({
       next: (items: any[]) => {
-        this.projects = (items || []).map((p: any) => ({
-          id: Number(p.id),
-          name: p.project_name || p.name || `Project #${p.id}`
-        })).filter((p: ProjectOption) => p.id > 0);
+        this.projects = (items || []).map((p: any) => ({ id: p.id, name: p.name }));
         this.loadingProjects = false;
       },
-      error: (err: any) => {
+      error: () => {
         this.loadingProjects = false;
-        this.errorMessage = err?.error?.detail || 'Unable to load projects for resource assignment.';
       }
     });
   }
 
   private mapResource(r: any): Resource {
-    const quantity = Number(r.quantity || 0);
-    const allocatedQuantity = Number(r.allocated_quantity || 0);
     return {
-      id: Number(r.id),
-      code: `RES-${String(r.id).padStart(3, '0')}`,
-      name: r.name || 'Unnamed resource',
+      id: r.id,
+      code: r.code || `RES-${r.id}`,
+      name: r.name || '',
       category: r.type || r.category || 'Equipment',
-      assignedProject: r.project_id ? `Project #${r.project_id}` : 'Unassigned',
-      availability: r.status || (allocatedQuantity >= quantity ? 'Fully Allocated' : 'Available'),
-      utilization: quantity ? Math.min(100, Math.round(allocatedQuantity / quantity * 100)) : 0,
-      location: r.location || 'Site',
-      quantity,
-      allocatedQuantity,
-      projectId: r.project_id ? Number(r.project_id) : undefined
+      assignedProject: r.project_name || r.assignedProject || 'Unassigned',
+      availability: r.status || 'Available',
+      utilization: r.utilization ?? 0,
+      location: r.location || '',
+      quantity: r.quantity ?? 1,
+      allocatedQuantity: r.allocated_quantity ?? r.allocatedQuantity ?? 0,
+      projectId: r.project_id ?? r.projectId
     };
   }
 

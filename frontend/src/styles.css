@@ -30,15 +30,21 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font: inherit;
 }
 
-button, a {
+button,
+a {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -132,7 +138,8 @@ table tbody tr:hover {
   background: #fbfcfe;
 }
 
-a, button {
+a,
+button {
   cursor: pointer;
 }
 
@@ -147,5 +154,5 @@ button:disabled {
 /* Subtle scrollbar for the fixed sidebar. */
 app-sidebar .sidebar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.28) transparent;
+  scrollbar-color: rgba(255, 255, 255, .28) transparent;
 }

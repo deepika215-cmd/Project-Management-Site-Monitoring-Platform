@@ -1,3 +1,72 @@
-<a routerLink="/site-engineer-notifications">
-    Notifications
-</a>
+<div class="page-container">
+    <app-sidebar active="notifications"></app-sidebar>
+
+    <main class="main-content">
+
+        <!-- Page Header -->
+        <header class="page-header">
+            <div>
+                <h1>Site Engineer Notifications</h1>
+                <p>Stay updated with the latest project and site activities.</p>
+            </div>
+        </header>
+
+        <!-- Error -->
+        @if (error) {
+        <div class="error">
+            {{ error }}
+        </div>
+        }
+
+        <!-- Loading -->
+        @if (loading) {
+        <div class="loading">
+            Loading notifications...
+        </div>
+        }
+
+        <!-- Notification List -->
+        @if (!loading) {
+        <section class="notification-list">
+
+            @for (n of notifications; track n.id || n.created_at || $index) {
+            <article class="notification-card">
+
+                <div class="notification-content">
+
+                    <div class="notification-header">
+                        <h3>
+                            {{ n.title || n.message || 'Notification' }}
+                        </h3>
+                    </div>
+
+                    <p class="notification-message">
+                        {{ n.message || n.description || 'No message available.' }}
+                    </p>
+
+                    @if (n.created_at || n.time) {
+                    <small class="notification-time">
+                        {{ n.created_at || n.time }}
+                    </small>
+                    }
+
+                </div>
+
+            </article>
+            }
+
+            <!-- Empty State -->
+            @if (!notifications || notifications.length === 0) {
+            <div class="empty-state">
+                <h3>No notifications</h3>
+                <p>
+                    You don't have any new notifications at the moment.
+                </p>
+            </div>
+            }
+
+        </section>
+        }
+
+    </main>
+</div>

@@ -3,12 +3,13 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Api } from '../../../services/api';
+import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
-@Component({ selector: 'app-contractor-dashboard', standalone: true, imports: [CommonModule, RouterLink], templateUrl: './contractor-dashboard.html', styleUrl: './contractor-dashboard.css' })
+@Component({ selector: 'app-contractor-dashboard', standalone: true, imports: [CommonModule, RouterLink, AppSidebarComponent], templateUrl: './contractor-dashboard.html', styleUrl: './contractor-dashboard.css' })
 export class ContractorDashboard implements OnInit {
   projects: any[] = []; procurements: any[] = []; loading = true; error = '';
 
-  constructor(private api: Api) {}
+  constructor(private api: Api) { }
 
   ngOnInit(): void {
     forkJoin({ projects: this.api.getProjects(), procurements: this.api.getProcurements() }).subscribe({

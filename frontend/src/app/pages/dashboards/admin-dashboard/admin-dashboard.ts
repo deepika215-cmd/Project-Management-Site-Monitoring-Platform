@@ -4,11 +4,12 @@ import { Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Api } from '../../../services/api';
+import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, AppSidebarComponent],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.css'
 })
@@ -19,7 +20,7 @@ export class AdminDashboard implements OnInit {
   recentProjects: any[] = [];
   recentProcurements: any[] = [];
 
-  constructor(private router: Router, private api: Api) {}
+  constructor(private router: Router, private api: Api) { }
 
   ngOnInit(): void { this.loadDashboard(); }
 

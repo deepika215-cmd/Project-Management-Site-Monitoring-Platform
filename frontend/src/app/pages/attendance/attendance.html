@@ -1,1 +1,185 @@
-<div class="page-container"><app-sidebar active="attendance"></app-sidebar><main class="main-content"><header class="page-header"><div><h1>Attendance</h1><p>Record attendance using the existing FastAPI attendance API.</p></div></header><p *ngIf="error" class="error">{{error}}</p><section class="card"><form (ngSubmit)="save()"><select name="worker" [(ngModel)]="form.worker_id" required><option [ngValue]="0">Select worker</option><option *ngFor="let w of workers" [ngValue]="w.id">{{w.name}}</option></select><input type="date" name="date" [(ngModel)]="form.date" required><select name="status" [(ngModel)]="form.status"><option>Present</option><option>Absent</option><option>Leave</option></select><button type="submit">Record Attendance</button></form></section><section class="card"><table><thead><tr><th>Worker ID</th><th>Date</th><th>Status</th><th>Action</th></tr></thead><tbody><tr *ngFor="let r of records"><td>{{r.worker_id}}</td><td>{{r.date}}</td><td>{{r.status}}</td><td><button (click)="remove(r.id)">Delete</button></td></tr><tr *ngIf="!records.length"><td colspan="4">No attendance records.</td></tr></tbody></table></section></main></div>
+<div class="page-container">
+
+    <app-sidebar active="attendance"></app-sidebar>
+
+    <main class="main-content">
+
+        <!-- Page Header -->
+        <header class="page-header">
+            <div>
+                <h1>Attendance</h1>
+                <p>
+                    Record and manage worker attendance using the existing FastAPI
+                    attendance API.
+                </p>
+            </div>
+        </header>
+
+        <!-- Error Message -->
+        <div class="error" *ngIf="error">
+            {{ error }}
+        </div>
+
+        <!-- Loading -->
+        <div class="loading" *ngIf="loading">
+            Loading attendance...
+        </div>
+
+        <!-- Attendance Form -->
+        <section class="card" *ngIf="!loading">
+
+            <h2>Record Attendance</h2>
+
+            <form class="attendance-form" (ngSubmit)="save()" #attendanceForm="ngForm">
+
+                <!-- Worker -->
+                <div class="form-group">
+
+                    <label for="worker">
+                        Worker
+                    </label>
+
+                    <select id="worker" name="worker" [(ngModel)]="form.worker_id" required>
+                        <option [ngValue]="0">
+                            Select worker
+                        </option>
+
+                        <option *ngFor="let worker of workers" [ngValue]="worker.id">
+                            {{ worker.name || ('Worker #' + worker.id) }}
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+
+                    <label for="attendance-date">
+                        Date
+                    </label>
+
+                    <input id="attendance-date" type="date" name="date" [(ngModel)]="form.date" required />
+
+                </div>
+
+                <!-- Status -->
+                <div class="form-group">
+
+                    <label for="attendance-status">
+                        Status
+                    </label>
+
+                    <select id="attendance-status" name="status" [(ngModel)]="form.status" required>
+                        <option value="Present">
+                            Present
+                        </option>
+
+                        <option value="Absent">
+                            Absent
+                        </option>
+
+                        <option value="Leave">
+                            Leave
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Submit -->
+                <div class="form-actions">
+
+                    <button type="submit" [disabled]="saving || !attendanceForm.valid || !form.worker_id">
+                        {{ saving ? 'Saving...' : 'Record Attendance' }}
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+        <!-- Attendance Records -->
+        <section class="card" *ngIf="!loading">
+
+            <div class="section-header">
+
+                <div>
+                    <h2>Attendance Records</h2>
+                    <p>{{ records.length }} record(s)</p>
+                </div>
+
+                <button type="button" class="refresh-button" (click)="load()" [disabled]="loading">
+                    ↻ Refresh
+                </button>
+
+            </div>
+
+            <div class="table-wrap">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>Worker ID</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr *ngFor="let record of records">
+
+                            <td>
+                                {{ record.worker_id }}
+                            </td>
+
+                            <td>
+                                {{ record.date }}
+                            </td>
+
+                            <td>
+
+                                <span class="status" [ngClass]="{
+                                        'present': record.status === 'Present',
+                                        'absent': record.status === 'Absent',
+                                        'leave': record.status === 'Leave'
+                                    }">
+                                    {{ record.status }}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <button type="button" class="delete-button" (click)="remove(record.id)">
+                                    Delete
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                        <!-- Empty State -->
+                        <tr *ngIf="records.length === 0">
+
+                            <td colspan="4" class="empty">
+                                No attendance records found.
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>

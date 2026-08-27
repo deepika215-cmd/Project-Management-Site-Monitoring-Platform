@@ -6,7 +6,8 @@
       <div>
         <p class="eyebrow">MATERIAL &amp; INVENTORY MANAGEMENT</p>
         <h1>Material Inventory</h1>
-        <p>Monitor stock, submit material requests, allocate materials and manage inventory using the existing FastAPI APIs.</p>
+        <p>Monitor stock, submit material requests, allocate materials and manage inventory using the existing FastAPI
+          APIs.</p>
       </div>
       <div class="header-actions">
         <a class="secondary" routerLink="/procurement">Open Procurement</a>
@@ -19,11 +20,16 @@
     <div class="loading-state" *ngIf="loading"><span class="loading-dot"></span>Loading inventory...</div>
 
     <section class="stats" *ngIf="!loading">
-      <div class="stat-card"><span>Total Items</span><strong>{{ items.length }}</strong><small>Inventory records</small></div>
-      <div class="stat-card"><span>Units in Stock</span><strong>{{ availableUnits() }}</strong><small>Available for allocation</small></div>
-      <div class="stat-card"><span>Allocated</span><strong>{{ usedUnits() }}</strong><small>Currently allocated</small></div>
-      <div class="stat-card"><span>Low Stock</span><strong>{{ lowStockCount() }}</strong><small>At or below 20% available</small></div>
-      <div class="stat-card"><span>Open Requests</span><strong>{{ pendingRequests() }}</strong><small>Pending or ordered</small></div>
+      <div class="stat-card"><span>Total Items</span><strong>{{ items.length }}</strong><small>Inventory records</small>
+      </div>
+      <div class="stat-card"><span>Units in Stock</span><strong>{{ availableUnits() }}</strong><small>Available for
+          allocation</small></div>
+      <div class="stat-card"><span>Allocated</span><strong>{{ usedUnits() }}</strong><small>Currently allocated</small>
+      </div>
+      <div class="stat-card"><span>Low Stock</span><strong>{{ lowStockCount() }}</strong><small>At or below 20%
+          available</small></div>
+      <div class="stat-card"><span>Open Requests</span><strong>{{ pendingRequests() }}</strong><small>Pending or
+          ordered</small></div>
     </section>
 
     <section class="category-card">
@@ -32,8 +38,10 @@
         <p>Categories required by the project outline.</p>
       </div>
       <div class="category-list">
-        <button type="button" [class.active]="categoryFilter === 'All'" (click)="categoryFilter='All';filter()">All</button>
-        <button type="button" *ngFor="let category of categories" [class.active]="categoryFilter === category" (click)="categoryFilter=category;filter()">{{ category }}</button>
+        <button type="button" [class.active]="categoryFilter === 'All'"
+          (click)="categoryFilter='All';filter()">All</button>
+        <button type="button" *ngFor="let category of categories" [class.active]="categoryFilter === category"
+          (click)="categoryFilter=category;filter()">{{ category }}</button>
       </div>
     </section>
 
@@ -72,10 +80,12 @@
       </div>
       <div class="suggestions">
         <span>Examples:</span>
-        <button type="button" *ngFor="let material of categoryMaterials[form.category]" (click)="form.material_name = material">{{ material }}</button>
+        <button type="button" *ngFor="let material of categoryMaterials[form.category]"
+          (click)="form.material_name = material">{{ material }}</button>
       </div>
       <div class="actions">
-        <button class="primary" type="button" [disabled]="saving" (click)="save()">{{ saving ? 'Saving...' : (editingId ? 'Update Material' : 'Save Material') }}</button>
+        <button class="primary" type="button" [disabled]="saving" (click)="save()">{{ saving ? 'Saving...' : (editingId
+          ? 'Update Material' : 'Save Material') }}</button>
         <button type="button" (click)="cancel()">Cancel</button>
       </div>
     </section>
@@ -84,7 +94,8 @@
       <div class="section-heading">
         <div>
           <h2>Material Request</h2>
-          <p>Submit a request through the existing procurement endpoint. It is saved with <strong>Pending</strong> status.</p>
+          <p>Submit a request through the existing procurement endpoint. It is saved with <strong>Pending</strong>
+            status.</p>
         </div>
         <button type="button" class="text-button" (click)="cancelRequest()">Close</button>
       </div>
@@ -111,7 +122,8 @@
         </label>
       </div>
       <div class="actions">
-        <button class="primary" type="button" [disabled]="saving" (click)="submitRequest()">{{ saving ? 'Submitting...' : 'Submit Request' }}</button>
+        <button class="primary" type="button" [disabled]="saving" (click)="submitRequest()">{{ saving ? 'Submitting...'
+          : 'Submit Request' }}</button>
         <button type="button" (click)="cancelRequest()">Cancel</button>
       </div>
     </section>
@@ -124,7 +136,8 @@
         </div>
         <div class="search-area">
           <span class="search-icon" aria-hidden="true">⌕</span>
-          <input [(ngModel)]="search" (input)="filter()" placeholder="Search material, supplier or category..." aria-label="Search inventory" />
+          <input [(ngModel)]="search" (input)="filter()" placeholder="Search material, supplier or category..."
+            aria-label="Search inventory" />
         </div>
       </div>
 
@@ -161,7 +174,10 @@
               </td>
             </tr>
             <tr *ngIf="!filtered.length">
-              <td colspan="8" class="empty"><div class="empty-state"><span class="empty-icon">▦</span><strong>No inventory records found</strong><small>Add your first material to start tracking stock.</small></div></td>
+              <td colspan="8" class="empty">
+                <div class="empty-state"><span class="empty-icon">▦</span><strong>No inventory records
+                    found</strong><small>Add your first material to start tracking stock.</small></div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -179,7 +195,13 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Material</th><th>Supplier</th><th>Quantity</th><th>Project</th><th>Status</th></tr>
+            <tr>
+              <th>Material</th>
+              <th>Supplier</th>
+              <th>Quantity</th>
+              <th>Project</th>
+              <th>Status</th>
+            </tr>
           </thead>
           <tbody>
             <tr *ngFor="let request of requests">
@@ -189,8 +211,17 @@
               <td>{{ request.project_id }}</td>
               <td><span class="status-badge">{{ request.status }}</span></td>
             </tr>
-            <tr *ngIf="!loadingRequests && !requests.length"><td colspan="5" class="empty"><div class="empty-state"><span class="empty-icon">↗</span><strong>No material requests found</strong><small>Material requests will appear here after submission.</small></div></td></tr>
-            <tr *ngIf="loadingRequests"><td colspan="5" class="empty"><div class="loading-state inline"><span class="loading-dot"></span>Loading requests...</div></td></tr>
+            <tr *ngIf="!loadingRequests && !requests.length">
+              <td colspan="5" class="empty">
+                <div class="empty-state"><span class="empty-icon">↗</span><strong>No material requests
+                    found</strong><small>Material requests will appear here after submission.</small></div>
+              </td>
+            </tr>
+            <tr *ngIf="loadingRequests">
+              <td colspan="5" class="empty">
+                <div class="loading-state inline"><span class="loading-dot"></span>Loading requests...</div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

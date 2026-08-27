@@ -8,7 +8,7 @@ import { Api } from '../../../services/api';
 export class WorkerDashboard implements OnInit {
   currentUser: any = null; worker: any = null; attendance: any[] = []; loading = true; error = '';
 
-  constructor(private api: Api) {}
+  constructor(private api: Api) { }
 
   ngOnInit(): void {
     forkJoin({ user: this.api.getCurrentUser(), workers: this.api.getWorkers(), attendance: this.api.getAttendance() }).subscribe({

@@ -24,19 +24,33 @@
     <div class="loading" *ngIf="loading">Loading administration data...</div>
 
     <div class="stats-grid" *ngIf="!loading">
-      <div class="stat-card"><h3>Total Projects</h3><strong>{{ summary.projects }}</strong></div>
-      <div class="stat-card"><h3>Active Projects</h3><strong>{{ summary.activeProjects }}</strong></div>
-      <div class="stat-card"><h3>Total Users</h3><strong>{{ summary.users }}</strong></div>
-      <div class="stat-card"><h3>Workers</h3><strong>{{ summary.workers }}</strong></div>
-      <div class="stat-card"><h3>Procurements</h3><strong>{{ summary.procurements }}</strong></div>
-      <div class="stat-card"><h3>Inventory Items</h3><strong>{{ summary.inventory }}</strong></div>
+      <div class="stat-card">
+        <h3>Total Projects</h3><strong>{{ summary.projects }}</strong>
+      </div>
+      <div class="stat-card">
+        <h3>Active Projects</h3><strong>{{ summary.activeProjects }}</strong>
+      </div>
+      <div class="stat-card">
+        <h3>Total Users</h3><strong>{{ summary.users }}</strong>
+      </div>
+      <div class="stat-card">
+        <h3>Workers</h3><strong>{{ summary.workers }}</strong>
+      </div>
+      <div class="stat-card">
+        <h3>Procurements</h3><strong>{{ summary.procurements }}</strong>
+      </div>
+      <div class="stat-card">
+        <h3>Inventory Items</h3><strong>{{ summary.inventory }}</strong>
+      </div>
     </div>
 
     <div class="dashboard-grid" *ngIf="!loading">
       <section class="dashboard-section">
         <h2>Recent Projects</h2>
         <div class="activity-item" *ngFor="let project of recentProjects">
-          <div><strong>{{ project.project_name }}</strong><p>{{ project.location }}</p></div>
+          <div><strong>{{ project.project_name }}</strong>
+            <p>{{ project.location }}</p>
+          </div>
           <span>{{ project.status }}</span>
         </div>
         <p *ngIf="!recentProjects.length">No projects returned by the backend.</p>
@@ -44,7 +58,9 @@
       <section class="dashboard-section">
         <h2>Procurement Overview</h2>
         <div class="activity-item" *ngFor="let item of recentProcurements">
-          <div><strong>{{ item.item_name }}</strong><p>{{ item.supplier }} · Qty {{ item.quantity }}</p></div>
+          <div><strong>{{ item.item_name }}</strong>
+            <p>{{ item.supplier }} · Qty {{ item.quantity }}</p>
+          </div>
           <span>{{ item.status }}</span>
         </div>
         <p *ngIf="!recentProcurements.length">No procurement records returned by the backend.</p>
@@ -55,7 +71,8 @@
       <h2>System Status</h2>
       <p>{{ summary.completedProjects }} projects are completed/closed.</p>
       <p>{{ summary.notifications }} notification records are available.</p>
-      <p>Use <a routerLink="/analytics">Analytics</a> for detailed project, resource, inventory and workforce metrics.</p>
+      <p>Use <a routerLink="/analytics">Analytics</a> for detailed project, resource, inventory and workforce metrics.
+      </p>
     </section>
   </main>
 </div>

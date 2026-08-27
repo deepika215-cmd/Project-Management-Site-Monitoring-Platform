@@ -1,2 +1,238 @@
-.error{color:#b42318}.card{margin:20px 0;padding:20px;background:#fff;border-radius:12px}.card form{display:flex;gap:10px;flex-wrap:wrap}.card input,.card select{padding:10px}button{padding:8px 12px}table{width:100%;border-collapse:collapse}th,td{padding:12px;border-bottom:1px solid #eee;text-align:left}
-.page-container,.dashboard{display:flex!important;min-height:100vh}.main-content{margin-left:0!important;width:auto!important;flex:1;min-width:0}@media(max-width:850px){.page-container,.dashboard{flex-direction:column}.main-content{width:100%!important}}
+.page-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1;
+    min-width: 0;
+    margin-left: 0;
+    padding: 28px;
+    box-sizing: border-box;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h1 {
+    margin: 0 0 8px;
+}
+
+.page-header p {
+    margin: 0;
+    color: #667085;
+}
+
+.error {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    background: #fef3f2;
+    border: 1px solid #fecdca;
+    border-radius: 8px;
+    color: #b42318;
+}
+
+.loading {
+    padding: 20px;
+    text-align: center;
+    color: #667085;
+}
+
+.card {
+    margin: 20px 0;
+    padding: 24px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #eaecf0;
+    box-sizing: border-box;
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.attendance-form {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 180px;
+}
+
+.form-group label {
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    min-height: 42px;
+    padding: 8px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #667085;
+}
+
+.form-actions {
+    display: flex;
+    align-items: flex-end;
+}
+
+button {
+    min-height: 42px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.attendance-form button {
+    background: #344054;
+    color: #fff;
+}
+
+.attendance-form button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.section-header h2 {
+    margin-bottom: 4px;
+}
+
+.section-header p {
+    margin: 0;
+    color: #667085;
+}
+
+.refresh-button {
+    background: #f2f4f7;
+    color: #344054;
+}
+
+.refresh-button:hover {
+    background: #e4e7ec;
+}
+
+.refresh-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #eaecf0;
+    text-align: left;
+}
+
+th {
+    font-weight: 600;
+    background: #f9fafb;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status.present {
+    background: #ecfdf3;
+    color: #027a48;
+}
+
+.status.absent {
+    background: #fef3f2;
+    color: #b42318;
+}
+
+.status.leave {
+    background: #fffaeb;
+    color: #b54708;
+}
+
+.delete-button {
+    min-height: 34px;
+    padding: 6px 12px;
+    background: #fef3f2;
+    color: #b42318;
+}
+
+.delete-button:hover {
+    background: #fee4e2;
+}
+
+.empty {
+    padding: 30px;
+    text-align: center;
+    color: #667085;
+}
+
+@media (max-width: 850px) {
+    .page-container {
+        flex-direction: column;
+    }
+
+    .main-content {
+        width: 100%;
+        padding: 20px;
+    }
+
+    .attendance-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-group {
+        width: 100%;
+    }
+
+    .form-actions {
+        width: 100%;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

@@ -3,16 +3,17 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Api } from '../../../services/api';
+import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
 @Component({
-  selector: 'app-client-dashboard', standalone: true, imports: [CommonModule, RouterLink],
+  selector: 'app-client-dashboard', standalone: true, imports: [CommonModule, RouterLink, AppSidebarComponent],
   templateUrl: './client-dashboard.html', styleUrl: './client-dashboard.css'
 })
 export class ClientDashboard implements OnInit {
   projects: any[] = []; loading = true; error = '';
   totalBudget = 0; activeProjects = 0; completedProjects = 0; averageProgress = 0;
 
-  constructor(private api: Api) {}
+  constructor(private api: Api) { }
 
   ngOnInit(): void {
     forkJoin({ projects: this.api.getProjects(), progress: this.api.getProjectProgress() }).subscribe({

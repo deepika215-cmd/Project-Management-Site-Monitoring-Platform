@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Api } from '../../../services/api';
+import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
-@Component({ selector: 'app-site-engineer-dashboard', standalone: true, imports: [CommonModule, RouterLink], templateUrl: './site-engineer-dashboard.html', styleUrl: './site-engineer-dashboard.css' })
+@Component({ selector: 'app-site-engineer-dashboard', standalone: true, imports: [CommonModule, RouterLink, AppSidebarComponent], templateUrl: './site-engineer-dashboard.html', styleUrl: './site-engineer-dashboard.css' })
 export class SiteEngineerDashboard implements OnInit {
   projects: any[] = []; progress: any[] = []; resources: any[] = []; loading = true; error = '';
-  constructor(private api: Api) {}
+  constructor(private api: Api) { }
   ngOnInit(): void {
     forkJoin({ projects: this.api.getProjects(), progress: this.api.getProjectProgress(), resources: this.api.getResourceUtilizationAnalytics() }).subscribe({
       next: data => { this.projects = Array.isArray(data.projects) ? data.projects : []; this.progress = Array.isArray(data.progress) ? data.progress : []; this.resources = Array.isArray(data.resources) ? data.resources : []; this.loading = false; },
