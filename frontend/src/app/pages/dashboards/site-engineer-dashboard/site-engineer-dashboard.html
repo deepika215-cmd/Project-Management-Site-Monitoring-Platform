@@ -1,0 +1,51 @@
+<div class="page-container">
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>BuildTrack</h2><span>Construction Management</span>
+        </div>
+        <nav><a routerLink="/site-engineer-dashboard" class="active">Dashboard</a><a
+                routerLink="/site-engineer-projects">Assigned Projects</a><a
+                routerLink="/site-engineer-milestones">Daily Progress</a><a
+                routerLink="/projects/schedule">Schedule</a><a routerLink="/resource-allocation">Resources</a></nav>
+        <div class="sidebar-bottom"><a routerLink="/notifications">Notifications</a><a
+                routerLink="/profile">Profile</a><a routerLink="/login">Logout</a></div>
+    </aside>
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1>Site Engineer Dashboard</h1>
+                <p>Monitor project progress and resource utilization using live backend data.</p>
+            </div><button type="button" class="view-projects-btn" routerLink="/site-engineer-projects">View
+                Projects</button>
+        </div>
+        <div class="error-banner" *ngIf="error">{{ error }}</div>
+        <div class="loading" *ngIf="loading">Loading site monitoring data...</div>
+        <section class="stats-row" *ngIf="!loading">
+            <div class="stat-card">
+                <h3>{{ projects.length }}</h3><span>Projects Returned</span>
+            </div>
+            <div class="stat-card">
+                <h3>{{ progress.length }}</h3><span>Progress Records</span>
+            </div>
+            <div class="stat-card">
+                <h3>{{ resources.length }}</h3><span>Resources</span>
+            </div>
+            <div class="stat-card">
+                <h3>{{ resourceUtilization() }}%</h3><span>Resource Utilization</span>
+            </div>
+        </section>
+        <section class="dashboard-section" *ngIf="!loading">
+            <h2>Project Progress</h2>
+            <p class="note">The current backend does not expose engineer-to-project assignment, so this view uses the
+                available project progress API.</p>
+            <div class="activity-item" *ngFor="let project of projects">
+                <div><strong>{{ project.project_name }}</strong>
+                    <p>{{ project.location }}</p>
+                    <div class="progress-bar">
+                        <div class="progress" [style.width.%]="progressFor(project.id)"></div>
+                    </div><small>{{ progressFor(project.id) }}% complete</small>
+                </div><span>{{ project.status }}</span>
+            </div>
+        </section>
+    </main>
+</div>

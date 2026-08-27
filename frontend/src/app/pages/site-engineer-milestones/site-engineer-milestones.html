@@ -1,0 +1,55 @@
+<div class="page-shell">
+  <app-sidebar active="milestones"></app-sidebar>
+  <main class="main-content">
+    <header class="page-header">
+      <div><span class="eyebrow">SITE PROGRESS MONITORING</span><h1>Daily Progress & Milestones</h1><p>Record daily work, monitor completion and identify delays before they impact the schedule.</p></div>
+    </header>
+
+    <section class="summary-grid">
+      <article><span>Reports</span><strong>{{ entries.length }}</strong><small>All site updates</small></article>
+      <article><span>Weekly Reports</span><strong>{{ weeklyCount }}</strong><small>Last 7 days</small></article>
+      <article><span>Average Progress</span><strong>{{ averageProgress }}%</strong><small>Across submitted updates</small></article>
+      <article><span>Delays</span><strong>{{ delayedCount }}</strong><small>Reports with issues</small></article>
+    </section>
+
+    <section class="content-grid">
+      <article class="card form-card">
+        <div class="card-title"><div><h2>Daily Progress Report</h2><p>Submit today's site activity and milestone status.</p></div><span class="tag">Daily</span></div>
+        <form (ngSubmit)="submitEntry()" #progressForm="ngForm">
+          <div class="field-grid">
+            <label><span>Date</span><input type="date" [(ngModel)]="form.date" name="date" required></label>
+            <label><span>Project</span><input type="text" [(ngModel)]="form.projectName" name="projectName" placeholder="Project name" required></label>
+            <label><span>Progress %</span><input type="number" min="0" max="100" [(ngModel)]="form.progress" name="progress" required></label>
+            <label><span>Engineer / Supervisor</span><input type="text" [(ngModel)]="form.engineerName" name="engineerName" placeholder="Name" required></label>
+            <label><span>Progress Category</span><select [(ngModel)]="form.category" name="category"><option *ngFor="let category of categories" [value]="category">{{ category }}</option></select></label>
+            <label><span>Work Status</span><input [value]="status(form.progress, form.issues)" readonly></label>
+          </div>
+          <label><span>Work Completed Today</span><textarea [(ngModel)]="form.workCompleted" name="workCompleted" rows="3" required></textarea></label>
+          <label><span>Work Description</span><textarea [(ngModel)]="form.workDescription" name="workDescription" rows="2"></textarea></label>
+          <div class="field-grid"><label><span>Today's Tasks</span><textarea [(ngModel)]="form.tasks" name="tasks" rows="2"></textarea></label><label><span>Issues / Delays</span><textarea [(ngModel)]="form.issues" name="issues" rows="2"></textarea></label></div>
+          <label><span>Next Day Plan</span><textarea [(ngModel)]="form.nextPlan" name="nextPlan" rows="2"></textarea></label>
+          <div class="field-grid">
+            <label><span>Site Photos</span><input #photoInput type="file" name="photos" multiple accept="image/*" (change)="onPhotoFilesSelected($event)"><small *ngIf="form.photos.length">{{ form.photos.length }} photo(s) selected</small></label>
+            <label><span>Videos</span><input #videoInput type="file" name="videos" multiple accept="video/*" (change)="onVideoFilesSelected($event)"><small *ngIf="form.videos.length">{{ form.videos.length }} video(s) selected</small></label>
+            <label><span>GPS Location</span><input type="text" [(ngModel)]="form.location" name="location" placeholder="Optional"></label>
+            <label><span>Weather</span><input type="text" [(ngModel)]="form.weather" name="weather" placeholder="Optional"></label>
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="progressForm.invalid">Save Daily Report</button>
+        </form>
+      </article>
+
+      <article class="card history-card">
+        <div class="card-title"><div><h2>Milestone & Activity Log</h2><p>Recent site activity, completion and delay tracking.</p></div><span class="tag">Live</span></div>
+        <div class="empty-state" *ngIf="!entries.length">No reports yet. Submit the first daily progress report.</div>
+        <article class="entry-card" *ngFor="let entry of entries">
+          <div class="entry-top"><div><h3>{{ entry.projectName }}</h3><span>{{ entry.date }} · {{ entry.engineerName }}</span></div><b class="status" [class.done]="entry.progress >= 100" [class.delay]="!!entry.issues">{{ status(entry.progress, entry.issues) }}</b></div>
+          <div class="category">Site Activity</div>
+          <p>{{ entry.workCompleted }}</p>
+          <div class="progress-line"><span [style.width.%]="entry.progress"></span></div><small>{{ entry.progress }}% complete</small>
+          <div class="issue" *ngIf="entry.issues"><b>Delay / Issue:</b> {{ entry.issues }}</div>
+          <div class="mini-grid"><span *ngIf="entry.tasks"><b>Tasks:</b> {{ entry.tasks }}</span><span *ngIf="entry.nextPlan"><b>Next:</b> {{ entry.nextPlan }}</span></div>
+        </article>
+      </article>
+    </section>
+  </main>
+</div>

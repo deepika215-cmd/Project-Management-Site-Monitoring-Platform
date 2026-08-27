@@ -1,0 +1,57 @@
+<div class="page-container"><app-sidebar active="reports"></app-sidebar>
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Reports & Documentation</h1>
+                <p>Manage report records using the existing report API.</p>
+            </div><button class="primary" (click)="openCreate()">+ New Report</button>
+        </header>
+        <div class="error" *ngIf="error">{{ error }}</div>
+        <div class="loading" *ngIf="loading">Loading reports...</div>
+        <section class="form-card" *ngIf="showForm">
+            <h2>{{ editingId ? 'Edit Report' : 'Create Report' }}</h2>
+            <div class="form-grid"><label>Title<input [(ngModel)]="form.title" /></label><label>Type<select
+                        [(ngModel)]="form.report_type">
+                        <option>Project Progress</option>
+                        <option>Resource Utilization</option>
+                        <option>Budget</option>
+                        <option>Workforce</option>
+                        <option>Procurement</option>
+                    </select></label><label>Status<select [(ngModel)]="form.status">
+                        <option>Draft</option>
+                        <option>Generated</option>
+                        <option>Published</option>
+                    </select></label><label class="wide">Description<textarea rows="4"
+                        [(ngModel)]="form.description"></textarea></label></div>
+            <!-- <div class="actions"><button class="primary" (click)="save()" [disabled]="saving">{{ saving ? 'Saving...' :
+                    'Save' }}</button><button (click)="cancel()">Cancel</button></div> -->
+            <button type="button" class="primary" (click)="save()" [disabled]="saving">
+                {{ saving ? 'Saving...' : 'Save' }}
+            </button>
+
+            <button type="button" (click)="cancel()">Cancel</button>
+        </section>
+        <section class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let report of reports">
+                        <td>{{ report.title }}</td>
+                        <td>{{ report.report_type || '—' }}</td>
+                        <td>{{ report.status || '—' }}</td>
+                        <td><button (click)="edit(report)">Edit</button><button class="danger-btn"
+                                (click)="remove(report)">Delete</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p *ngIf="!loading && !reports.length">No reports found.</p>
+        </section>
+    </main>
+</div>

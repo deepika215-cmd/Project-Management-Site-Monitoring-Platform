@@ -29,3 +29,9 @@ class Project(Base):
     )
 
     manager = relationship("User")
+
+    milestones = relationship(
+        "ProjectMilestone",
+        back_populates="project",
+        cascade="all, delete-orphan"
+    )
