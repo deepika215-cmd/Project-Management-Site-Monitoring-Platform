@@ -1,0 +1,285 @@
+<div class="details-page">
+
+  <div class="details-container">
+
+    <!-- BACK -->
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()">
+
+      ← Back to Notifications
+
+    </button>
+
+
+    <!-- LOADING -->
+
+    <div
+      class="loading"
+      *ngIf="loading">
+
+      <div class="loader"></div>
+
+      <p>
+        Loading notification...
+      </p>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    <div
+      class="error"
+      *ngIf="!loading && error">
+
+      <h2>
+        Unable to load notification
+      </h2>
+
+      <p>
+        {{ error }}
+      </p>
+
+      <button
+        type="button"
+        (click)="goBack()">
+
+        Back to Notifications
+
+      </button>
+
+    </div>
+
+
+    <!-- DETAILS -->
+
+    <article
+      class="notification-details"
+      *ngIf="!loading && notification">
+
+      <!-- HEADER -->
+
+      <div class="details-header">
+
+        <div class="large-icon">
+
+          <span
+            *ngIf="getType() === 'PROJECT'">
+            🏗️
+          </span>
+
+          <span
+            *ngIf="getType() === 'TASK'">
+            📋
+          </span>
+
+          <span
+            *ngIf="getType() === 'PROCUREMENT'">
+            📦
+          </span>
+
+          <span
+            *ngIf="getType() === 'ATTENDANCE'">
+            👷
+          </span>
+
+          <span
+            *ngIf="getType() === 'DEADLINE'">
+            ⏰
+          </span>
+
+          <span
+            *ngIf="getType() === 'SYSTEM'">
+            ⚙️
+          </span>
+
+          <span
+            *ngIf="
+              getType() !== 'PROJECT' &&
+              getType() !== 'TASK' &&
+              getType() !== 'PROCUREMENT' &&
+              getType() !== 'ATTENDANCE' &&
+              getType() !== 'DEADLINE' &&
+              getType() !== 'SYSTEM'
+            ">
+
+            🔔
+
+          </span>
+
+        </div>
+
+        <div class="header-info">
+
+          <span class="type">
+            {{ getType() }}
+          </span>
+
+          <h1>
+            {{ getTitle() }}
+          </h1>
+
+          <p class="date">
+            🕒 {{ getDate() }}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- STATUS -->
+
+      <div class="status-row">
+
+        <span
+          class="status unread"
+          *ngIf="!isRead()">
+
+          ● Unread
+
+        </span>
+
+        <span
+          class="status read"
+          *ngIf="isRead()">
+
+          ✓ Read
+
+        </span>
+
+      </div>
+
+
+      <!-- MESSAGE -->
+
+      <div class="message-section">
+
+        <h2>
+          Notification
+        </h2>
+
+        <p>
+          {{ getMessage() }}
+        </p>
+
+      </div>
+
+
+      <!-- RELATED -->
+
+      <div
+        class="related-section"
+        *ngIf="
+          notification.project_id ||
+          notification.task_id ||
+          notification['milestone_id'] ||
+          notification['action_url'] ||
+          notification['link']
+        ">
+
+        <h2>
+          Related Information
+        </h2>
+
+
+        <!-- PROJECT -->
+
+        <p
+          *ngIf="notification.project_id">
+
+          Project ID:
+
+          <strong>
+            {{ notification.project_id }}
+          </strong>
+
+        </p>
+
+
+        <!-- TASK -->
+
+        <p
+          *ngIf="notification.task_id">
+
+          Task ID:
+
+          <strong>
+            {{ notification.task_id }}
+          </strong>
+
+        </p>
+
+
+        <!-- MILESTONE -->
+
+        <p
+          *ngIf="notification['milestone_id']">
+
+          Milestone ID:
+
+          <strong>
+            {{ notification['milestone_id'] }}
+          </strong>
+
+        </p>
+
+
+        <!-- BUTTON -->
+
+        <button
+          type="button"
+          class="related-button"
+          (click)="openRelatedInformation()">
+
+          View Related Information →
+
+        </button>
+
+      </div>
+
+
+      <!-- ACTIONS -->
+
+      <div class="details-actions">
+
+        <button
+          type="button"
+          class="secondary"
+          (click)="goBack()">
+
+          ← Back
+
+        </button>
+
+
+        <button
+          type="button"
+          class="secondary"
+          *ngIf="!isRead()"
+          (click)="markAsRead()">
+
+          ✓ Mark as Read
+
+        </button>
+
+
+        <button
+          type="button"
+          class="secondary"
+          *ngIf="isRead()"
+          (click)="markAsUnread()">
+
+          Mark as Unread
+
+        </button>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</div>

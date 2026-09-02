@@ -1,0 +1,923 @@
+<div class="page-container">
+
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
+    <app-sidebar active="procurement"></app-sidebar>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="main-content">
+
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+
+        <header class="page-header">
+
+            <div>
+
+                <h1>
+                    Vendor Management
+                </h1>
+
+                <p>
+                    Manage vendors and suppliers for construction procurement.
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="primary"
+                (click)="openCreate()"
+                [disabled]="saving">
+
+                + Add Vendor
+
+            </button>
+
+        </header>
+
+
+
+        <!-- =====================================================
+             STATISTICS
+        ====================================================== -->
+
+        <section class="stats-grid">
+
+
+            <!-- TOTAL VENDORS -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon blue">
+                    🏢
+                </div>
+
+                <div>
+
+                    <span>
+                        Total Vendors
+                    </span>
+
+                    <strong>
+                        {{ totalVendors }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ACTIVE VENDORS -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon green">
+                    ✓
+                </div>
+
+                <div>
+
+                    <span>
+                        Active Vendors
+                    </span>
+
+                    <strong>
+                        {{ activeVendors }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- INACTIVE VENDORS -->
+
+            <div class="stat-card">
+
+                <div class="stat-icon orange">
+                    !
+                </div>
+
+                <div>
+
+                    <span>
+                        Inactive Vendors
+                    </span>
+
+                    <strong>
+                        {{ inactiveVendors }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             SEARCH / FILTERS
+        ====================================================== -->
+
+        <section class="filter-card">
+
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <span>
+                    🔍
+                </span>
+
+                <input
+                    type="text"
+                    placeholder="Search vendor, contact, email or product..."
+                    [(ngModel)]="searchText"
+                    (input)="filterVendors()"
+                />
+
+            </div>
+
+
+
+            <!-- CATEGORY FILTER -->
+
+            <select
+                [(ngModel)]="selectedCategory"
+                (change)="filterVendors()">
+
+                <option value="All">
+                    All Categories
+                </option>
+
+                <option value="Raw Materials">
+                    Raw Materials
+                </option>
+
+                <option value="Equipment">
+                    Equipment
+                </option>
+
+                <option value="Machinery">
+                    Machinery
+                </option>
+
+                <option value="Safety Equipment">
+                    Safety Equipment
+                </option>
+
+                <option value="Office Supplies">
+                    Office Supplies
+                </option>
+
+            </select>
+
+
+
+            <!-- STATUS FILTER -->
+
+            <select
+                [(ngModel)]="selectedStatus"
+                (change)="filterVendors()">
+
+                <option value="All">
+                    All Status
+                </option>
+
+                <option value="Active">
+                    Active
+                </option>
+
+                <option value="Inactive">
+                    Inactive
+                </option>
+
+            </select>
+
+
+
+            <!-- REFRESH -->
+
+            <button
+                type="button"
+                class="refresh-btn"
+                (click)="refresh()"
+                [disabled]="loading">
+
+                {{ loading ? 'Loading...' : '↻ Refresh' }}
+
+            </button>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             ADD / EDIT VENDOR FORM
+        ====================================================== -->
+
+        <section
+            class="form-card"
+            *ngIf="showForm">
+
+
+            <!-- FORM HEADER -->
+
+            <div class="form-title">
+
+                <div>
+
+                    <h2>
+
+                        {{
+                            editingId !== null
+                                ? 'Edit Vendor'
+                                : 'Add New Vendor'
+                        }}
+
+                    </h2>
+
+                    <p>
+                        Enter complete vendor information.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="close-btn"
+                    (click)="closeForm()"
+                    [disabled]="saving">
+
+                    ×
+
+                </button>
+
+            </div>
+
+
+
+            <!-- =================================================
+                 FORM GRID
+            ================================================== -->
+
+            <div class="form-grid">
+
+
+                <!-- =================================================
+                     VENDOR NAME
+                ================================================== -->
+
+                <label>
+
+                    Vendor Name *
+
+                    <input
+                        type="text"
+                        [(ngModel)]="form.vendor_name"
+                        placeholder="Enter vendor name"
+                        [disabled]="saving"
+                    />
+
+                </label>
+
+
+
+                <!-- =================================================
+                     CONTACT PERSON
+                ================================================== -->
+
+                <label>
+
+                    Contact Person *
+
+                    <input
+                        type="text"
+                        [(ngModel)]="form.contact_person"
+                        placeholder="Enter contact person"
+                        [disabled]="saving"
+                    />
+
+                </label>
+
+
+
+                <!-- =================================================
+                     CONTACT NUMBER
+                ================================================== -->
+
+                <label>
+
+                    Contact Number *
+
+                    <input
+                        type="tel"
+                        [(ngModel)]="form.contact_number"
+                        placeholder="Enter contact number"
+                        [disabled]="saving"
+                    />
+
+                </label>
+
+
+
+                <!-- =================================================
+                     EMAIL
+                ================================================== -->
+
+                <label>
+
+                    Email *
+
+                    <input
+                        type="email"
+                        [(ngModel)]="form.email"
+                        placeholder="Enter email"
+                        [disabled]="saving"
+                    />
+
+                </label>
+
+
+
+                <!-- =================================================
+                     VENDOR CATEGORY
+                     Backend field:
+                     vendor_category
+                ================================================== -->
+
+                <label>
+
+                    Vendor Category *
+
+                    <select
+                        [(ngModel)]="form.vendor_category"
+                        [disabled]="saving">
+
+                        <option value="Raw Materials">
+                            Raw Materials
+                        </option>
+
+                        <option value="Equipment">
+                            Equipment
+                        </option>
+
+                        <option value="Machinery">
+                            Machinery
+                        </option>
+
+                        <option value="Safety Equipment">
+                            Safety Equipment
+                        </option>
+
+                        <option value="Office Supplies">
+                            Office Supplies
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+
+                <!-- =================================================
+                     STATUS
+                ================================================== -->
+
+                <label>
+
+                    Vendor Status *
+
+                    <select
+                        [(ngModel)]="form.status"
+                        [disabled]="saving">
+
+                        <option value="Active">
+                            Active
+                        </option>
+
+                        <option value="Inactive">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+
+                <!-- =================================================
+                     ADDRESS
+                ================================================== -->
+
+                <label class="full-width">
+
+                    Address *
+
+                    <textarea
+                        rows="3"
+                        [(ngModel)]="form.address"
+                        placeholder="Enter vendor address"
+                        [disabled]="saving"></textarea>
+
+                </label>
+
+
+
+                <!-- =================================================
+                     PRODUCTS / SERVICES
+                     Backend field:
+                     products_services
+                ================================================== -->
+
+                <label class="full-width">
+
+                    Products / Services Supplied *
+
+                    <textarea
+                        rows="3"
+                        [(ngModel)]="form.products_services"
+                        placeholder="Example: Cement, Steel, Bricks"
+                        [disabled]="saving"></textarea>
+
+                </label>
+
+
+            </div>
+
+
+
+            <!-- =====================================================
+                 FORM ACTIONS
+            ====================================================== -->
+
+            <div class="actions">
+
+
+                <!-- SAVE / UPDATE -->
+
+                <button
+                    type="button"
+                    class="primary"
+                    (click)="saveVendor()"
+                    [disabled]="saving">
+
+                    {{
+                        saving
+                            ? 'Saving...'
+                            : (
+                                editingId !== null
+                                    ? 'Update Vendor'
+                                    : 'Save Vendor'
+                            )
+                    }}
+
+                </button>
+
+
+
+                <!-- CANCEL -->
+
+                <button
+                    type="button"
+                    class="cancel-btn"
+                    (click)="closeForm()"
+                    [disabled]="saving">
+
+                    Cancel
+
+                </button>
+
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =====================================================
+             VENDOR TABLE
+        ====================================================== -->
+
+        <section class="table-card">
+
+
+            <!-- TABLE HEADER -->
+
+            <div class="table-header">
+
+                <div>
+
+                    <h2>
+                        All Vendors
+                    </h2>
+
+                    <p>
+                        Centralized vendor and supplier database.
+                    </p>
+
+                </div>
+
+
+                <span class="record-count">
+
+                    {{ filteredVendors.length }} Vendors
+
+                </span>
+
+            </div>
+
+
+
+            <!-- =====================================================
+                 LOADING MESSAGE
+            ====================================================== -->
+
+            <div
+                class="empty-state"
+                *ngIf="loading && vendors.length === 0">
+
+                <div class="empty-icon">
+                    ⏳
+                </div>
+
+                <h3>
+                    Loading vendors...
+                </h3>
+
+                <p>
+                    Please wait while vendors are loaded from database.
+                </p>
+
+            </div>
+
+
+
+            <!-- =====================================================
+                 TABLE
+            ====================================================== -->
+
+            <div
+                class="table-wrap"
+                *ngIf="!loading || vendors.length > 0">
+
+                <table>
+
+
+                    <!-- =================================================
+                         TABLE HEADER
+                    ================================================== -->
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                ID
+                            </th>
+
+                            <th>
+                                Vendor
+                            </th>
+
+                            <th>
+                                Contact
+                            </th>
+
+                            <th>
+                                Contact Number
+                            </th>
+
+                            <th>
+                                Category
+                            </th>
+
+                            <th>
+                                Products / Services
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                            <th>
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+
+                    <!-- =================================================
+                         TABLE BODY
+                    ================================================== -->
+
+                    <tbody>
+
+
+                        <!-- =================================================
+                             VENDOR ROW
+                        ================================================== -->
+
+                        <tr
+                            *ngFor="let vendor of filteredVendors">
+
+
+                            <!-- ID -->
+
+                            <td>
+
+                                <span class="vendor-id">
+
+                                    #{{ vendor.id }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- VENDOR -->
+
+                            <td>
+
+                                <div class="vendor-info">
+
+
+                                    <!-- AVATAR -->
+
+                                    <div class="vendor-avatar">
+
+                                        {{
+                                            vendor.vendor_name
+                                                ? vendor.vendor_name
+                                                    .charAt(0)
+                                                    .toUpperCase()
+                                                : 'V'
+                                        }}
+
+                                    </div>
+
+
+
+                                    <!-- VENDOR DETAILS -->
+
+                                    <div>
+
+                                        <strong>
+                                            {{ vendor.vendor_name }}
+                                        </strong>
+
+                                        <small>
+                                            {{ vendor.email }}
+                                        </small>
+
+                                    </div>
+
+
+                                </div>
+
+                            </td>
+
+
+
+                            <!-- CONTACT PERSON -->
+
+                            <td>
+
+                                {{ vendor.contact_person }}
+
+                            </td>
+
+
+
+                            <!-- CONTACT NUMBER -->
+
+                            <td>
+
+                                {{ vendor.contact_number }}
+
+                            </td>
+
+
+
+                            <!-- =================================================
+                                 CATEGORY
+                                 Backend:
+                                 vendor_category
+                            ================================================== -->
+
+                            <td>
+
+                                <span class="category-badge">
+
+                                    {{ vendor.vendor_category }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- =================================================
+                                 PRODUCTS / SERVICES
+                                 Backend:
+                                 products_services
+                            ================================================== -->
+
+                            <td>
+
+                                <span class="products">
+
+                                    {{ vendor.products_services }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- STATUS -->
+
+                            <td>
+
+                                <span
+                                    class="status-badge"
+                                    [class.active]="vendor.status === 'Active'"
+                                    [class.inactive]="vendor.status === 'Inactive'">
+
+                                    <span class="status-dot"></span>
+
+                                    {{ vendor.status }}
+
+                                </span>
+
+                            </td>
+
+
+
+                            <!-- =================================================
+                                 ACTIONS
+                            ================================================== -->
+
+                            <td>
+
+                                <div class="action-buttons">
+
+
+                                    <!-- EDIT -->
+
+                                    <button
+                                        type="button"
+                                        class="edit-btn"
+                                        title="Edit"
+                                        (click)="editVendor(vendor)"
+                                        [disabled]="saving">
+
+                                        Edit
+
+                                    </button>
+
+
+
+                                    <!-- ENABLE / DISABLE -->
+
+                                    <button
+                                        type="button"
+                                        class="status-btn"
+                                        title="Change status"
+                                        (click)="toggleStatus(vendor)"
+                                        [disabled]="
+                                            saving ||
+                                            deletingId === vendor.id
+                                        ">
+
+                                        {{
+                                            vendor.status === 'Active'
+                                                ? 'Disable'
+                                                : 'Activate'
+                                        }}
+
+                                    </button>
+
+
+
+                                    <!-- DELETE -->
+
+                                    <button
+                                        type="button"
+                                        class="delete-btn"
+                                        title="Delete"
+                                        (click)="deleteVendor(vendor)"
+                                        [disabled]="
+                                            deletingId === vendor.id
+                                        ">
+
+                                        {{
+                                            deletingId === vendor.id
+                                                ? 'Deleting...'
+                                                : 'Delete'
+                                        }}
+
+                                    </button>
+
+
+                                </div>
+
+                            </td>
+
+
+                        </tr>
+
+
+
+                        <!-- =================================================
+                             EMPTY STATE
+                        ================================================== -->
+
+                        <tr
+                            *ngIf="
+                                !loading &&
+                                filteredVendors.length === 0
+                            ">
+
+                            <td
+                                colspan="8"
+                                class="empty-state">
+
+
+                                <div class="empty-icon">
+                                    🏢
+                                </div>
+
+
+                                <h3>
+                                    No vendors found
+                                </h3>
+
+
+                                <p
+                                    *ngIf="vendors.length > 0">
+
+                                    Try changing your search or filter.
+
+                                </p>
+
+
+                                <p
+                                    *ngIf="vendors.length === 0">
+
+                                    No vendors are available in the database.
+
+                                </p>
+
+
+                                <button
+                                    type="button"
+                                    class="primary"
+                                    (click)="openCreate()">
+
+                                    + Add Vendor
+
+                                </button>
+
+
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+
+
+                </table>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+</div>

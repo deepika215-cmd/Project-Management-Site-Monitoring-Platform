@@ -1,0 +1,1068 @@
+<div class="page-layout">
+
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
+  <app-sidebar></app-sidebar>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- ===================================================
+         HEADER
+         =================================================== -->
+
+    <div class="page-header">
+
+      <div>
+
+        <h1>
+          Purchase Orders
+        </h1>
+
+        <p>
+          Manage purchase orders, suppliers, materials and deliveries.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="primary-btn"
+        (click)="openCreate()"
+        *ngIf="!showForm">
+
+        + Create Purchase Order
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         SUCCESS
+         =================================================== -->
+
+    <div
+      class="alert success"
+      *ngIf="success">
+
+      ✓ {{ success }}
+
+    </div>
+
+
+    <!-- ===================================================
+         ERROR
+         =================================================== -->
+
+    <div
+      class="alert error"
+      *ngIf="error">
+
+      ⚠ {{ error }}
+
+    </div>
+
+
+    <!-- ===================================================
+         FORM
+         =================================================== -->
+
+    <section
+      class="form-card"
+      *ngIf="showForm">
+
+
+      <!-- FORM HEADER -->
+
+      <div class="form-header">
+
+        <div>
+
+          <h2>
+
+            {{
+              editingId !== null
+                ? 'Edit Purchase Order'
+                : 'Create Purchase Order'
+            }}
+
+          </h2>
+
+          <p>
+            Enter purchase order details below.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="cancel()"
+          [disabled]="saving">
+
+          × Close
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           FORM
+           ================================================= -->
+
+      <form
+        #purchaseForm="ngForm"
+        (ngSubmit)="save()">
+
+
+        <div class="form-grid">
+
+
+          <!-- =================================================
+               PURCHASE ORDER ID
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Purchase Order ID
+              <span>*</span>
+            </label>
+
+            <input
+              type="text"
+              name="purchase_order_id"
+              [(ngModel)]="form.purchase_order_id"
+              placeholder="PO-20260901-0001"
+              maxlength="100"
+              [readonly]="editingId !== null"
+              required>
+
+          </div>
+
+
+          <!-- =================================================
+               PROCUREMENT REQUEST
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Procurement Request
+              <span>*</span>
+            </label>
+
+            <select
+              name="procurement_request_id"
+              [(ngModel)]="form.procurement_request_id"
+              (change)="onProcurementRequestChange()"
+              required>
+
+              <option
+                [ngValue]="0">
+
+                Select Procurement Request
+
+              </option>
+
+
+              <option
+                *ngFor="let request of procurementRequests"
+                [ngValue]="request.id">
+
+                {{
+                  request.request_id ||
+                  ('Request #' + request.id)
+                }}
+
+                -
+                {{
+                  request.item_name ||
+                  'Material Request'
+                }}
+
+              </option>
+
+            </select>
+
+
+            <small
+              *ngIf="loadingRequests">
+
+              Loading procurement requests...
+
+            </small>
+
+
+            <small
+              class="field-hint"
+              *ngIf="
+                !loadingRequests &&
+                procurementRequests.length === 0
+              ">
+
+              No procurement requests available.
+
+            </small>
+
+          </div>
+
+
+          <!-- =================================================
+               VENDOR
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Vendor
+              <span>*</span>
+            </label>
+
+            <select
+              name="vendor_id"
+              [(ngModel)]="form.vendor_id"
+              required>
+
+              <option
+                [ngValue]="0">
+
+                Select Vendor
+
+              </option>
+
+
+              <option
+                *ngFor="let vendor of vendors"
+                [ngValue]="vendor.id">
+
+                {{
+                  vendor.vendor_name ||
+                  vendor.name ||
+                  vendor.company_name ||
+                  ('Vendor #' + vendor.id)
+                }}
+
+              </option>
+
+            </select>
+
+
+            <small
+              *ngIf="loadingVendors">
+
+              Loading vendors...
+
+            </small>
+
+          </div>
+
+
+          <!-- =================================================
+               PROJECT
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Project
+              <span>*</span>
+            </label>
+
+            <select
+              name="project_id"
+              [(ngModel)]="form.project_id"
+              required>
+
+              <option
+                [ngValue]="0">
+
+                Select Project
+
+              </option>
+
+
+              <option
+                *ngFor="let project of projects"
+                [ngValue]="project.id">
+
+                {{
+                  project.project_name ||
+                  project.name ||
+                  ('Project #' + project.id)
+                }}
+
+              </option>
+
+            </select>
+
+
+            <small
+              *ngIf="loadingProjects">
+
+              Loading projects...
+
+            </small>
+
+          </div>
+
+
+          <!-- =================================================
+               ORDER DATE
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Order Date
+              <span>*</span>
+            </label>
+
+            <input
+              type="date"
+              name="order_date"
+              [(ngModel)]="form.order_date"
+              required>
+
+          </div>
+
+
+          <!-- =================================================
+               EXPECTED DELIVERY DATE
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Expected Delivery Date
+              <span>*</span>
+            </label>
+
+            <input
+              type="date"
+              name="expected_delivery_date"
+              [(ngModel)]="form.expected_delivery_date"
+              required>
+
+          </div>
+
+
+          <!-- =================================================
+               QUANTITY
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Quantity
+              <span>*</span>
+            </label>
+
+            <input
+              type="number"
+              name="quantity"
+              [(ngModel)]="form.quantity"
+              (input)="calculateTotal()"
+              min="1"
+              step="1"
+              required>
+
+          </div>
+
+
+          <!-- =================================================
+               UNIT PRICE
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Unit Price
+              <span>*</span>
+            </label>
+
+            <input
+              type="number"
+              name="unit_price"
+              [(ngModel)]="form.unit_price"
+              (input)="calculateTotal()"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              required>
+
+          </div>
+
+
+          <!-- =================================================
+               TAXES
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Taxes
+            </label>
+
+            <input
+              type="number"
+              name="taxes"
+              [(ngModel)]="form.taxes"
+              (input)="calculateTotal()"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+
+          </div>
+
+
+          <!-- =================================================
+               ADDITIONAL CHARGES
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Additional Charges
+            </label>
+
+            <input
+              type="number"
+              name="additional_charges"
+              [(ngModel)]="form.additional_charges"
+              (input)="calculateTotal()"
+              min="0"
+              step="0.01"
+              placeholder="0.00">
+
+          </div>
+
+
+          <!-- =================================================
+               TOTAL AMOUNT
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Total Amount
+              <span>*</span>
+            </label>
+
+            <input
+              type="number"
+              name="total_amount"
+              [ngModel]="form.total_amount"
+              readonly>
+
+          </div>
+
+
+          <!-- =================================================
+               STATUS
+               ================================================= -->
+
+          <div class="form-group">
+
+            <label>
+              Status
+            </label>
+
+            <select
+              name="status"
+              [(ngModel)]="form.status">
+
+              <option value="Processing">
+                Processing
+              </option>
+
+              <option value="Pending">
+                Pending
+              </option>
+
+              <option value="Approved">
+                Approved
+              </option>
+
+              <option value="Completed">
+                Completed
+              </option>
+
+              <option value="Rejected">
+                Rejected
+              </option>
+
+              <option value="Cancelled">
+                Cancelled
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- =================================================
+               REMARKS
+               ================================================= -->
+
+          <div class="form-group full-width">
+
+            <label>
+              Remarks
+            </label>
+
+            <textarea
+              name="remarks"
+              [(ngModel)]="form.remarks"
+              rows="4"
+              maxlength="500"
+              placeholder="Additional purchase order information...">
+            </textarea>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORM ACTIONS
+             ================================================= -->
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="secondary-btn"
+            (click)="cancel()"
+            [disabled]="saving">
+
+            Cancel
+
+          </button>
+
+
+          <button
+            type="submit"
+            class="primary-btn"
+            [disabled]="saving || purchaseForm.invalid">
+
+            {{
+              saving
+                ? 'Saving...'
+                : (
+                    editingId !== null
+                      ? 'Update Purchase Order'
+                      : 'Create Purchase Order'
+                  )
+            }}
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- ===================================================
+         LOADING
+         =================================================== -->
+
+    <div
+      class="loading"
+      *ngIf="loading">
+
+      Loading purchase orders...
+
+    </div>
+
+
+    <!-- ===================================================
+         SUMMARY
+         =================================================== -->
+
+    <div
+      class="summary-grid"
+      *ngIf="!loading">
+
+
+      <div class="summary-card">
+
+        <span>
+          Total Orders
+        </span>
+
+        <strong>
+          {{ totalOrders }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Processing
+        </span>
+
+        <strong>
+          {{ processingOrders }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Approved
+        </span>
+
+        <strong>
+          {{ approvedOrders }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Completed
+        </span>
+
+        <strong>
+          {{ completedOrders }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLE
+         =================================================== -->
+
+    <section
+      class="table-card"
+      *ngIf="!loading">
+
+
+      <!-- TABLE HEADER -->
+
+      <div class="table-header">
+
+        <div>
+
+          <h2>
+            Purchase Order List
+          </h2>
+
+          <span>
+            {{ orders.length }} order(s)
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="refresh()"
+          [disabled]="loading">
+
+          ↻ Refresh
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           TABLE
+           ================================================= -->
+
+      <div
+        class="table-wrapper"
+        *ngIf="orders.length > 0">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                #
+              </th>
+
+              <th>
+                PO ID
+              </th>
+
+              <th>
+                Procurement Request
+              </th>
+
+              <th>
+                Project
+              </th>
+
+              <th>
+                Vendor
+              </th>
+
+              <th>
+                Quantity
+              </th>
+
+              <th>
+                Unit Price
+              </th>
+
+              <th>
+                Taxes
+              </th>
+
+              <th>
+                Additional Charges
+              </th>
+
+              <th>
+                Total Amount
+              </th>
+
+              <th>
+                Order Date
+              </th>
+
+              <th>
+                Delivery Date
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let order of orders;
+                let i = index
+              ">
+
+
+              <!-- NUMBER -->
+
+              <td>
+                {{ i + 1 }}
+              </td>
+
+
+              <!-- PO ID -->
+
+              <td>
+
+                <strong>
+                  {{
+                    order.purchase_order_id ||
+                    ('PO-' + order.id)
+                  }}
+                </strong>
+
+              </td>
+
+
+              <!-- REQUEST -->
+
+              <td>
+
+                {{
+                  getProcurementRequestId(
+                    order.procurement_request_id
+                  )
+                }}
+
+              </td>
+
+
+              <!-- PROJECT -->
+
+              <td>
+
+                {{
+                  getProjectName(
+                    order.project_id
+                  )
+                }}
+
+              </td>
+
+
+              <!-- VENDOR -->
+
+              <td>
+
+                {{
+                  getVendorName(
+                    order.vendor_id
+                  )
+                }}
+
+              </td>
+
+
+              <!-- QUANTITY -->
+
+              <td>
+
+                {{
+                  order.quantity || 0
+                }}
+
+              </td>
+
+
+              <!-- UNIT PRICE -->
+
+              <td>
+
+                ₹{{
+                  (order.unit_price || 0)
+                    | number:'1.2-2'
+                }}
+
+              </td>
+
+
+              <!-- TAXES -->
+
+              <td>
+
+                ₹{{
+                  (order.taxes || 0)
+                    | number:'1.2-2'
+                }}
+
+              </td>
+
+
+              <!-- ADDITIONAL CHARGES -->
+
+              <td>
+
+                ₹{{
+                  (order.additional_charges || 0)
+                    | number:'1.2-2'
+                }}
+
+              </td>
+
+
+              <!-- TOTAL -->
+
+              <td>
+
+                <strong>
+
+                  ₹{{
+                    getTotal(order)
+                      | number:'1.2-2'
+                  }}
+
+                </strong>
+
+              </td>
+
+
+              <!-- ORDER DATE -->
+
+              <td>
+
+                {{
+                  order.order_date || '-'
+                }}
+
+              </td>
+
+
+              <!-- DELIVERY DATE -->
+
+              <td>
+
+                {{
+                  order.expected_delivery_date || '-'
+                }}
+
+              </td>
+
+
+              <!-- STATUS -->
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="
+                    getStatusClass(
+                      order.status
+                    )
+                  ">
+
+                  {{
+                    order.status ||
+                    'Processing'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- ACTIONS -->
+
+              <td>
+
+                <div class="actions">
+
+
+                  <!-- EDIT -->
+
+                  <button
+                    type="button"
+                    class="action-btn edit"
+                    (click)="edit(order)"
+                    [disabled]="deleting">
+
+                    Edit
+
+                  </button>
+
+
+                  <!-- APPROVE -->
+
+                  <button
+                    type="button"
+                    class="action-btn approve"
+                    *ngIf="
+                      (
+                        order.status ||
+                        ''
+                      ).toLowerCase() === 'pending'
+                    "
+                    (click)="approve(order)"
+                    [disabled]="deleting">
+
+                    ✓
+
+                  </button>
+
+
+                  <!-- REJECT -->
+
+                  <button
+                    type="button"
+                    class="action-btn reject"
+                    *ngIf="
+                      (
+                        order.status ||
+                        ''
+                      ).toLowerCase() === 'pending'
+                    "
+                    (click)="reject(order)"
+                    [disabled]="deleting">
+
+                    ✕
+
+                  </button>
+
+
+                  <!-- DELETE -->
+
+                  <button
+                    type="button"
+                    class="action-btn delete"
+                    (click)="remove(order)"
+                    [disabled]="deleting">
+
+                    {{
+                      deleting
+                        ? 'Deleting...'
+                        : 'Delete'
+                    }}
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- =================================================
+           EMPTY STATE
+           ================================================= -->
+
+      <div
+        class="empty-state"
+        *ngIf="orders.length === 0">
+
+        <div class="empty-icon">
+          📦
+        </div>
+
+        <h3>
+          No Purchase Orders
+        </h3>
+
+        <p>
+          Create your first purchase order to get started.
+        </p>
+
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="openCreate()">
+
+          + Create Purchase Order
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

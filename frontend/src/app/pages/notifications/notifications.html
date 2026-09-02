@@ -1,0 +1,309 @@
+<div class="notifications-page">
+
+  <app-sidebar active="notifications"></app-sidebar>
+
+  <main class="main-content">
+
+    <!-- HEADER -->
+    <header class="notifications-header">
+
+      <div class="header-text">
+
+        <p class="breadcrumb">
+          Dashboard / Notifications
+        </p>
+
+        <h1>
+          Notifications
+        </h1>
+
+        <p class="subtitle">
+          Stay updated with important project, task,
+          procurement, attendance and system activities.
+        </p>
+
+      </div>
+
+      <div class="header-actions">
+
+        <div class="unread-summary">
+
+          <span class="notification-bell">
+            🔔
+          </span>
+
+          <span>
+            {{ unreadCount }} unread
+          </span>
+
+        </div>
+
+        <button
+          type="button"
+          class="refresh-btn"
+          (click)="refresh()"
+          [disabled]="refreshing">
+
+          {{ refreshing ? 'Refreshing...' : 'Refresh' }}
+
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- ERROR -->
+    <div
+      class="error-message"
+      *ngIf="error">
+
+      {{ error }}
+
+      <button
+        type="button"
+        (click)="loadNotifications()">
+
+        Try Again
+
+      </button>
+
+    </div>
+
+
+    <!-- FILTERS -->
+    <section
+      class="notification-toolbar"
+      *ngIf="!loading">
+
+      <div class="filter-buttons">
+
+        <button
+          type="button"
+          [class.active]="selectedFilter === 'ALL'"
+          (click)="setFilter('ALL')">
+
+          All
+          <span>
+            {{ notifications.length }}
+          </span>
+
+        </button>
+
+        <button
+          type="button"
+          [class.active]="selectedFilter === 'UNREAD'"
+          (click)="setFilter('UNREAD')">
+
+          Unread
+          <span>
+            {{ unreadCount }}
+          </span>
+
+        </button>
+
+        <button
+          type="button"
+          [class.active]="selectedFilter === 'READ'"
+          (click)="setFilter('READ')">
+
+          Read
+          <span>
+            {{ notifications.length - unreadCount }}
+          </span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- LOADING -->
+    <section
+      class="loading-state"
+      *ngIf="loading">
+
+      <div class="loader"></div>
+
+      <p>
+        Loading notifications...
+      </p>
+
+    </section>
+
+
+    <!-- NOTIFICATIONS -->
+    <section
+      class="notifications-list"
+      *ngIf="!loading">
+
+      <!-- EMPTY -->
+      <div
+        class="empty-state"
+        *ngIf="filteredNotifications.length === 0">
+
+        <div class="empty-icon">
+          🔔
+        </div>
+
+        <h2>
+          No notifications
+        </h2>
+
+        <p *ngIf="selectedFilter === 'ALL'">
+          You don't have any notifications yet.
+        </p>
+
+        <p *ngIf="selectedFilter === 'UNREAD'">
+          You have no unread notifications.
+        </p>
+
+        <p *ngIf="selectedFilter === 'READ'">
+          You have no read notifications.
+        </p>
+
+      </div>
+
+
+      <!-- CARD -->
+      <article
+        class="notification-card"
+        *ngFor="
+          let notification of filteredNotifications;
+          trackBy: trackByNotification
+        "
+        [class.unread]="!isRead(notification)"
+        [class.read]="isRead(notification)"
+        (click)="openNotification(notification)">
+
+        <div class="notification-icon">
+
+          <span *ngIf="getType(notification) === 'PROJECT'">
+            🏗️
+          </span>
+
+          <span *ngIf="getType(notification) === 'TASK'">
+            📋
+          </span>
+
+          <span *ngIf="getType(notification) === 'PROCUREMENT'">
+            📦
+          </span>
+
+          <span *ngIf="getType(notification) === 'ATTENDANCE'">
+            👷
+          </span>
+
+          <span *ngIf="getType(notification) === 'DEADLINE'">
+            ⏰
+          </span>
+
+          <span *ngIf="getType(notification) === 'SYSTEM'">
+            ⚙️
+          </span>
+
+          <span
+            *ngIf="
+              getType(notification) !== 'PROJECT' &&
+              getType(notification) !== 'TASK' &&
+              getType(notification) !== 'PROCUREMENT' &&
+              getType(notification) !== 'ATTENDANCE' &&
+              getType(notification) !== 'DEADLINE' &&
+              getType(notification) !== 'SYSTEM'
+            ">
+
+            🔔
+
+          </span>
+
+        </div>
+
+
+        <div class="notification-content">
+
+          <div class="notification-top">
+
+            <div>
+
+              <span class="notification-type">
+                {{ getType(notification) }}
+              </span>
+
+              <h3>
+                {{ getTitle(notification) }}
+              </h3>
+
+            </div>
+
+            <span
+              class="unread-dot"
+              *ngIf="!isRead(notification)">
+            </span>
+
+          </div>
+
+
+          <p class="notification-message">
+            {{ getMessage(notification) }}
+          </p>
+
+
+          <div class="notification-meta">
+
+            <span>
+              🕒 {{ getDate(notification) }}
+            </span>
+
+            <span
+              *ngIf="notification.project_id">
+
+              Project #{{ notification.project_id }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="notification-actions">
+
+          <button
+            type="button"
+            class="view-btn"
+            (click)="openNotification(notification); $event.stopPropagation()">
+
+            View
+
+          </button>
+
+          <button
+            type="button"
+            class="read-btn"
+            *ngIf="!isRead(notification)"
+            (click)="markAsRead($event, notification)">
+
+            Mark read
+
+          </button>
+
+          <button
+            type="button"
+            class="read-btn"
+            *ngIf="isRead(notification)"
+            (click)="markAsUnread($event, notification)">
+
+            Mark unread
+
+          </button>
+
+        </div>
+
+      </article>
+
+    </section>
+
+  </main>
+
+</div>

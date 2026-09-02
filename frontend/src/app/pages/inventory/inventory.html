@@ -1,0 +1,610 @@
+<!-- <div class="page-container"><app-sidebar active="inventory"></app-sidebar>
+    <main class="main-content">
+        <header class="page-header">
+            <div>
+                <h1>Material Inventory</h1>
+                <p>Monitor stock using the existing FastAPI inventory API.</p>
+            </div><button class="create-btn" (click)="showForm=!showForm">+ Add Material</button>
+        </header>
+        <p *ngIf="error" class="error">{{error}}</p>
+        <section class="stats">
+            <div class="stat-card"><span>Total Items</span>
+                <h2>{{items.length}}</h2>
+            </div>
+            <div class="stat-card"><span>Units in Stock</span>
+                <h2>{{availableUnits()}}</h2>
+            </div>
+            <div class="stat-card"><span>Used</span>
+                <h2>{{usedUnits()}}</h2>
+            </div>
+        </section>
+        <section class="card" *ngIf="showForm">
+            <h2>Add Material</h2>
+            <form (ngSubmit)="add()"><input name="material" [(ngModel)]="form.material_name" placeholder="Material name"
+                    required><input name="quantity" type="number" [(ngModel)]="form.quantity" min="0" required><input
+                    name="unit" [(ngModel)]="form.unit" placeholder="Unit" required><input name="supplier"
+                    [(ngModel)]="form.supplier" placeholder="Supplier" required><select name="status"
+                    [(ngModel)]="form.status">
+                    <option>Available</option>
+                    <option>Out of Stock</option>
+                </select><button type="submit">Save</button></form>
+        </section>
+        <section class="card"><input placeholder="Search material or supplier" [(ngModel)]="search" (input)="filter()">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Supplier</th>
+                        <th>Quantity</th>
+                        <th>Used</th>
+                        <th>Available</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let item of filtered">
+                        <td>{{item.material_name}}</td>
+                        <td>{{item.supplier}}</td>
+                        <td>{{item.quantity}} {{item.unit}}</td>
+                        <td>{{item.used}}</td>
+                        <td>{{item.quantity-item.used}}</td>
+                        <td>{{item.status}}</td>
+                        <td><button (click)="use(item)">Use</button><button
+                                (click)="release(item)">Release</button><button (click)="remove(item)">Delete</button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="!filtered.length">
+                        <td colspan="7">No inventory records found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div> -->
+
+
+<div class="page-container">
+
+  <!-- SIDEBAR -->
+  <app-sidebar active="inventory"></app-sidebar>
+
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+
+      <div class="header-text">
+
+        <h1>
+          Material Inventory
+        </h1>
+
+        <p>
+          Monitor construction materials, stock usage and availability.
+        </p>
+
+      </div>
+
+
+      <button
+        class="create-btn"
+        (click)="showForm = !showForm"
+      >
+
+        {{ showForm ? '✕ Close' : '+ Add Material' }}
+
+      </button>
+
+    </header>
+
+
+
+    <!-- ERROR MESSAGE -->
+    <div
+      class="error"
+      *ngIf="error"
+    >
+
+      {{ error }}
+
+    </div>
+
+
+
+    <!-- LOADING -->
+    <div
+      class="loading"
+      *ngIf="loading"
+    >
+
+      Loading inventory...
+
+    </div>
+
+
+
+    <!-- STATISTICS -->
+    <section class="stats">
+
+
+      <!-- TOTAL ITEMS -->
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          📦
+        </div>
+
+        <div>
+
+          <span>
+            Total Items
+          </span>
+
+          <h2>
+            {{ items.length }}
+          </h2>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- AVAILABLE -->
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          📊
+        </div>
+
+        <div>
+
+          <span>
+            Available Units
+          </span>
+
+          <h2>
+            {{ availableUnits() }}
+          </h2>
+
+        </div>
+
+      </div>
+
+
+
+      <!-- USED -->
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          🔧
+        </div>
+
+        <div>
+
+          <span>
+            Used Units
+          </span>
+
+          <h2>
+            {{ usedUnits() }}
+          </h2>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ADD MATERIAL FORM -->
+    <section
+      class="card form-card"
+      *ngIf="showForm"
+    >
+
+      <div class="card-title">
+
+        <div>
+
+          <h2>
+            Add Material
+          </h2>
+
+          <p>
+            Enter new construction material details.
+          </p>
+
+        </div>
+
+      </div>
+
+
+
+      <form
+        (ngSubmit)="add()"
+      >
+
+
+        <!-- MATERIAL NAME -->
+        <div class="form-group">
+
+          <label>
+            Material Name
+          </label>
+
+          <input
+            type="text"
+            name="material"
+            [(ngModel)]="form.material_name"
+            placeholder="e.g. Cement"
+            required
+          >
+
+        </div>
+
+
+
+        <!-- QUANTITY -->
+        <div class="form-group">
+
+          <label>
+            Quantity
+          </label>
+
+          <input
+            type="number"
+            name="quantity"
+            [(ngModel)]="form.quantity"
+            min="0"
+            required
+          >
+
+        </div>
+
+
+
+        <!-- UNIT -->
+        <div class="form-group">
+
+          <label>
+            Unit
+          </label>
+
+          <input
+            type="text"
+            name="unit"
+            [(ngModel)]="form.unit"
+            placeholder="e.g. Bags, Kg, Ton"
+            required
+          >
+
+        </div>
+
+
+
+        <!-- SUPPLIER -->
+        <div class="form-group">
+
+          <label>
+            Supplier
+          </label>
+
+          <input
+            type="text"
+            name="supplier"
+            [(ngModel)]="form.supplier"
+            placeholder="Supplier name"
+            required
+          >
+
+        </div>
+
+
+
+        <!-- BUTTONS -->
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="save-btn"
+            [disabled]="saving"
+          >
+
+            {{ saving ? 'Saving...' : 'Save Material' }}
+
+          </button>
+
+
+          <button
+            type="button"
+            class="cancel-btn"
+            (click)="showForm = false"
+          >
+
+            Cancel
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+
+    <!-- INVENTORY TABLE -->
+    <section class="card inventory-card">
+
+
+      <!-- TABLE HEADER -->
+      <div class="table-header">
+
+        <div>
+
+          <h2>
+            Inventory Records
+          </h2>
+
+          <p>
+            Manage current material stock.
+          </p>
+
+        </div>
+
+
+        <!-- SEARCH -->
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search material or supplier..."
+          [(ngModel)]="search"
+          (input)="filter()"
+        >
+
+      </div>
+
+
+
+      <!-- TABLE -->
+      <div class="table-wrapper">
+
+        <table>
+
+
+          <!-- HEADER -->
+          <thead>
+
+            <tr>
+
+              <th>
+                Material
+              </th>
+
+              <th>
+                Supplier
+              </th>
+
+              <th>
+                Quantity
+              </th>
+
+              <th>
+                Used
+              </th>
+
+              <th>
+                Available
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+
+          <!-- BODY -->
+          <tbody>
+
+
+            <tr
+              *ngFor="let item of filtered"
+            >
+
+
+              <!-- MATERIAL -->
+              <td>
+
+                <div class="material-name">
+
+                  <span class="material-icon">
+                    📦
+                  </span>
+
+                  <strong>
+                    {{ item.material_name }}
+                  </strong>
+
+                </div>
+
+              </td>
+
+
+
+              <!-- SUPPLIER -->
+              <td>
+
+                {{ item.supplier }}
+
+              </td>
+
+
+
+              <!-- QUANTITY -->
+              <td>
+
+                <span class="quantity">
+
+                  {{ item.quantity }}
+
+                  {{ item.unit }}
+
+                </span>
+
+              </td>
+
+
+
+              <!-- USED -->
+              <td>
+
+                {{ item.used || 0 }}
+
+                {{ item.unit }}
+
+              </td>
+
+
+
+              <!-- AVAILABLE -->
+              <td>
+
+                <strong>
+
+                  {{ getAvailable(item) }}
+
+                  {{ item.unit }}
+
+                </strong>
+
+              </td>
+
+
+
+              <!-- STATUS -->
+              <td>
+
+                <span
+                  class="status"
+                  [class.out-stock]="
+                    isOutOfStock(item)
+                  "
+                >
+
+                  {{
+                    isOutOfStock(item)
+                      ? 'Out of Stock'
+                      : 'Available'
+                  }}
+
+                </span>
+
+              </td>
+
+
+
+              <!-- ACTIONS -->
+              <td>
+
+                <div class="actions">
+
+
+                  <!-- USE -->
+                  <button
+                    class="use-btn"
+                    (click)="use(item)"
+                    [disabled]="isOutOfStock(item)"
+                    title="Use inventory"
+                  >
+
+                    Use
+
+                  </button>
+
+
+
+                  <!-- RELEASE -->
+                  <button
+                    class="release-btn"
+                    (click)="release(item)"
+                    [disabled]="!item.used"
+                    title="Release used inventory"
+                  >
+
+                    Release
+
+                  </button>
+
+
+
+                  <!-- DELETE -->
+                  <button
+                    class="delete-btn"
+                    (click)="remove(item)"
+                    title="Delete inventory"
+                  >
+
+                    Delete
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+
+
+            <!-- EMPTY -->
+            <tr
+              *ngIf="!filtered.length && !loading"
+            >
+
+              <td
+                colspan="7"
+                class="empty"
+              >
+
+                <div class="empty-icon">
+                  📦
+                </div>
+
+                <strong>
+                  No inventory records found
+                </strong>
+
+                <p>
+                  Add a material to start managing inventory.
+                </p>
+
+              </td>
+
+            </tr>
+
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

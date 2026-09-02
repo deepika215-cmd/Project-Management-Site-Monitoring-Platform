@@ -1,0 +1,139 @@
+<div class="notification-panel">
+
+  <div class="panel-header">
+
+    <div>
+
+      <h3>
+        Notifications
+      </h3>
+
+      <span *ngIf="unreadCount > 0">
+        {{ unreadCount }} unread
+      </span>
+
+      <span *ngIf="unreadCount === 0">
+        All caught up
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      (click)="openAll()">
+
+      View All
+
+    </button>
+
+  </div>
+
+
+  <div
+    class="panel-loading"
+    *ngIf="loading">
+
+    Loading...
+
+  </div>
+
+
+  <div
+    class="panel-empty"
+    *ngIf="
+      !loading &&
+      recentNotifications.length === 0
+    ">
+
+    <div>
+      🔔
+    </div>
+
+    <p>
+      No notifications
+    </p>
+
+  </div>
+
+
+  <div
+    class="panel-list"
+    *ngIf="
+      !loading &&
+      recentNotifications.length > 0
+    ">
+
+    <article
+      class="panel-item"
+      *ngFor="
+        let notification of recentNotifications;
+        trackBy: trackByNotification
+      "
+      [class.unread]="!isRead(notification)"
+      (click)="openNotification(notification)">
+
+      <div class="item-icon">
+
+        <span *ngIf="getType(notification) === 'PROJECT'">
+          🏗️
+        </span>
+
+        <span *ngIf="getType(notification) === 'TASK'">
+          📋
+        </span>
+
+        <span *ngIf="getType(notification) === 'PROCUREMENT'">
+          📦
+        </span>
+
+        <span *ngIf="getType(notification) === 'ATTENDANCE'">
+          👷
+        </span>
+
+        <span *ngIf="getType(notification) === 'DEADLINE'">
+          ⏰
+        </span>
+
+        <span
+          *ngIf="
+            getType(notification) !== 'PROJECT' &&
+            getType(notification) !== 'TASK' &&
+            getType(notification) !== 'PROCUREMENT' &&
+            getType(notification) !== 'ATTENDANCE' &&
+            getType(notification) !== 'DEADLINE'
+          ">
+
+          🔔
+
+        </span>
+
+      </div>
+
+
+      <div class="item-content">
+
+        <strong>
+          {{ getTitle(notification) }}
+        </strong>
+
+        <p>
+          {{ getMessage(notification) }}
+        </p>
+
+        <small>
+          {{ getDate(notification) }}
+        </small>
+
+      </div>
+
+
+      <span
+        class="unread-indicator"
+        *ngIf="!isRead(notification)">
+      </span>
+
+    </article>
+
+  </div>
+
+</div>

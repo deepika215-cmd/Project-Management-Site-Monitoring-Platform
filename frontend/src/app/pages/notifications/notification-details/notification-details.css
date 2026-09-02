@@ -1,0 +1,155 @@
+.details-page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 32px;
+}
+
+.details-container {
+  max-width: 900px;
+  margin: auto;
+}
+
+.back-button {
+  border: 0;
+  background: transparent;
+  color: #1f6feb;
+  cursor: pointer;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.notification-details {
+  background: white;
+  border: 1px solid #e1e6ee;
+  border-radius: 14px;
+  padding: 28px;
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.large-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #eef4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.type {
+  color: #1f6feb;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+}
+
+.details-header h1 {
+  margin: 5px 0;
+  color: #1b2535;
+}
+
+.date {
+  margin: 0;
+  color: #8a93a2;
+  font-size: 13px;
+}
+
+.status-row {
+  padding: 18px 0;
+}
+
+.status {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status.unread {
+  color: #1f6feb;
+}
+
+.status.read {
+  color: #27834a;
+}
+
+.message-section,
+.related-section {
+  padding: 20px 0;
+  border-top: 1px solid #edf0f4;
+}
+
+.message-section h2,
+.related-section h2 {
+  font-size: 16px;
+  color: #283345;
+}
+
+.message-section p,
+.related-section p {
+  color: #5d687a;
+  line-height: 1.7;
+}
+
+.related-button {
+  margin-top: 8px;
+  border: 0;
+  background: #1f6feb;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.details-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.secondary {
+  border: 1px solid #d9e0e9;
+  background: white;
+  color: #3e495a;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.loading,
+.error {
+  background: white;
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.error {
+  color: #b42318;
+}
+
+@media (max-width: 600px) {
+
+  .details-page {
+    padding: 18px;
+  }
+
+  .notification-details {
+    padding: 20px;
+  }
+
+  .details-header {
+    align-items: flex-start;
+  }
+
+  .details-actions {
+    flex-direction: column;
+  }
+
+}

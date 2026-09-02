@@ -1,0 +1,1162 @@
+<div class="page-container">
+
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
+  <app-sidebar active="procurement"></app-sidebar>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- ===================================================
+         HEADER
+         =================================================== -->
+
+    <header class="page-header">
+
+      <div>
+
+        <div class="breadcrumb">
+          Procurement
+          <span>›</span>
+          Requests
+        </div>
+
+        <h1>
+          Procurement Requests
+        </h1>
+
+        <p>
+          Create, review and manage procurement requirements for projects.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="primary"
+        (click)="openCreate()">
+
+        + New Request
+
+      </button>
+
+    </header>
+
+
+    <!-- ===================================================
+         SUCCESS MESSAGE
+         =================================================== -->
+
+    <div
+      class="success"
+      *ngIf="success">
+
+      <span>✓</span>
+
+      <span>
+        {{ success }}
+      </span>
+
+      <button
+        type="button"
+        class="message-close"
+        (click)="success = ''">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         ERROR MESSAGE
+         =================================================== -->
+
+    <div
+      class="error"
+      *ngIf="error">
+
+      <span>⚠</span>
+
+      <span>
+        {{ error }}
+      </span>
+
+      <button
+        type="button"
+        class="message-close"
+        (click)="error = ''">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+         =================================================== -->
+
+    <div
+      class="loading"
+      *ngIf="loading">
+
+      <div class="spinner"></div>
+
+      Loading procurement requests...
+
+    </div>
+
+
+    <!-- ===================================================
+         PROCUREMENT REQUEST FORM
+         =================================================== -->
+
+    <section
+      class="form-card"
+      *ngIf="showForm">
+
+
+      <!-- FORM HEADER -->
+
+      <div class="form-header">
+
+        <div>
+
+          <h2>
+
+            {{
+              editingId !== null
+                ? 'Edit Procurement Request'
+                : 'Create Procurement Request'
+            }}
+
+          </h2>
+
+          <p>
+
+            {{
+              editingId !== null
+                ? 'Update procurement request details.'
+                : 'Enter the requirement details below.'
+            }}
+
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="cancel()"
+          [disabled]="saving">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           FORM GRID
+           ================================================= -->
+
+      <div class="form-grid">
+
+
+        <!-- =================================================
+             PROJECT + ADD PROJECT
+             ================================================= -->
+
+        <div class="project-field">
+
+          <label for="projectSelect">
+
+            Project
+            <b>*</b>
+
+          </label>
+
+
+          <div class="project-select-row">
+
+            <select
+              id="projectSelect"
+              name="project_id"
+              [(ngModel)]="form.project_id">
+
+              <option
+                [ngValue]="0">
+
+                Select project
+
+              </option>
+
+
+              <option
+                *ngFor="let project of projects"
+                [ngValue]="project.id">
+
+                {{
+                  project.project_name ||
+                  project.name ||
+                  ('Project #' + project.id)
+                }}
+
+              </option>
+
+            </select>
+
+
+            <button
+              type="button"
+              class="add-project-btn"
+              (click)="openProjectModal()"
+              [disabled]="saving">
+
+              + Add Project
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             REQUESTED BY
+             ================================================= -->
+
+        <label>
+
+          <span>
+
+            Requested By
+            <b>*</b>
+
+          </span>
+
+          <input
+            type="text"
+            name="requested_by"
+            [(ngModel)]="form.requested_by"
+            placeholder="Enter requester name"
+            maxlength="100">
+
+        </label>
+
+
+        <!-- =================================================
+             ITEM
+             ================================================= -->
+
+        <label>
+
+          <span>
+
+            Item / Material
+            <b>*</b>
+
+          </span>
+
+          <input
+            type="text"
+            name="item_name"
+            [(ngModel)]="form.item_name"
+            placeholder="e.g. Cement"
+            maxlength="150">
+
+        </label>
+
+
+        <!-- =================================================
+             CATEGORY
+             ================================================= -->
+
+        <label>
+
+          <span>
+            Category
+          </span>
+
+          <select
+            name="category"
+            [(ngModel)]="form.category">
+
+            <option value="Raw Materials">
+              Raw Materials
+            </option>
+
+            <option value="Equipment">
+              Equipment
+            </option>
+
+            <option value="Machinery">
+              Machinery
+            </option>
+
+            <option value="Safety Equipment">
+              Safety Equipment
+            </option>
+
+            <option value="Office Supplies">
+              Office Supplies
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <!-- =================================================
+             QUANTITY
+             ================================================= -->
+
+        <label>
+
+          <span>
+
+            Required Quantity
+            <b>*</b>
+
+          </span>
+
+          <input
+            type="number"
+            name="quantity"
+            [(ngModel)]="form.quantity"
+            min="1">
+
+        </label>
+
+
+        <!-- =================================================
+             REQUIRED DATE
+             ================================================= -->
+
+        <label>
+
+          <span>
+
+            Required Date
+            <b>*</b>
+
+          </span>
+
+          <input
+            type="date"
+            name="required_date"
+            [(ngModel)]="form.required_date">
+
+        </label>
+
+
+        <!-- =================================================
+             PRIORITY
+             ================================================= -->
+
+        <label>
+
+          <span>
+            Priority
+          </span>
+
+          <select
+            name="priority"
+            [(ngModel)]="form.priority">
+
+            <option value="Low">
+              Low
+            </option>
+
+            <option value="Medium">
+              Medium
+            </option>
+
+            <option value="High">
+              High
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <!-- =================================================
+             STATUS
+             ================================================= -->
+
+        <label>
+
+          <span>
+            Status
+          </span>
+
+          <select
+            name="status"
+            [(ngModel)]="form.status">
+
+            <option value="Pending">
+              Pending
+            </option>
+
+            <option value="Approved">
+              Approved
+            </option>
+
+            <option value="Rejected">
+              Rejected
+            </option>
+
+            <option value="Processing">
+              Processing
+            </option>
+
+            <option value="Completed">
+              Completed
+            </option>
+
+          </select>
+
+        </label>
+
+
+        <!-- =================================================
+             PURPOSE
+             ================================================= -->
+
+        <label class="full-width">
+
+          <span>
+
+            Purpose / Requirement
+            <b>*</b>
+
+          </span>
+
+          <textarea
+            name="purpose"
+            rows="3"
+            [(ngModel)]="form.purpose"
+            placeholder="Explain why this item is required"
+            maxlength="500">
+          </textarea>
+
+        </label>
+
+
+        <!-- =================================================
+             REMARKS
+             ================================================= -->
+
+        <label class="full-width">
+
+          <span>
+            Remarks
+          </span>
+
+          <textarea
+            name="remarks"
+            rows="3"
+            [(ngModel)]="form.remarks"
+            placeholder="Additional remarks"
+            maxlength="500">
+          </textarea>
+
+        </label>
+
+      </div>
+
+
+      <!-- =================================================
+           FORM ACTIONS
+           ================================================= -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="secondary"
+          (click)="cancel()"
+          [disabled]="saving">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="primary"
+          (click)="save()"
+          [disabled]="saving">
+
+          {{
+            saving
+              ? 'Saving...'
+              : (
+                  editingId !== null
+                    ? 'Update Request'
+                    : 'Create Request'
+                )
+          }}
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         SUMMARY CARDS
+         =================================================== -->
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading">
+
+
+      <!-- TOTAL -->
+
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          📋
+        </div>
+
+        <div>
+
+          <span>
+            Total Requests
+          </span>
+
+          <strong>
+            {{ totalRequests }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- PENDING -->
+
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          ⏳
+        </div>
+
+        <div>
+
+          <span>
+            Pending
+          </span>
+
+          <strong>
+            {{ pendingRequests }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- APPROVED -->
+
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          ✓
+        </div>
+
+        <div>
+
+          <span>
+            Approved
+          </span>
+
+          <strong>
+            {{ approvedRequests }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- HIGH PRIORITY -->
+
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          ⚠
+        </div>
+
+        <div>
+
+          <span>
+            High Priority
+          </span>
+
+          <strong>
+            {{ highPriorityRequests }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         REQUEST TABLE
+         =================================================== -->
+
+    <section class="table-card">
+
+
+      <div class="table-header">
+
+        <div>
+
+          <h2>
+            Procurement Requests
+          </h2>
+
+          <p>
+            Track all material and resource requirements.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="refresh-btn"
+          (click)="refresh()"
+          [disabled]="loading">
+
+          ↻ Refresh
+
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Request ID
+              </th>
+
+              <th>
+                Project
+              </th>
+
+              <th>
+                Requested By
+              </th>
+
+              <th>
+                Item
+              </th>
+
+              <th>
+                Category
+              </th>
+
+              <th>
+                Quantity
+              </th>
+
+              <th>
+                Required Date
+              </th>
+
+              <th>
+                Priority
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th>
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+
+            <!-- REQUEST ROW -->
+
+            <tr
+              *ngFor="let request of requests">
+
+
+              <!-- ID -->
+
+              <td>
+
+                <strong>
+                  #{{ request.id }}
+                </strong>
+
+              </td>
+
+
+              <!-- PROJECT -->
+
+              <td>
+
+                <span class="project-name">
+
+                  {{
+                    getProjectName(
+                      request.project_id
+                    )
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- REQUESTED BY -->
+
+              <td>
+
+                {{
+                  request.requested_by ||
+                  '-'
+                }}
+
+              </td>
+
+
+              <!-- ITEM -->
+
+              <td>
+
+                <div class="item-cell">
+
+                  <strong>
+
+                    {{
+                      request.item_name ||
+                      request.item_material ||
+                      request.item ||
+                      '-'
+                    }}
+
+                  </strong>
+
+                  <small>
+
+                    {{
+                      request.purpose ||
+                      request.requirement ||
+                      ''
+                    }}
+
+                  </small>
+
+                </div>
+
+              </td>
+
+
+              <!-- CATEGORY -->
+
+              <td>
+
+                <span class="category-badge">
+
+                  {{
+                    request.category ||
+                    'Raw Materials'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- QUANTITY -->
+
+              <td>
+
+                {{
+                  request.quantity ||
+                  request.required_quantity ||
+                  0
+                }}
+
+              </td>
+
+
+              <!-- DATE -->
+
+              <td>
+
+                {{
+                  request.required_date ||
+                  '-'
+                }}
+
+              </td>
+
+
+              <!-- PRIORITY -->
+
+              <td>
+
+                <span
+                  class="priority-badge"
+                  [ngClass]="
+                    getPriorityClass(
+                      request.priority
+                    )
+                  ">
+
+                  {{
+                    request.priority ||
+                    'Medium'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- STATUS -->
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="
+                    getStatusClass(
+                      request.status
+                    )
+                  ">
+
+                  {{
+                    request.status ||
+                    'Pending'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- ACTIONS -->
+
+              <td>
+
+                <div class="row-actions">
+
+
+                  <!-- APPROVE -->
+
+                  <button
+                    type="button"
+                    class="approve-btn"
+                    *ngIf="
+                      (request.status || '')
+                        .toLowerCase() === 'pending'
+                    "
+                    (click)="approve(request)"
+                    title="Approve">
+
+                    ✓
+
+                  </button>
+
+
+                  <!-- REJECT -->
+
+                  <button
+                    type="button"
+                    class="reject-btn"
+                    *ngIf="
+                      (request.status || '')
+                        .toLowerCase() === 'pending'
+                    "
+                    (click)="reject(request)"
+                    title="Reject">
+
+                    ✕
+
+                  </button>
+
+
+                  <!-- EDIT -->
+
+                  <button
+                    type="button"
+                    class="edit-btn"
+                    (click)="edit(request)"
+                    [disabled]="deleting || saving"
+                    title="Edit">
+
+                    Edit
+
+                  </button>
+
+
+                  <!-- DELETE -->
+
+                  <button
+                    type="button"
+                    class="delete-btn"
+                    (click)="remove(request)"
+                    [disabled]="deleting"
+                    title="Delete">
+
+                    Delete
+
+                  </button>
+
+
+                </div>
+
+              </td>
+
+            </tr>
+
+
+            <!-- =================================================
+                 EMPTY
+                 ================================================= -->
+
+            <tr
+              *ngIf="
+                !loading &&
+                !requests.length
+              ">
+
+              <td
+                colspan="10"
+                class="empty-state">
+
+                <div class="empty-icon">
+                  📋
+                </div>
+
+                <h3>
+                  No procurement requests
+                </h3>
+
+                <p>
+                  Create your first procurement request.
+                </p>
+
+                <button
+                  type="button"
+                  class="primary"
+                  (click)="openCreate()">
+
+                  + New Request
+
+                </button>
+
+              </td>
+
+            </tr>
+
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+  </main>
+
+
+  <!-- =====================================================
+       ADD PROJECT MODAL
+       ===================================================== -->
+
+  <div
+    class="project-modal"
+    *ngIf="showProjectModal"
+    (click)="closeProjectModal()">
+
+
+    <div
+      class="project-modal-card"
+      (click)="$event.stopPropagation()">
+
+
+      <!-- MODAL HEADER -->
+
+      <div class="project-modal-header">
+
+        <div>
+
+          <h2>
+            Add New Project
+          </h2>
+
+          <p>
+            Create a project and use it in this procurement request.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeProjectModal()"
+          [disabled]="projectSaving">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- PROJECT NAME -->
+
+      <label>
+
+        <span>
+
+          Project Name
+          <b>*</b>
+
+        </span>
+
+        <input
+          type="text"
+          name="new_project_name"
+          [(ngModel)]="projectForm.project_name"
+          placeholder="e.g. City Mall Construction"
+          maxlength="150"
+          autocomplete="off">
+
+      </label>
+
+
+      <!-- DESCRIPTION -->
+
+      <label>
+
+        <span>
+          Description
+        </span>
+
+        <textarea
+          name="new_project_description"
+          [(ngModel)]="projectForm.description"
+          rows="4"
+          maxlength="500"
+          placeholder="Enter project description...">
+        </textarea>
+
+      </label>
+
+
+      <!-- STATUS -->
+
+      <label>
+
+        <span>
+          Status
+        </span>
+
+        <select
+          name="new_project_status"
+          [(ngModel)]="projectForm.status">
+
+          <option value="Planning">
+            Planning
+          </option>
+
+          <option value="Active">
+            Active
+          </option>
+
+          <option value="On Hold">
+            On Hold
+          </option>
+
+          <option value="Completed">
+            Completed
+          </option>
+
+        </select>
+
+      </label>
+
+
+      <!-- MODAL ACTIONS -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="secondary"
+          (click)="closeProjectModal()"
+          [disabled]="projectSaving">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="primary"
+          (click)="saveProject()"
+          [disabled]="projectSaving">
+
+          {{
+            projectSaving
+              ? 'Creating...'
+              : 'Create Project'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

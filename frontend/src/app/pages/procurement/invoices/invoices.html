@@ -1,0 +1,969 @@
+<div class="page-layout">
+
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
+  <app-sidebar></app-sidebar>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- ===================================================
+         HEADER
+         =================================================== -->
+
+    <div class="page-header">
+
+      <div>
+
+        <h1>
+          Invoices
+        </h1>
+
+        <p>
+          Manage project invoices, billing and payment status.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="primary-btn"
+        (click)="openCreate()">
+
+        + Add Invoice
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         SUCCESS MESSAGE
+         =================================================== -->
+
+    <div
+      class="alert success"
+      *ngIf="success">
+
+      ✓ {{ success }}
+
+    </div>
+
+
+    <!-- ===================================================
+         ERROR MESSAGE
+         =================================================== -->
+
+    <div
+      class="alert error"
+      *ngIf="error">
+
+      ⚠ {{ error }}
+
+    </div>
+
+
+    <!-- ===================================================
+         FORM
+         =================================================== -->
+
+    <div
+      class="form-card"
+      *ngIf="showForm">
+
+
+      <!-- FORM HEADER -->
+
+      <div class="form-header">
+
+        <div>
+
+          <h2>
+
+            {{
+              editingId !== null
+                ? 'Edit Invoice'
+                : 'Create Invoice'
+            }}
+
+          </h2>
+
+          <p>
+            Enter invoice details below.
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="cancel()"
+          [disabled]="saving">
+
+          × Close
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           FORM GRID
+           ================================================= -->
+
+      <div class="form-grid">
+
+
+        <!-- =================================================
+             INVOICE ID
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Invoice ID
+            <span>*</span>
+          </label>
+
+          <input
+            type="text"
+            name="invoice_id"
+            [(ngModel)]="form.invoice_id"
+            placeholder="INV-20260901-000001"
+            maxlength="100"
+            [readonly]="editingId !== null">
+
+        </div>
+
+
+        <!-- =================================================
+             INVOICE NUMBER
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Invoice Number
+            <span>*</span>
+          </label>
+
+          <input
+            type="text"
+            name="invoice_number"
+            [(ngModel)]="form.invoice_number"
+            placeholder="e.g. ABC-INV-001"
+            maxlength="100">
+
+        </div>
+
+
+        <!-- =================================================
+             PURCHASE ORDER
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Purchase Order
+            <span>*</span>
+          </label>
+
+          <select
+            name="purchase_order_id"
+            [(ngModel)]="form.purchase_order_id"
+            (change)="onPurchaseOrderChange()">
+
+            <option
+              [ngValue]="0">
+
+              Select Purchase Order
+
+            </option>
+
+
+            <option
+              *ngFor="let order of purchaseOrders"
+              [ngValue]="order.id">
+
+              {{
+                order.purchase_order_id ||
+                ('PO #' + order.id)
+              }}
+
+            </option>
+
+          </select>
+
+
+          <small
+            *ngIf="loadingPurchaseOrders">
+
+            Loading purchase orders...
+
+          </small>
+
+
+          <small
+            class="field-hint"
+            *ngIf="
+              !loadingPurchaseOrders &&
+              purchaseOrders.length === 0
+            ">
+
+            No purchase orders available.
+
+          </small>
+
+        </div>
+
+
+        <!-- =================================================
+             PROJECT
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Project
+            <span>*</span>
+          </label>
+
+          <select
+            name="project_id"
+            [(ngModel)]="form.project_id">
+
+            <option
+              [ngValue]="0">
+
+              Select Project
+
+            </option>
+
+
+            <option
+              *ngFor="let project of projects"
+              [ngValue]="project.id">
+
+              {{
+                project.project_name ||
+                project.name ||
+                ('Project #' + project.id)
+              }}
+
+            </option>
+
+          </select>
+
+
+          <small
+            *ngIf="loadingProjects">
+
+            Loading projects...
+
+          </small>
+
+        </div>
+
+
+        <!-- =================================================
+             VENDOR
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Vendor
+            <span>*</span>
+          </label>
+
+          <select
+            name="vendor_id"
+            [(ngModel)]="form.vendor_id">
+
+            <option
+              [ngValue]="0">
+
+              Select Vendor
+
+            </option>
+
+
+            <option
+              *ngFor="let vendor of vendors"
+              [ngValue]="vendor.id">
+
+              {{
+                vendor.vendor_name ||
+                vendor.name ||
+                vendor.company_name ||
+                ('Vendor #' + vendor.id)
+              }}
+
+            </option>
+
+          </select>
+
+
+          <small
+            *ngIf="loadingVendors">
+
+            Loading vendors...
+
+          </small>
+
+        </div>
+
+
+        <!-- =================================================
+             INVOICE DATE
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Invoice Date
+            <span>*</span>
+          </label>
+
+          <input
+            type="date"
+            name="invoice_date"
+            [(ngModel)]="form.invoice_date">
+
+        </div>
+
+
+        <!-- =================================================
+             DUE DATE
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Due Date
+            <span>*</span>
+          </label>
+
+          <input
+            type="date"
+            name="due_date"
+            [(ngModel)]="form.due_date">
+
+        </div>
+
+
+        <!-- =================================================
+             INVOICE AMOUNT
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Invoice Amount
+            <span>*</span>
+          </label>
+
+          <input
+            type="number"
+            name="invoice_amount"
+            [(ngModel)]="form.invoice_amount"
+            min="0"
+            step="0.01"
+            placeholder="0.00">
+
+        </div>
+
+
+        <!-- =================================================
+             PAYMENT STATUS
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Payment Status
+          </label>
+
+          <select
+            name="payment_status"
+            [(ngModel)]="form.payment_status">
+
+            <option value="Pending">
+              Pending
+            </option>
+
+            <option value="Paid">
+              Paid
+            </option>
+
+            <option value="Partial">
+              Partial
+            </option>
+
+            <option value="Overdue">
+              Overdue
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- =================================================
+             INVOICE STATUS
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label>
+            Invoice Status
+          </label>
+
+          <select
+            name="invoice_status"
+            [(ngModel)]="form.invoice_status">
+
+            <option value="Received">
+              Received
+            </option>
+
+            <option value="Approved">
+              Approved
+            </option>
+
+            <option value="Processing">
+              Processing
+            </option>
+
+            <option value="Completed">
+              Completed
+            </option>
+
+            <option value="Rejected">
+              Rejected
+            </option>
+
+            <option value="Cancelled">
+              Cancelled
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- =================================================
+             REMARKS
+             ================================================= -->
+
+        <div class="form-group full-width">
+
+          <label>
+            Remarks
+          </label>
+
+          <textarea
+            name="remarks"
+            [(ngModel)]="form.remarks"
+            rows="4"
+            maxlength="500"
+            placeholder="Additional invoice information...">
+          </textarea>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           FORM ACTIONS
+           ================================================= -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="cancel()"
+          [disabled]="saving">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="save()"
+          [disabled]="saving">
+
+          {{
+            saving
+              ? 'Saving...'
+              : (
+                  editingId !== null
+                    ? 'Update Invoice'
+                    : 'Save Invoice'
+                )
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         LOADING
+         =================================================== -->
+
+    <div
+      class="loading"
+      *ngIf="loading">
+
+      Loading invoices...
+
+    </div>
+
+
+    <!-- ===================================================
+         SUMMARY
+         =================================================== -->
+
+    <div
+      class="summary-grid"
+      *ngIf="!loading">
+
+
+      <div class="summary-card">
+
+        <span>
+          Total Invoices
+        </span>
+
+        <strong>
+          {{ totalInvoices }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Pending Payment
+        </span>
+
+        <strong>
+          {{ pendingInvoices }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Paid
+        </span>
+
+        <strong>
+          {{ paidInvoices }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-card">
+
+        <span>
+          Overdue
+        </span>
+
+        <strong>
+          {{ overdueInvoices }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLE CARD
+         =================================================== -->
+
+    <div
+      class="table-card"
+      *ngIf="!loading">
+
+
+      <!-- TABLE HEADER -->
+
+      <div class="table-header">
+
+        <div>
+
+          <h2>
+            Invoice List
+          </h2>
+
+          <span>
+            {{ invoices.length }} invoice(s)
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="secondary-btn"
+          (click)="refresh()"
+          [disabled]="loading">
+
+          ↻ Refresh
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           TABLE
+           ================================================= -->
+
+      <div
+        class="table-wrapper"
+        *ngIf="invoices.length > 0">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                #
+              </th>
+
+              <th>
+                Invoice ID
+              </th>
+
+              <th>
+                Invoice Number
+              </th>
+
+              <th>
+                Project
+              </th>
+
+              <th>
+                Vendor
+              </th>
+
+              <th>
+                Purchase Order
+              </th>
+
+              <th>
+                Invoice Date
+              </th>
+
+              <th>
+                Due Date
+              </th>
+
+              <th>
+                Amount
+              </th>
+
+              <th>
+                Invoice Status
+              </th>
+
+              <th>
+                Payment
+              </th>
+
+              <th>
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let invoice of invoices;
+                let i = index
+              ">
+
+
+              <!-- NUMBER -->
+
+              <td>
+
+                {{ i + 1 }}
+
+              </td>
+
+
+              <!-- INVOICE ID -->
+
+              <td>
+
+                <strong>
+                  {{ invoice.invoice_id || '-' }}
+                </strong>
+
+              </td>
+
+
+              <!-- INVOICE NUMBER -->
+
+              <td>
+
+                <strong>
+                  {{ getInvoiceNumber(invoice) }}
+                </strong>
+
+              </td>
+
+
+              <!-- PROJECT -->
+
+              <td>
+
+                {{ getProjectName(invoice.project_id) }}
+
+              </td>
+
+
+              <!-- VENDOR -->
+
+              <td>
+
+                {{ getVendorName(invoice.vendor_id) }}
+
+              </td>
+
+
+              <!-- PURCHASE ORDER -->
+
+              <td>
+
+                {{
+                  getPurchaseOrderName(
+                    invoice.purchase_order_id
+                  )
+                }}
+
+              </td>
+
+
+              <!-- INVOICE DATE -->
+
+              <td>
+
+                {{
+                  invoice.invoice_date || '-'
+                }}
+
+              </td>
+
+
+              <!-- DUE DATE -->
+
+              <td>
+
+                {{
+                  invoice.due_date || '-'
+                }}
+
+              </td>
+
+
+              <!-- AMOUNT -->
+
+              <td>
+
+                <strong>
+
+                  ₹{{
+                    getTotal(invoice)
+                      | number:'1.2-2'
+                  }}
+
+                </strong>
+
+              </td>
+
+
+              <!-- INVOICE STATUS -->
+
+              <td>
+
+                <span
+                  class="status"
+                  [ngClass]="
+                    getStatusClass(
+                      invoice.invoice_status
+                    )
+                  ">
+
+                  {{
+                    invoice.invoice_status ||
+                    'Received'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- PAYMENT STATUS -->
+
+              <td>
+
+                <span
+                  class="status"
+                  [ngClass]="
+                    getPaymentStatusClass(
+                      invoice.payment_status
+                    )
+                  ">
+
+                  {{
+                    invoice.payment_status ||
+                    'Pending'
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- ACTIONS -->
+
+              <td>
+
+                <div class="actions">
+
+
+                  <!-- EDIT -->
+
+                  <button
+                    type="button"
+                    class="edit-btn"
+                    (click)="edit(invoice)"
+                    [disabled]="deleting || paying">
+
+                    Edit
+
+                  </button>
+
+
+                  <!-- MARK PAID -->
+
+                  <button
+                    type="button"
+                    class="paid-btn"
+                    *ngIf="
+                      (
+                        invoice.payment_status ||
+                        'Pending'
+                      ).toLowerCase() !== 'paid'
+                    "
+                    (click)="markPaid(invoice)"
+                    [disabled]="paying || deleting">
+
+                    {{
+                      paying
+                        ? 'Updating...'
+                        : 'Mark Paid'
+                    }}
+
+                  </button>
+
+
+                  <!-- DELETE -->
+
+                  <button
+                    type="button"
+                    class="delete-btn"
+                    (click)="remove(invoice)"
+                    [disabled]="deleting || paying">
+
+                    {{
+                      deleting
+                        ? 'Deleting...'
+                        : 'Delete'
+                    }}
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- =================================================
+           EMPTY STATE
+           ================================================= -->
+
+      <div
+        class="empty-state"
+        *ngIf="invoices.length === 0">
+
+        <div class="empty-icon">
+          🧾
+        </div>
+
+        <h3>
+          No invoices found
+        </h3>
+
+        <p>
+          Create your first invoice to get started.
+        </p>
+
+        <button
+          type="button"
+          class="primary-btn"
+          (click)="openCreate()">
+
+          + Add Invoice
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>

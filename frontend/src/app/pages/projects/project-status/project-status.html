@@ -1,0 +1,37 @@
+<div class="page-container">
+  <app-sidebar active="status"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header"><div><span class="eyebrow">PROJECT MANAGEMENT</span><h1>Project Status Tracking</h1><p>Track milestone progress and move projects through the backend-approved lifecycle.</p></div><button class="refresh-btn" type="button" (click)="loadProjects()" [disabled]="loadingProjects">↻ Refresh</button></header>
+
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <section class="card selector-card">
+      <div><h2>Select Project</h2><p>{{ projects.length ? 'Choose a project to view progress and its available next status.' : 'No persisted projects are available yet.' }}</p></div>
+      <select [(ngModel)]="selectedProjectId" (change)="selectProject()" [disabled]="loadingProjects || !projects.length">
+        <option [ngValue]="0">Select project</option><option *ngFor="let project of projects" [ngValue]="project.id">#{{ project.id }} · {{ project.project_name }}</option>
+      </select>
+    </section>
+
+    <section class="empty-state" *ngIf="!loadingProjects && !projects.length"><div class="empty-icon">📋</div><h2>No projects available</h2><p>Create a project first. This page reads directly from the project API.</p><a routerLink="/projects/create-project">Create Project</a></section>
+
+    <ng-container *ngIf="selectedProject">
+      <section class="summary-grid"><div class="summary-card"><span>Project</span><strong>{{ selectedProject.project_name }}</strong><small>ID {{ selectedProject.id }} · {{ selectedProject.location }}</small></div><div class="summary-card"><span>Current Status</span><strong class="status-badge" [ngClass]="getStatusClass(selectedProject.status)">{{ selectedProject.status }}</strong></div><div class="summary-card"><span>Milestone Progress</span><strong>{{ completion }}%</strong></div></section>
+
+      <section class="card">
+        <div class="card-heading"><div><h2>Update Project Status</h2><p>Only the next valid transition is offered, matching the FastAPI rules.</p></div><span class="transition-note" *ngIf="nextStatuses.length">Next: {{ nextStatuses[0] }}</span><span class="transition-note neutral" *ngIf="!nextStatuses.length">No further transition</span></div>
+        <div class="status-form" *ngIf="nextStatuses.length; else closedState">
+          <div class="field"><label for="newStatus">Next Status</label><select id="newStatus" [(ngModel)]="newStatus"><option *ngFor="let status of nextStatuses" [value]="status">{{ status }}</option></select></div>
+          <button class="primary-btn" type="button" (click)="updateStatus()" [disabled]="loading || !newStatus">{{ loading ? 'Updating...' : 'Update Status' }}</button>
+        </div>
+        <ng-template #closedState><div class="closed-state">{{ selectedProject.status === 'Closed' ? 'This project is closed and cannot be modified.' : 'The project has reached the end of the configured lifecycle.' }}</div></ng-template>
+      </section>
+
+      <section class="card" *ngIf="selectedProject.status === 'Completed'">
+        <div class="close-row"><div><h2>Project Closure</h2><p>Closing is available only after the project reaches Completed.</p></div><button class="close-btn" type="button" (click)="closeProject()" [disabled]="loading">Close Project</button></div>
+      </section>
+
+      <section class="card"><div class="section-title"><div><h2>Milestone Completion</h2><p>Calculated by the backend from milestones linked to this project.</p></div><div class="tracking-actions"><strong>{{ completion }}%</strong><button type="button" class="refresh-small" (click)="refreshTracking()" [disabled]="loading || !selectedProject">↻ Refresh</button></div></div><div class="progress-bar"><div class="progress" [style.width.%]="completion"></div></div><div class="tracking-grid" *ngIf="tracking; else noTracking"><div><span>Total</span><strong>{{ tracking.total_milestones }}</strong></div><div><span>Completed</span><strong>{{ tracking.completed_milestones }}</strong></div><div><span>Pending</span><strong>{{ tracking.pending_milestones }}</strong></div></div><ng-template #noTracking><div class="empty-inline">{{ loadingTracking ? 'Loading tracking from the backend...' : 'No tracking data is available yet. Add a milestone to start project progress tracking.' }}</div></ng-template></section>
+    </ng-container>
+  </main>
+</div>

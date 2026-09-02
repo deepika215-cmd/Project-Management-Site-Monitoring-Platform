@@ -1,0 +1,755 @@
+<div class="page-wrapper">
+
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+
+  <app-sidebar></app-sidebar>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+
+  <main class="main-content">
+
+    <!-- ===================================================
+         PAGE HEADER
+         =================================================== -->
+
+    <div class="page-header">
+
+      <div>
+
+        <h1>
+          Material Categories
+        </h1>
+
+        <p>
+          Manage construction material categories.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="openCreate()">
+
+        <span class="btn-icon">
+          +
+        </span>
+
+        Add Category
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         SUCCESS MESSAGE
+         =================================================== -->
+
+    <div
+      *ngIf="success"
+      class="alert alert-success">
+
+      <span class="alert-icon">
+        ✓
+      </span>
+
+      <span>
+        {{ success }}
+      </span>
+
+      <button
+        type="button"
+        class="alert-close"
+        (click)="success = ''">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         ERROR MESSAGE
+         =================================================== -->
+
+    <div
+      *ngIf="error"
+      class="alert alert-error">
+
+      <span class="alert-icon">
+        ⚠
+      </span>
+
+      <span>
+        {{ error }}
+      </span>
+
+      <button
+        type="button"
+        class="alert-close"
+        (click)="error = ''">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- ===================================================
+         STATISTICS
+         =================================================== -->
+
+    <div class="stats-grid">
+
+      <!-- TOTAL -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon">
+          📦
+        </div>
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            Total Categories
+          </span>
+
+          <strong>
+            {{ totalCategories }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACTIVE -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon active-icon">
+          ✓
+        </div>
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            Active
+          </span>
+
+          <strong>
+            {{ activeCategories }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- INACTIVE -->
+
+      <div class="stat-card">
+
+        <div class="stat-icon inactive-icon">
+          ⏸
+        </div>
+
+        <div class="stat-content">
+
+          <span class="stat-label">
+            Inactive
+          </span>
+
+          <strong>
+            {{ inactiveCategories }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         ADD / EDIT FORM
+         =================================================== -->
+
+    <section
+      class="form-card"
+      *ngIf="showForm">
+
+      <!-- FORM HEADER -->
+
+      <div class="form-header">
+
+        <div>
+
+          <h2>
+
+            {{
+              editingId !== null
+                ? 'Edit Category'
+                : 'Add New Category'
+            }}
+
+          </h2>
+
+          <p>
+
+            {{
+              editingId !== null
+                ? 'Update category information.'
+                : 'Enter the category details below.'
+            }}
+
+          </p>
+
+        </div>
+
+
+        <!-- CLOSE BUTTON -->
+
+        <button
+          type="button"
+          class="close-button"
+          (click)="cancel()"
+          [disabled]="saving">
+
+          ×
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           CATEGORY FORM
+           ================================================= -->
+
+      <form
+        #categoryForm="ngForm"
+        (ngSubmit)="save()">
+
+        <!-- =================================================
+             CATEGORY NAME + STATUS
+             ================================================= -->
+
+        <div class="form-grid">
+
+          <!-- CATEGORY NAME -->
+
+          <div class="form-group">
+
+            <label for="categoryName">
+
+              Category Name
+
+              <span>
+                *
+              </span>
+
+            </label>
+
+            <input
+              id="categoryName"
+              name="categoryName"
+              type="text"
+              [(ngModel)]="form.name"
+              placeholder="e.g. Cement"
+              autocomplete="off"
+              maxlength="100"
+              required />
+
+          </div>
+
+
+          <!-- STATUS -->
+
+          <div class="form-group">
+
+            <label for="categoryStatus">
+
+              Status
+
+            </label>
+
+            <select
+              id="categoryStatus"
+              name="categoryStatus"
+              [(ngModel)]="form.status">
+
+              <option value="Active">
+                Active
+              </option>
+
+              <option value="Inactive">
+                Inactive
+              </option>
+
+              <option value="Pending">
+                Pending
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             DESCRIPTION
+             ================================================= -->
+
+        <div class="form-group">
+
+          <label for="categoryDescription">
+
+            Description
+
+          </label>
+
+          <textarea
+            id="categoryDescription"
+            name="categoryDescription"
+            [(ngModel)]="form.description"
+            placeholder="Enter category description..."
+            rows="4"
+            maxlength="500"></textarea>
+
+
+          <!-- CHARACTER COUNT -->
+
+          <div class="character-count">
+
+            {{ form.description.length }}/500
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FORM ACTIONS
+             ================================================= -->
+
+        <div class="form-actions">
+
+          <!-- CANCEL -->
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cancel()"
+            [disabled]="saving">
+
+            Cancel
+
+          </button>
+
+
+          <!-- SAVE / UPDATE -->
+
+          <button
+            type="submit"
+            class="btn-primary"
+            [disabled]="saving || !categoryForm.valid">
+
+            <span *ngIf="!saving">
+
+              {{
+                editingId !== null
+                  ? 'Update Category'
+                  : 'Save Category'
+              }}
+
+            </span>
+
+
+            <span *ngIf="saving">
+
+              Saving...
+
+            </span>
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </section>
+
+
+    <!-- ===================================================
+         CATEGORY LIST
+         =================================================== -->
+
+    <section class="table-card">
+
+      <!-- =================================================
+           TABLE HEADER
+           ================================================= -->
+
+      <div class="table-header">
+
+        <div>
+
+          <h2>
+            Category List
+          </h2>
+
+          <p>
+
+            {{ filteredCategories.length }}
+
+            categories found
+
+          </p>
+
+        </div>
+
+
+        <!-- =================================================
+             SEARCH + REFRESH
+             ================================================= -->
+
+        <div class="table-actions">
+
+          <!-- SEARCH -->
+
+          <div class="search-box">
+
+            <span class="search-icon">
+              🔍
+            </span>
+
+
+            <input
+              type="text"
+              name="categorySearch"
+              [(ngModel)]="searchText"
+              placeholder="Search categories..."
+              aria-label="Search categories" />
+
+
+            <!-- CLEAR SEARCH -->
+
+            <button
+              *ngIf="searchText"
+              type="button"
+              class="clear-search"
+              (click)="clearSearch()">
+
+              ×
+
+            </button>
+
+          </div>
+
+
+          <!-- REFRESH -->
+
+          <button
+            type="button"
+            class="btn-refresh"
+            (click)="refresh()"
+            [disabled]="loading">
+
+            <span>
+              ↻
+            </span>
+
+            Refresh
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           LOADING
+           ================================================= -->
+
+      <div
+        *ngIf="loading"
+        class="loading-container">
+
+        <div class="spinner"></div>
+
+        <p>
+          Loading categories...
+        </p>
+
+      </div>
+
+
+      <!-- =================================================
+           EMPTY STATE
+           ================================================= -->
+
+      <div
+        *ngIf="
+          !loading &&
+          filteredCategories.length === 0
+        "
+        class="empty-state">
+
+        <div class="empty-icon">
+          📦
+        </div>
+
+        <h3>
+          No Categories Found
+        </h3>
+
+
+        <!-- SEARCH EMPTY -->
+
+        <p *ngIf="searchText">
+
+          No categories match your search.
+
+        </p>
+
+
+        <!-- DATABASE EMPTY -->
+
+        <p *ngIf="!searchText">
+
+          You have not added any categories yet.
+
+        </p>
+
+
+        <!-- CLEAR SEARCH -->
+
+        <button
+          *ngIf="searchText"
+          type="button"
+          class="btn-secondary"
+          (click)="clearSearch()">
+
+          Clear Search
+
+        </button>
+
+
+        <!-- ADD FIRST CATEGORY -->
+
+        <button
+          *ngIf="!searchText"
+          type="button"
+          class="btn-primary"
+          (click)="openCreate()">
+
+          + Add First Category
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           CATEGORY TABLE
+           ================================================= -->
+
+      <div
+        class="table-responsive"
+        *ngIf="
+          !loading &&
+          filteredCategories.length > 0
+        ">
+
+        <table>
+
+          <!-- =================================================
+               TABLE HEADER
+               ================================================= -->
+
+          <thead>
+
+            <tr>
+
+              <th>
+                #
+              </th>
+
+              <th>
+                Category Name
+              </th>
+
+              <th>
+                Description
+              </th>
+
+              <th>
+                Status
+              </th>
+
+              <th class="action-column">
+                Actions
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <!-- =================================================
+               TABLE BODY
+               ================================================= -->
+
+          <tbody>
+
+            <tr
+              *ngFor="
+                let category of filteredCategories
+              ">
+
+              <!-- ID -->
+
+              <td class="id-cell">
+
+                #{{ category.id }}
+
+              </td>
+
+
+              <!-- CATEGORY -->
+
+              <td>
+
+                <div class="category-info">
+
+                  <!-- AVATAR -->
+
+                  <div class="category-avatar">
+
+                    {{
+                      getCategoryName(category)
+                        .charAt(0)
+                        .toUpperCase()
+                    }}
+
+                  </div>
+
+
+                  <!-- CATEGORY NAME -->
+
+                  <div>
+
+                    <strong>
+
+                      {{ getCategoryName(category) }}
+
+                    </strong>
+
+                  </div>
+
+                </div>
+
+              </td>
+
+
+              <!-- DESCRIPTION -->
+
+              <td class="description-cell">
+
+                {{ getDescription(category) }}
+
+              </td>
+
+
+              <!-- STATUS -->
+
+              <td>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="
+                    getStatusClass(
+                      getStatus(category)
+                    )
+                  ">
+
+                  <span class="status-dot"></span>
+
+                  {{ getStatus(category) }}
+
+                </span>
+
+              </td>
+
+
+              <!-- ACTIONS -->
+
+              <td>
+
+                <div class="action-buttons">
+
+                  <!-- EDIT -->
+
+                  <button
+                    type="button"
+                    class="btn-edit"
+                    (click)="edit(category)"
+                    [disabled]="deleting || saving"
+                    title="Edit Category">
+
+                    ✏️
+
+                    <span>
+                      Edit
+                    </span>
+
+                  </button>
+
+
+                  <!-- DELETE -->
+
+                  <button
+                    type="button"
+                    class="btn-delete"
+                    (click)="remove(category)"
+                    [disabled]="deleting || saving"
+                    title="Delete Category">
+
+                    🗑️
+
+                    <span>
+                      Delete
+                    </span>
+
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>
