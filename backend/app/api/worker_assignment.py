@@ -15,6 +15,8 @@ from app.schemas.worker_assignment_schema import (
     WorkerAssignmentResponse
 )
 
+from app.services.notification_service import create_notification
+
 
 router = APIRouter(
     prefix="/worker-assignments",
@@ -130,6 +132,43 @@ def create_worker_assignment(
     db.commit()
     db.refresh(new_assignment)
 
+    # --------------------------------------------------------
+    # MODULE 8 - CREATE NOTIFICATION
+    # --------------------------------------------------------
+
+    worker_name = (
+        getattr(worker, "name", None)
+        or getattr(worker, "full_name", None)
+        or f"Worker #{worker.id}"
+    )
+
+    project_name = (
+        getattr(project, "name", None)
+        or getattr(project, "project_name", None)
+        or f"Project #{project.id}"
+    )
+
+    # Notify ADMIN and MANAGER roles.
+    create_notification(
+        db=db,
+        title="Worker Assigned",
+        message=(
+            f"{worker_name} has been assigned to "
+            f"{project_name}."
+        ),
+        recipient="ADMIN"
+    )
+
+    create_notification(
+        db=db,
+        title="Worker Assigned",
+        message=(
+            f"{worker_name} has been assigned to "
+            f"{project_name}."
+        ),
+        recipient="MANAGER"
+    )
+
     return new_assignment
 
 
@@ -229,6 +268,54 @@ def close_worker_assignment(
 
     db.commit()
     db.refresh(assignment)
+
+    # --------------------------------------------------------
+    # MODULE 8 - CREATE NOTIFICATION
+    # --------------------------------------------------------
+
+    worker = db.query(
+        Worker
+    ).filter(
+        Worker.id == assignment.worker_id
+    ).first()
+
+    project = db.query(
+        Project
+    ).filter(
+        Project.id == assignment.project_id
+    ).first()
+
+    worker_name = (
+        getattr(worker, "name", None)
+        or getattr(worker, "full_name", None)
+        or f"Worker #{assignment.worker_id}"
+    )
+
+    project_name = (
+        getattr(project, "name", None)
+        or getattr(project, "project_name", None)
+        or f"Project #{assignment.project_id}"
+    )
+
+    create_notification(
+        db=db,
+        title="Worker Assignment Closed",
+        message=(
+            f"{worker_name}'s assignment to "
+            f"{project_name} has been closed."
+        ),
+        recipient="ADMIN"
+    )
+
+    create_notification(
+        db=db,
+        title="Worker Assignment Closed",
+        message=(
+            f"{worker_name}'s assignment to "
+            f"{project_name} has been closed."
+        ),
+        recipient="MANAGER"
+    )
 
     return assignment
 

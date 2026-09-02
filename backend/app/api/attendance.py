@@ -13,6 +13,7 @@ from app.models.user import User
 from app.schemas.attendance_schema import (
     AttendanceCreate,
     AttendanceResponse,
+    AttendanceSummaryResponse,
 )
 
 
@@ -128,6 +129,119 @@ def create_attendance(
     db.refresh(new_attendance)
 
     return new_attendance
+
+
+# ============================================================
+# ATTENDANCE SUMMARY
+# Allowed roles: ADMIN, MANAGER, ENGINEER
+# ============================================================
+
+@router.get(
+    "/summary",
+    response_model=AttendanceSummaryResponse
+)
+def get_attendance_summary(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        role_required(["ADMIN", "MANAGER", "ENGINEER"])
+    )
+):
+
+    # --------------------------------------------------------
+    # Get all attendance records
+    # --------------------------------------------------------
+
+    attendance_records = db.query(
+        Attendance
+    ).all()
+
+    # --------------------------------------------------------
+    # If no attendance records exist
+    # --------------------------------------------------------
+
+    if not attendance_records:
+        return AttendanceSummaryResponse(
+            total_records=0,
+            present_count=0,
+            absent_count=0,
+            late_count=0,
+            half_day_count=0,
+            total_working_hours=0.0,
+            attendance_percentage=0.0
+        )
+
+    # --------------------------------------------------------
+    # Initialize counters
+    # --------------------------------------------------------
+
+    total_records = len(attendance_records)
+
+    present_count = 0
+    absent_count = 0
+    late_count = 0
+    half_day_count = 0
+
+    total_working_hours = 0.0
+
+    # --------------------------------------------------------
+    # Calculate summary
+    # --------------------------------------------------------
+
+    for record in attendance_records:
+
+        status = (record.status or "").strip().upper()
+
+        if status == "PRESENT":
+            present_count += 1
+
+        elif status == "ABSENT":
+            absent_count += 1
+
+        elif status == "LATE":
+            late_count += 1
+
+        elif status in ["HALF_DAY", "HALF-DAY", "HALFDAY"]:
+            half_day_count += 1
+
+        # Add working hours
+        total_working_hours += record.working_hours or 0.0
+
+    # --------------------------------------------------------
+    # Calculate attendance percentage
+    #
+    # Present + Late + Half Day are treated as attended
+    # records.
+    # --------------------------------------------------------
+
+    attended_records = (
+        present_count
+        + late_count
+        + half_day_count
+    )
+
+    attendance_percentage = (
+        attended_records / total_records
+    ) * 100
+
+    # --------------------------------------------------------
+    # Return summary
+    # --------------------------------------------------------
+
+    return AttendanceSummaryResponse(
+        total_records=total_records,
+        present_count=present_count,
+        absent_count=absent_count,
+        late_count=late_count,
+        half_day_count=half_day_count,
+        total_working_hours=round(
+            total_working_hours,
+            2
+        ),
+        attendance_percentage=round(
+            attendance_percentage,
+            2
+        )
+    )
 
 
 # ============================================================

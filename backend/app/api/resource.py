@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -8,7 +7,8 @@ from app.schemas.resource_schema import (
     ResourceCreate,
     ResourceResponse,
     ResourceAllocation,
-    ResourceUtilization
+    ResourceUtilization,
+    ResourceAvailability
 )
 
 router = APIRouter(
@@ -58,6 +58,54 @@ def get_resources(
     db: Session = Depends(get_db)
 ):
     return db.query(Resource).all()
+
+
+# =========================================================
+# Resource Availability
+# IMPORTANT:
+# This route is placed before /{resource_id}
+# =========================================================
+
+@router.get(
+    "/availability",
+    response_model=list[ResourceAvailability]
+)
+def get_resource_availability(
+    db: Session = Depends(get_db)
+):
+    resources = db.query(Resource).all()
+
+    availability = []
+
+    for resource in resources:
+
+        # Calculate available quantity
+        available_quantity = (
+            resource.quantity - resource.allocated_quantity
+        )
+
+        # Determine availability status
+        if available_quantity == resource.quantity:
+            availability_status = "Available"
+
+        elif available_quantity > 0:
+            availability_status = "Partially Available"
+
+        else:
+            availability_status = "Fully Allocated"
+
+        availability.append({
+            "resource_id": resource.id,
+            "resource_name": resource.name,
+            "type": resource.type,
+            "project_id": resource.project_id,
+            "total_quantity": resource.quantity,
+            "allocated_quantity": resource.allocated_quantity,
+            "available_quantity": available_quantity,
+            "status": availability_status
+        })
+
+    return availability
 
 
 # =========================================================
@@ -119,6 +167,16 @@ def update_resource(
     resource.status = resource_data.status
     resource.project_id = resource_data.project_id
 
+    # Keep status consistent with allocation
+    if resource.allocated_quantity == 0:
+        resource.status = "Available"
+
+    elif resource.allocated_quantity == resource.quantity:
+        resource.status = "Fully Allocated"
+
+    else:
+        resource.status = "Partially Allocated"
+
     db.commit()
     db.refresh(resource)
 
@@ -167,8 +225,10 @@ def allocate_resource(
     # Update status
     if resource.allocated_quantity == resource.quantity:
         resource.status = "Fully Allocated"
+
     elif resource.allocated_quantity > 0:
         resource.status = "Partially Allocated"
+
     else:
         resource.status = "Available"
 
@@ -217,8 +277,10 @@ def release_resource(
     # Update status
     if resource.allocated_quantity == 0:
         resource.status = "Available"
+
     elif resource.allocated_quantity < resource.quantity:
         resource.status = "Partially Allocated"
+
     else:
         resource.status = "Fully Allocated"
 
@@ -310,4 +372,5 @@ def delete_resource(
     db.commit()
 
     return {
-        "message": "Resource deleted successfully"}
+        "message": "Resource deleted successfully"
+    }
