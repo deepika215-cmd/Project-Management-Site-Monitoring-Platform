@@ -90,6 +90,36 @@ def create_worker_assignment(
         )
 
     # --------------------------------------------------------
+    # IMPORTANT:
+    # Contractor must belong to the selected project
+    # --------------------------------------------------------
+
+    if contractor.project_id is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Contractor is not assigned to any project"
+        )
+
+    if contractor.project_id != assignment.project_id:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Worker cannot be assigned to this project because "
+                "the selected contractor is assigned to a different project"
+            )
+        )
+
+    # --------------------------------------------------------
+    # Closed projects cannot receive new workers
+    # --------------------------------------------------------
+
+    if project.status == "Closed":
+        raise HTTPException(
+            status_code=400,
+            detail="Closed project cannot be modified"
+        )
+
+    # --------------------------------------------------------
     # Prevent multiple active assignments
     # --------------------------------------------------------
 

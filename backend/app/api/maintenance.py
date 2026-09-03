@@ -69,6 +69,26 @@ def get_maintenance(
 
 
 # =========================================================
+# Upcoming Maintenance
+# IMPORTANT: This route must come BEFORE /{maintenance_id}
+# =========================================================
+
+@router.get(
+    "/upcoming",
+    response_model=list[MaintenanceResponse]
+)
+def get_upcoming_maintenance(
+    db: Session = Depends(get_db)
+):
+    return db.query(Maintenance).filter(
+        Maintenance.scheduled_date >= date.today(),
+        Maintenance.status != "Completed"
+    ).order_by(
+        Maintenance.scheduled_date
+    ).all()
+
+
+# =========================================================
 # Get Maintenance By ID
 # =========================================================
 
@@ -202,25 +222,6 @@ def complete_maintenance(
     db.refresh(maintenance)
 
     return maintenance
-
-
-# =========================================================
-# Upcoming Maintenance
-# =========================================================
-
-@router.get(
-    "/upcoming",
-    response_model=list[MaintenanceResponse]
-)
-def get_upcoming_maintenance(
-    db: Session = Depends(get_db)
-):
-    return db.query(Maintenance).filter(
-        Maintenance.scheduled_date >= date.today(),
-        Maintenance.status != "Completed"
-    ).order_by(
-        Maintenance.scheduled_date
-    ).all()
 
 
 # =========================================================

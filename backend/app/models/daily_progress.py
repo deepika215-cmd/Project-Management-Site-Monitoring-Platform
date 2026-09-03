@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, Text, Boolean
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -43,6 +43,12 @@ class DailyProgress(Base):
     safety_observation = Column(Text)
 
     quality_remarks = Column(Text)
+
+    quality_verified = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
 
     delay_hours = Column(Float)
 

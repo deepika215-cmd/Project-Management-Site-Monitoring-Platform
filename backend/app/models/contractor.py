@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -35,6 +35,20 @@ class Contractor(Base):
         default="Active"
     )
 
+    # Project assigned to this contractor
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id"),
+        nullable=True,
+        index=True
+    )
+
+    # Relationship with Project
+    project = relationship(
+        "Project"
+    )
+
+    # Existing worker assignments
     workers = relationship(
         "WorkerAssignment",
         back_populates="contractor"

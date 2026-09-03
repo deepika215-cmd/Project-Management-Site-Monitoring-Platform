@@ -31,7 +31,6 @@ router = APIRouter(
     tags=["Authentication"],
 )
 
-
 # ============================================================
 # REGISTER
 # ============================================================
@@ -41,6 +40,14 @@ def register(
     user: UserCreate,
     db: Session = Depends(get_db),
 ):
+    # Prevent users from creating an ADMIN account
+    # through public registration.
+    if user.role == "ADMIN":
+        raise HTTPException(
+            status_code=403,
+            detail="Public registration as ADMIN is not allowed",
+        )
+
     existing_user = (
         db.query(User)
         .filter(User.email == user.email)
@@ -67,6 +74,7 @@ def register(
     db.refresh(new_user)
 
     return new_user
+
 
 
 # ============================================================

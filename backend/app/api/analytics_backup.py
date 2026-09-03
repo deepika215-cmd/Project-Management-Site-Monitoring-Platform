@@ -120,15 +120,8 @@ def project_progress(
     Returns actual project progress.
 
     Progress is calculated from Daily Progress reports.
-
-    For each work category, only the latest progress
-    percentage is used.
-
-    Overall project progress is the average of the
-    latest progress percentage of each work category.
-
-    If no Daily Progress exists, milestone progress is
-    used as a fallback.
+    The latest daily progress percentage is treated as the
+    current construction progress for that project.
 
     Milestone information is also returned.
     """
@@ -159,79 +152,32 @@ def project_progress(
         # Get daily progress records
         # ----------------------------------------------------
 
-        daily_progress_records = (
-            db.query(DailyProgress)
-            .filter(
-                DailyProgress.project_id == project.id
-            )
-            .order_by(
-                DailyProgress.report_date.asc(),
-                DailyProgress.id.asc()
-            )
-            .all()
-        )
-
-        # ----------------------------------------------------
-        # Calculate actual construction progress
-        #
-        # Example:
-        #
-        # Foundation:
-        # 40% -> 60% -> 80%
-        #
-        # Structure:
-        # 30% -> 50%
-        #
-        # Electrical:
-        # 20%
-        #
-        # Latest values:
-        # Foundation = 80%
-        # Structure = 50%
-        # Electrical = 20%
-        #
-        # Overall:
-        # (80 + 50 + 20) / 3 = 50%
-        # ----------------------------------------------------
+        daily_progress_records = db.query(DailyProgress).filter(
+            DailyProgress.project_id == project.id
+        ).order_by(
+            DailyProgress.report_date.desc(),
+            DailyProgress.id.desc()
+        ).all()
 
         progress = 0.0
 
         if daily_progress_records:
+            latest_progress = daily_progress_records[0]
 
-            latest_progress_by_category = {}
-
-            for record in daily_progress_records:
-
-                category = record.work_category
-
-                if record.completion_percentage is not None:
-
-                    latest_progress_by_category[category] = (
-                        record.completion_percentage
-                    )
-
-            if latest_progress_by_category:
-
-                progress = round(
-                    sum(
-                        latest_progress_by_category.values()
-                    )
-                    / len(latest_progress_by_category),
-                    2
+            if latest_progress.completion_percentage is not None:
+                progress = float(
+                    latest_progress.completion_percentage
                 )
 
         # ----------------------------------------------------
-        # If no Daily Progress exists, use milestone progress
+        # If no daily progress exists, use milestone progress
         # as a fallback.
         # ----------------------------------------------------
 
         elif total_milestones > 0:
 
             progress = round(
-                (
-                    completed_milestones
-                    / total_milestones
-                ) * 100,
+                (completed_milestones / total_milestones) * 100,
                 2
             )
 
@@ -275,7 +221,6 @@ def resource_utilization(
         utilization = 0.0
 
         if total_quantity > 0:
-
             utilization = round(
                 (allocated / total_quantity) * 100,
                 2
@@ -414,7 +359,6 @@ def worker_attendance(
         percentage = 0.0
 
         if total > 0:
-
             percentage = round(
                 (present / total) * 100,
                 2
@@ -445,11 +389,9 @@ def project_summary(
     """
     Returns project status and actual construction progress.
 
-    Progress is calculated from the latest Daily Progress
-    record for each work category.
-
-    If no Daily Progress exists, milestone progress is
-    used as a fallback.
+    Daily Progress is used as the primary source for progress.
+    Milestone progress is used only when no daily progress
+    exists for the project.
     """
 
     projects = db.query(Project).all()
@@ -462,46 +404,22 @@ def project_summary(
         # Get daily progress
         # ----------------------------------------------------
 
-        daily_progress_records = (
-            db.query(DailyProgress)
-            .filter(
-                DailyProgress.project_id == project.id
-            )
-            .order_by(
-                DailyProgress.report_date.asc(),
-                DailyProgress.id.asc()
-            )
-            .all()
-        )
-
-        # ----------------------------------------------------
-        # Calculate actual construction progress
-        # ----------------------------------------------------
+        daily_progress_records = db.query(DailyProgress).filter(
+            DailyProgress.project_id == project.id
+        ).order_by(
+            DailyProgress.report_date.desc(),
+            DailyProgress.id.desc()
+        ).all()
 
         progress = 0.0
 
         if daily_progress_records:
 
-            latest_progress_by_category = {}
+            latest_progress = daily_progress_records[0]
 
-            for record in daily_progress_records:
-
-                category = record.work_category
-
-                if record.completion_percentage is not None:
-
-                    latest_progress_by_category[category] = (
-                        record.completion_percentage
-                    )
-
-            if latest_progress_by_category:
-
-                progress = round(
-                    sum(
-                        latest_progress_by_category.values()
-                    )
-                    / len(latest_progress_by_category),
-                    2
+            if latest_progress.completion_percentage is not None:
+                progress = float(
+                    latest_progress.completion_percentage
                 )
 
         # ----------------------------------------------------
@@ -523,7 +441,6 @@ def project_summary(
             ])
 
             if total > 0:
-
                 progress = round(
                     (completed / total) * 100,
                     2

@@ -17,12 +17,19 @@ router = APIRouter(
 # CREATE PAYROLL
 # ============================================================
 
-@router.post("/", response_model=PayrollResponse)
+@router.post(
+    "/",
+    response_model=PayrollResponse
+)
 def create_payroll(
     payroll: PayrollCreate,
     db: Session = Depends(get_db)
 ):
-    # Check whether worker exists
+
+    # --------------------------------------------------------
+    # Validate Worker
+    # --------------------------------------------------------
+
     worker = db.query(Worker).filter(
         Worker.id == payroll.worker_id
     ).first()
@@ -33,17 +40,38 @@ def create_payroll(
             detail="Worker not found"
         )
 
-    # Calculate estimated pay
+    # --------------------------------------------------------
+    # Calculate Regular Pay
+    # --------------------------------------------------------
+
     regular_pay = (
-        payroll.working_hours * payroll.pay_rate
+        payroll.working_hours *
+        payroll.pay_rate
     )
+
+    # --------------------------------------------------------
+    # Calculate Overtime Pay
+    # Overtime = 1.5 × regular hourly rate
+    # --------------------------------------------------------
 
     overtime_pay = (
         payroll.overtime_hours *
-        payroll.pay_rate * 1.5
+        payroll.pay_rate *
+        1.5
     )
 
-    estimated_pay = regular_pay + overtime_pay
+    # --------------------------------------------------------
+    # Total Estimated Pay
+    # --------------------------------------------------------
+
+    estimated_pay = (
+        regular_pay +
+        overtime_pay
+    )
+
+    # --------------------------------------------------------
+    # Create Payroll Record
+    # --------------------------------------------------------
 
     db_payroll = Payroll(
         worker_id=payroll.worker_id,
@@ -65,13 +93,17 @@ def create_payroll(
 
 
 # ============================================================
-# GET ALL PAYROLL RECORDS
+# GET ALL PAYROLL
 # ============================================================
 
-@router.get("/", response_model=list[PayrollResponse])
+@router.get(
+    "/",
+    response_model=list[PayrollResponse]
+)
 def get_all_payroll(
     db: Session = Depends(get_db)
 ):
+
     return db.query(Payroll).all()
 
 
@@ -79,11 +111,15 @@ def get_all_payroll(
 # GET PAYROLL BY ID
 # ============================================================
 
-@router.get("/{payroll_id}", response_model=PayrollResponse)
+@router.get(
+    "/{payroll_id}",
+    response_model=PayrollResponse
+)
 def get_payroll(
     payroll_id: int,
     db: Session = Depends(get_db)
 ):
+
     payroll = db.query(Payroll).filter(
         Payroll.id == payroll_id
     ).first()
@@ -98,7 +134,7 @@ def get_payroll(
 
 
 # ============================================================
-# GET PAYROLL FOR A WORKER
+# GET PAYROLL BY WORKER
 # ============================================================
 
 @router.get(
@@ -109,6 +145,11 @@ def get_worker_payroll(
     worker_id: int,
     db: Session = Depends(get_db)
 ):
+
+    # --------------------------------------------------------
+    # Validate Worker
+    # --------------------------------------------------------
+
     worker = db.query(Worker).filter(
         Worker.id == worker_id
     ).first()
@@ -118,6 +159,10 @@ def get_worker_payroll(
             status_code=404,
             detail="Worker not found"
         )
+
+    # --------------------------------------------------------
+    # Get Payroll Records
+    # --------------------------------------------------------
 
     return db.query(Payroll).filter(
         Payroll.worker_id == worker_id
@@ -137,6 +182,11 @@ def update_payroll(
     payroll: PayrollCreate,
     db: Session = Depends(get_db)
 ):
+
+    # --------------------------------------------------------
+    # Find Payroll
+    # --------------------------------------------------------
+
     db_payroll = db.query(Payroll).filter(
         Payroll.id == payroll_id
     ).first()
@@ -146,6 +196,10 @@ def update_payroll(
             status_code=404,
             detail="Payroll record not found"
         )
+
+    # --------------------------------------------------------
+    # Validate Worker
+    # --------------------------------------------------------
 
     worker = db.query(Worker).filter(
         Worker.id == payroll.worker_id
@@ -157,17 +211,37 @@ def update_payroll(
             detail="Worker not found"
         )
 
-    # Recalculate estimated pay
+    # --------------------------------------------------------
+    # Calculate Regular Pay
+    # --------------------------------------------------------
+
     regular_pay = (
-        payroll.working_hours * payroll.pay_rate
+        payroll.working_hours *
+        payroll.pay_rate
     )
+
+    # --------------------------------------------------------
+    # Calculate Overtime Pay
+    # --------------------------------------------------------
 
     overtime_pay = (
         payroll.overtime_hours *
-        payroll.pay_rate * 1.5
+        payroll.pay_rate *
+        1.5
     )
 
-    estimated_pay = regular_pay + overtime_pay
+    # --------------------------------------------------------
+    # Calculate Total Estimated Pay
+    # --------------------------------------------------------
+
+    estimated_pay = (
+        regular_pay +
+        overtime_pay
+    )
+
+    # --------------------------------------------------------
+    # Update Payroll
+    # --------------------------------------------------------
 
     db_payroll.worker_id = payroll.worker_id
     db_payroll.project_id = payroll.project_id
@@ -189,11 +263,18 @@ def update_payroll(
 # DELETE PAYROLL
 # ============================================================
 
-@router.delete("/{payroll_id}")
+@router.delete(
+    "/{payroll_id}"
+)
 def delete_payroll(
     payroll_id: int,
     db: Session = Depends(get_db)
 ):
+
+    # --------------------------------------------------------
+    # Find Payroll
+    # --------------------------------------------------------
+
     db_payroll = db.query(Payroll).filter(
         Payroll.id == payroll_id
     ).first()
@@ -203,6 +284,10 @@ def delete_payroll(
             status_code=404,
             detail="Payroll record not found"
         )
+
+    # --------------------------------------------------------
+    # Delete
+    # --------------------------------------------------------
 
     db.delete(db_payroll)
     db.commit()
@@ -216,12 +301,19 @@ def delete_payroll(
 # UPDATE PAYROLL STATUS
 # ============================================================
 
-@router.patch("/{payroll_id}/status")
+@router.patch(
+    "/{payroll_id}/status"
+)
 def update_payroll_status(
     payroll_id: int,
     status: str,
     db: Session = Depends(get_db)
 ):
+
+    # --------------------------------------------------------
+    # Find Payroll
+    # --------------------------------------------------------
+
     db_payroll = db.query(Payroll).filter(
         Payroll.id == payroll_id
     ).first()
@@ -231,6 +323,10 @@ def update_payroll_status(
             status_code=404,
             detail="Payroll record not found"
         )
+
+    # --------------------------------------------------------
+    # Update Status
+    # --------------------------------------------------------
 
     db_payroll.payroll_status = status
 
