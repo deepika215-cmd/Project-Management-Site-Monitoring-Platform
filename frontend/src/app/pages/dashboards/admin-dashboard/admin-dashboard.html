@@ -1,43 +1,1265 @@
-<div class="dashboard">
-  <app-sidebar active="dashboard"></app-sidebar><main class="main-content">
-    <h1>Administrator Dashboard</h1>
-    <p>Live system overview from BuildTrack APIs.</p>
-    <div class="error-banner" *ngIf="error">{{ error }}</div>
-    <div class="loading" *ngIf="loading">Loading administration data...</div>
+<div class="dashboard-page">
 
-    <div class="stats-grid" *ngIf="!loading">
-      <div class="stat-card"><h3>Total Projects</h3><strong>{{ summary.projects }}</strong></div>
-      <div class="stat-card"><h3>Active Projects</h3><strong>{{ summary.activeProjects }}</strong></div>
-      <div class="stat-card"><h3>Total Users</h3><strong>{{ summary.users }}</strong></div>
-      <div class="stat-card"><h3>Workers</h3><strong>{{ summary.workers }}</strong></div>
-      <div class="stat-card"><h3>Procurements</h3><strong>{{ summary.procurements }}</strong></div>
-      <div class="stat-card"><h3>Inventory Items</h3><strong>{{ summary.inventory }}</strong></div>
+  <!-- =====================================================
+       SIDEBAR
+  ====================================================== -->
+
+  <aside
+    class="sidebar"
+    [class.open]="sidebarOpen"
+  >
+
+    <!-- LOGO -->
+    <div class="logo-section">
+
+      <div class="logo-box">
+        BT
+      </div>
+
+      <div class="logo-text">
+        <h2>BuildTrack</h2>
+        <span>Project Management</span>
+      </div>
+
     </div>
 
-    <div class="dashboard-grid" *ngIf="!loading">
-      <section class="dashboard-section">
-        <h2>Recent Projects</h2>
-        <div class="activity-item" *ngFor="let project of recentProjects">
-          <div><strong>{{ project.project_name }}</strong><p>{{ project.location }}</p></div>
-          <span>{{ project.status }}</span>
-        </div>
-        <p *ngIf="!recentProjects.length">No projects returned by the backend.</p>
-      </section>
-      <section class="dashboard-section">
-        <h2>Procurement Overview</h2>
-        <div class="activity-item" *ngFor="let item of recentProcurements">
-          <div><strong>{{ item.item_name }}</strong><p>{{ item.supplier }} · Qty {{ item.quantity }}</p></div>
-          <span>{{ item.status }}</span>
-        </div>
-        <p *ngIf="!recentProcurements.length">No procurement records returned by the backend.</p>
-      </section>
+
+    <!-- ADMIN PROFILE -->
+    <div class="admin-profile">
+
+      <div class="admin-avatar">
+        {{ adminInitials }}
+      </div>
+
+      <div class="admin-profile-info">
+        <strong>{{ adminName }}</strong>
+        <span>{{ adminRole }}</span>
+      </div>
+
     </div>
 
-    <section class="dashboard-section" *ngIf="!loading">
-      <h2>System Status</h2>
-      <p>{{ summary.completedProjects }} projects are completed/closed.</p>
-      <p>{{ summary.notifications }} notification records are available.</p>
-      <p>Use <a routerLink="/analytics">Analytics</a> for detailed project, resource, inventory and workforce metrics.</p>
+
+    <!-- NAVIGATION -->
+    <nav class="sidebar-nav">
+
+      <div class="nav-title">
+        MAIN
+      </div>
+
+
+      <!-- DASHBOARD -->
+      <a
+        class="nav-item active"
+        routerLink="/admin-dashboard"
+        (click)="closeSidebar()"
+      >
+        <span class="nav-icon">⌂</span>
+        <span>Dashboard</span>
+      </a>
+
+
+      <!-- USER MANAGEMENT -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openUsers()"
+      >
+        <span class="nav-icon">👥</span>
+        <span>User Management</span>
+      </button>
+
+
+      <!-- PROJECTS -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openProjects()"
+      >
+        <span class="nav-icon">▣</span>
+        <span>Projects</span>
+      </button>
+
+
+      <!-- PROCUREMENT -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openProcurement()"
+      >
+        <span class="nav-icon">🛒</span>
+        <span>Procurement</span>
+      </button>
+
+
+      <!-- INVENTORY -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="navigateTo('/inventory')"
+      >
+        <span class="nav-icon">▤</span>
+        <span>Inventory</span>
+      </button>
+
+
+      <!-- RESOURCES -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openResources()"
+      >
+        <span class="nav-icon">⚙</span>
+        <span>Resources</span>
+      </button>
+
+
+      <!-- WORKFORCE -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openWorkforce()"
+      >
+        <span class="nav-icon">👷</span>
+        <span>Workforce</span>
+      </button>
+
+
+      <div class="nav-title monitoring-title">
+        MONITORING
+      </div>
+
+
+      <!-- ANALYTICS -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openAnalytics()"
+      >
+        <span class="nav-icon">◔</span>
+        <span>Analytics</span>
+      </button>
+
+
+      <!-- REPORTS -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="openReports()"
+      >
+        <span class="nav-icon">▥</span>
+        <span>Reports</span>
+      </button>
+
+
+      <!-- NOTIFICATIONS -->
+      <button
+        type="button"
+        class="nav-item"
+        (click)="navigateTo('/notifications')"
+      >
+        <span class="nav-icon">🔔</span>
+        <span>Notifications</span>
+      </button>
+
+    </nav>
+
+
+    <!-- LOGOUT -->
+    <div class="logout-section">
+
+      <button
+        type="button"
+        class="logout-btn"
+        (click)="logout()"
+      >
+        <span>↪</span>
+        <span>Logout</span>
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+  ====================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- =====================================================
+         TOP HEADER
+    ====================================================== -->
+
+    <header class="top-header">
+
+      <!-- MOBILE MENU -->
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        (click)="toggleSidebar()"
+        aria-label="Open menu"
+      >
+        ☰
+      </button>
+
+
+      <div class="header-title">
+
+        <h1>
+          Admin Dashboard
+        </h1>
+
+        <p>
+          System overview and monitoring
+        </p>
+
+      </div>
+
+
+      <div class="header-actions">
+
+        <!-- REFRESH -->
+        <button
+          type="button"
+          class="refresh-btn"
+          (click)="refreshDashboard()"
+          [disabled]="loading"
+        >
+          <span>↻</span>
+          <span>Refresh</span>
+        </button>
+
+
+        <!-- NOTIFICATION -->
+        <button
+          type="button"
+          class="notification-btn"
+          (click)="navigateTo('/notifications')"
+          aria-label="Notifications"
+        >
+          🔔
+        </button>
+
+
+        <!-- HEADER USER -->
+        <div class="header-user">
+
+          <div class="header-avatar">
+            {{ adminInitials }}
+          </div>
+
+          <div class="header-user-info">
+
+            <strong>
+              {{ adminName }}
+            </strong>
+
+            <span>
+              {{ adminRole }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         LOADING
+    ====================================================== -->
+
+    <section
+      class="loading-container"
+      *ngIf="loading"
+    >
+
+      <div class="loader"></div>
+
+      <h2>
+        Loading Admin Dashboard...
+      </h2>
+
+      <p>
+        Fetching latest system information.
+      </p>
+
     </section>
+
+
+    <!-- =====================================================
+         ERROR
+    ====================================================== -->
+
+    <section
+      class="error-container"
+      *ngIf="!loading && errorMessage"
+    >
+
+      <div class="error-icon">
+        ⚠
+      </div>
+
+      <h2>
+        Dashboard Error
+      </h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        class="retry-btn"
+        (click)="retry()"
+      >
+        Try Again
+      </button>
+
+    </section>
+
+
+    <!-- =====================================================
+         DASHBOARD
+    ====================================================== -->
+
+    <section
+      class="dashboard-content"
+      *ngIf="!loading && dashboard"
+    >
+
+
+      <!-- =====================================================
+           WELCOME
+      ====================================================== -->
+
+      <div class="welcome-section">
+
+        <div class="welcome-content">
+
+          <h2>
+            Welcome back, {{ adminName }}!
+          </h2>
+
+          <p>
+            Here is your latest system overview.
+          </p>
+
+        </div>
+
+        <div class="date-box">
+          {{ formatDate(currentDate) }}
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           STAT CARDS
+      ====================================================== -->
+
+      <div class="stats-grid">
+
+
+        <!-- USERS -->
+        <div
+          class="stat-card"
+          (click)="openUsers()"
+        >
+
+          <div class="stat-icon users">
+            👥
+          </div>
+
+          <div class="stat-info">
+
+            <span>
+              Total Users
+            </span>
+
+            <strong>
+              {{ totalUsers }}
+            </strong>
+
+            <small>
+              {{ activeUsers }} active
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROJECTS -->
+        <div
+          class="stat-card"
+          (click)="openProjects()"
+        >
+
+          <div class="stat-icon projects">
+            📁
+          </div>
+
+          <div class="stat-info">
+
+            <span>
+              Total Projects
+            </span>
+
+            <strong>
+              {{ totalProjects }}
+            </strong>
+
+            <small>
+              {{ activeProjects }} active
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- WORKERS -->
+        <div
+          class="stat-card"
+          (click)="openWorkforce()"
+        >
+
+          <div class="stat-icon workers">
+            👷
+          </div>
+
+          <div class="stat-info">
+
+            <span>
+              Total Workers
+            </span>
+
+            <strong>
+              {{ totalWorkers }}
+            </strong>
+
+            <small>
+              Workforce
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- RESOURCES -->
+        <div
+          class="stat-card"
+          (click)="openResources()"
+        >
+
+          <div class="stat-icon resources">
+            ⚙
+          </div>
+
+          <div class="stat-info">
+
+            <span>
+              Total Resources
+            </span>
+
+            <strong>
+              {{ totalResources }}
+            </strong>
+
+            <small>
+              Available resources
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROCUREMENT -->
+        <div
+          class="stat-card"
+          (click)="openProcurement()"
+        >
+
+          <div class="stat-icon procurement">
+            🛒
+          </div>
+
+          <div class="stat-info">
+
+            <span>
+              Procurements
+            </span>
+
+            <strong>
+              {{ totalProcurements }}
+            </strong>
+
+            <small>
+              Procurement records
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- REPORTS -->
+        <div
+          class="stat-card"
+          (click)="openReports()"
+        >
+
+          <div class="stat-icon reports">
+            📊
+          </div>
+
+          <div class="stat-info">
+
+            <span>
+              Reports
+            </span>
+
+            <strong>
+              {{ totalReports }}
+            </strong>
+
+            <small>
+              System reports
+            </small>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           USER + PROJECT ANALYTICS
+      ====================================================== -->
+
+      <div class="content-grid">
+
+
+        <!-- USER ANALYTICS -->
+        <div class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <h3>
+                User Analytics
+              </h3>
+
+              <p>
+                User account statistics
+              </p>
+            </div>
+
+            <button
+              type="button"
+              (click)="openUsers()"
+            >
+              View Users
+            </button>
+
+          </div>
+
+
+          <div class="analytics-row">
+
+            <div class="analytics-number">
+
+              <strong>
+                {{ totalUsers }}
+              </strong>
+
+              <span>
+                Total Users
+              </span>
+
+            </div>
+
+
+            <div class="analytics-number">
+
+              <strong>
+                {{ activeUsers }}
+              </strong>
+
+              <span>
+                Active
+              </span>
+
+            </div>
+
+
+            <div class="analytics-number">
+
+              <strong>
+                {{ inactiveUsers }}
+              </strong>
+
+              <span>
+                Inactive
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- ACTIVE USERS -->
+          <div class="progress-wrapper">
+
+            <div class="progress-label">
+
+              <span>
+                Active Users
+              </span>
+
+              <strong>
+                {{ activeUserPercentage }}%
+              </strong>
+
+            </div>
+
+            <div class="progress-bar">
+
+              <div
+                class="progress-fill active-fill"
+                [style.width.%]="activeUserPercentage"
+              ></div>
+
+            </div>
+
+          </div>
+
+
+          <!-- INACTIVE USERS -->
+          <div class="progress-wrapper">
+
+            <div class="progress-label">
+
+              <span>
+                Inactive Users
+              </span>
+
+              <strong>
+                {{ inactiveUserPercentage }}%
+              </strong>
+
+            </div>
+
+            <div class="progress-bar">
+
+              <div
+                class="progress-fill inactive-fill"
+                [style.width.%]="inactiveUserPercentage"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- PROJECT ANALYTICS -->
+        <div class="panel">
+
+          <div class="panel-header">
+
+            <div>
+
+              <h3>
+                Project Analytics
+              </h3>
+
+              <p>
+                Current project status
+              </p>
+
+            </div>
+
+            <button
+              type="button"
+              (click)="openProjects()"
+            >
+              View Projects
+            </button>
+
+          </div>
+
+
+          <div class="project-summary">
+
+            <div>
+              <strong>
+                {{ totalProjects }}
+              </strong>
+
+              <span>
+                Total
+              </span>
+            </div>
+
+
+            <div>
+              <strong>
+                {{ activeProjects }}
+              </strong>
+
+              <span>
+                Active
+              </span>
+            </div>
+
+
+            <div>
+              <strong>
+                {{ completedProjects }}
+              </strong>
+
+              <span>
+                Completed
+              </span>
+            </div>
+
+
+            <div>
+              <strong>
+                {{ pendingProjects }}
+              </strong>
+
+              <span>
+                Pending
+              </span>
+            </div>
+
+          </div>
+
+
+          <!-- PROJECT PROGRESS -->
+          <div class="project-analytics-progress">
+
+            <div class="progress-wrapper">
+
+              <div class="progress-label">
+
+                <span>
+                  Active Projects
+                </span>
+
+                <strong>
+                  {{ activeProjectPercentage }}%
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress-fill"
+                  [style.width.%]="activeProjectPercentage"
+                ></div>
+
+              </div>
+
+            </div>
+
+
+            <div class="progress-wrapper">
+
+              <div class="progress-label">
+
+                <span>
+                  Completed Projects
+                </span>
+
+                <strong>
+                  {{ completedProjectPercentage }}%
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress-fill completed-fill"
+                  [style.width.%]="completedProjectPercentage"
+                ></div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           PROJECTS
+      ====================================================== -->
+
+      <div class="panel projects-panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h3>
+              Projects
+            </h3>
+
+            <p>
+              Latest project information
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            (click)="openProjects()"
+          >
+            View All
+          </button>
+
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+          class="empty-state"
+          *ngIf="projectDetails.length === 0"
+        >
+
+          <div>
+            📁
+          </div>
+
+          <p>
+            No projects available.
+          </p>
+
+        </div>
+
+
+        <!-- PROJECT LIST -->
+        <div
+          class="project-list"
+          *ngIf="projectDetails.length > 0"
+        >
+
+          <div
+            class="project-item"
+            *ngFor="let project of projectDetails"
+            (click)="selectProject(project)"
+          >
+
+
+            <!-- PROJECT INFO -->
+            <div class="project-info">
+
+              <strong>
+                {{ project.project_name }}
+              </strong>
+
+              <span>
+                Project #{{ project.project_id }}
+              </span>
+
+            </div>
+
+
+            <!-- PROGRESS -->
+            <div class="project-progress">
+
+              <div class="progress-label">
+
+                <span>
+                  Progress
+                </span>
+
+                <strong>
+                  {{ getProjectProgress(project) }}%
+                </strong>
+
+              </div>
+
+              <div class="progress-bar">
+
+                <div
+                  class="progress-fill"
+                  [style.width.%]="getProjectProgress(project)"
+                ></div>
+
+              </div>
+
+            </div>
+
+
+            <!-- STATUS -->
+            <div>
+
+              <span
+                class="status-badge"
+                [ngClass]="getStatusClass(project.status)"
+              >
+                {{ getProjectStatusLabel(project.status) }}
+              </span>
+
+            </div>
+
+
+            <!-- OPEN -->
+            <button
+              type="button"
+              class="open-project-btn"
+              (click)="openProject(project); $event.stopPropagation()"
+            >
+              Open
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           SELECTED PROJECT
+      ====================================================== -->
+
+      <div
+        class="panel selected-project-panel"
+        *ngIf="selectedProject"
+      >
+
+        <div class="panel-header">
+
+          <div>
+
+            <h3>
+              Selected Project
+            </h3>
+
+            <p>
+              Project details
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            (click)="openProject(selectedProject)"
+          >
+            Open Project
+          </button>
+
+        </div>
+
+
+        <div class="selected-project">
+
+
+          <!-- NAME -->
+          <div>
+
+            <span>
+              Project Name
+            </span>
+
+            <strong>
+              {{ selectedProject.project_name }}
+            </strong>
+
+          </div>
+
+
+          <!-- STATUS -->
+          <div>
+
+            <span>
+              Status
+            </span>
+
+            <strong
+              class="status-text"
+              [ngClass]="getStatusClass(selectedProject.status)"
+            >
+              {{ getProjectStatusLabel(selectedProject.status) }}
+            </strong>
+
+          </div>
+
+
+          <!-- MANAGER -->
+          <div>
+
+            <span>
+              Manager
+            </span>
+
+            <strong>
+              {{ getProjectManagerId(selectedProject) }}
+            </strong>
+
+          </div>
+
+
+          <!-- PROGRESS -->
+          <div>
+
+            <span>
+              Progress
+            </span>
+
+            <strong>
+              {{ selectedProjectProgress }}%
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           USERS BY ROLE
+      ====================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h3>
+              Users by Role
+            </h3>
+
+            <p>
+              User distribution
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="role-list">
+
+          <div
+            class="role-item"
+            *ngFor="let role of roleAnalytics"
+          >
+
+            <div class="role-name">
+
+              <span>
+                {{ role.label }}
+              </span>
+
+              <strong>
+                {{ role.value }}
+              </strong>
+
+            </div>
+
+            <div class="progress-bar">
+
+              <div
+                class="progress-fill"
+                [style.width.%]="getRolePercentage(role.value)"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           REPORTS
+      ====================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h3>
+              Recent Reports
+            </h3>
+
+            <p>
+              {{ reportCount }} reports available
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            (click)="openReports()"
+          >
+            View Reports
+          </button>
+
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+          class="empty-state"
+          *ngIf="reports.length === 0"
+        >
+
+          <div>
+            📄
+          </div>
+
+          <p>
+            No reports available.
+          </p>
+
+        </div>
+
+
+        <!-- REPORT LIST -->
+        <div
+          class="report-list"
+          *ngIf="reports.length > 0"
+        >
+
+          <div
+            class="report-item"
+            *ngFor="let report of reports"
+          >
+
+            <div class="report-info">
+
+              <strong>
+                {{ getReportTitle(report) }}
+              </strong>
+
+              <span>
+                {{ getReportDate(report) }}
+              </span>
+
+            </div>
+
+
+            <span
+              class="status-badge"
+              [ngClass]="getReportStatusClass(report)"
+            >
+              {{ getReportStatus(report) }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           RECENT ACTIVITIES
+      ====================================================== -->
+
+      <div class="panel">
+
+        <div class="panel-header">
+
+          <div>
+
+            <h3>
+              Recent Activities
+            </h3>
+
+            <p>
+              Latest system activities
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <!-- EMPTY -->
+        <div
+          class="empty-state"
+          *ngIf="activities.length === 0"
+        >
+
+          <div>
+            📝
+          </div>
+
+          <p>
+            No recent activities.
+          </p>
+
+        </div>
+
+
+        <!-- ACTIVITY LIST -->
+        <div
+          class="activity-list"
+          *ngIf="activities.length > 0"
+        >
+
+          <div
+            class="activity-item"
+            *ngFor="let activity of activities"
+          >
+
+            <div class="activity-icon">
+              ●
+            </div>
+
+            <div class="activity-info">
+
+              <strong>
+                {{ getActivityText(activity) }}
+              </strong>
+
+              <span>
+                By {{ getActivityUser(activity) }}
+              </span>
+
+              <small>
+                {{ getActivityDate(activity) }}
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+    </section>
+
   </main>
+
 </div>
