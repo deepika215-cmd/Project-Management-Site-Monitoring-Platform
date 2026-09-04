@@ -13,6 +13,8 @@ from app.schemas.project_engineer_assignment import (
     ProjectEngineerAssignmentResponse
 )
 
+from app.services.notification_service import create_notification
+
 
 router = APIRouter(
     prefix="/projects",
@@ -145,6 +147,20 @@ def assign_engineer(
     db.add(new_assignment)
     db.commit()
     db.refresh(new_assignment)
+
+    # --------------------------------------------------------
+    # Module 8 - Notify the assigned engineer
+    # --------------------------------------------------------
+
+    create_notification(
+        db=db,
+        title="Engineer Assigned to Project",
+        message=(
+            f"You have been assigned as a Site Engineer to "
+            f"Project #{project.id} - {project.project_name}."
+        ),
+        recipient=engineer.email
+    )
 
     return new_assignment
 

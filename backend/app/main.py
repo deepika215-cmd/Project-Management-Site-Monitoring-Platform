@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.project import Project
 from app.models.project_milestone import ProjectMilestone
 from app.models.project_engineer_assignment import ProjectEngineerAssignment
+from app.models.task import Task
 
 from app.models.resource import Resource
 from app.models.resource_category import ResourceCategory
@@ -73,6 +74,13 @@ from app.api.milestone import router as milestone_router
 from app.api.project_engineer_assignment import (
     router as project_engineer_assignment_router
 )
+
+
+# ============================================================
+# TASK MANAGEMENT — MODULE 8
+# ============================================================
+
+from app.api.task import router as task_router
 
 
 # ============================================================
@@ -214,6 +222,13 @@ app.include_router(milestone_router)
 
 
 # ============================================================
+# TASK MANAGEMENT — MODULE 8
+# ============================================================
+
+app.include_router(task_router)
+
+
+# ============================================================
 # RESOURCE MANAGEMENT
 # ============================================================
 
@@ -298,5 +313,3 @@ def home():
     return {
         "message": "BuildTrack Backend Running Successfully"
     }
-
-

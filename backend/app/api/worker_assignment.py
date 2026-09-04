@@ -25,6 +25,38 @@ router = APIRouter(
 
 
 # ============================================================
+# MODULE 8 - GET RESPONSIBLE PROJECT MANAGER
+# ============================================================
+
+def get_project_manager_email(
+    db: Session,
+    project_id: int
+):
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    if not project or not project.manager_id:
+        return None
+
+    manager = (
+        db.query(User)
+        .filter(
+            User.id == project.manager_id,
+            User.role == "MANAGER"
+        )
+        .first()
+    )
+
+    if not manager:
+        return None
+
+    return manager.email
+
+
+# ============================================================
 # CREATE WORKER ASSIGNMENT
 # Allowed roles: ADMIN, MANAGER
 # ============================================================
@@ -41,10 +73,6 @@ def create_worker_assignment(
     )
 ):
 
-    # --------------------------------------------------------
-    # Check worker
-    # --------------------------------------------------------
-
     worker = db.query(
         Worker
     ).filter(
@@ -56,10 +84,6 @@ def create_worker_assignment(
             status_code=404,
             detail="Worker not found"
         )
-
-    # --------------------------------------------------------
-    # Check contractor
-    # --------------------------------------------------------
 
     contractor = db.query(
         Contractor
@@ -73,10 +97,6 @@ def create_worker_assignment(
             detail="Contractor not found"
         )
 
-    # --------------------------------------------------------
-    # Check project
-    # --------------------------------------------------------
-
     project = db.query(
         Project
     ).filter(
@@ -88,11 +108,6 @@ def create_worker_assignment(
             status_code=404,
             detail="Project not found"
         )
-
-    # --------------------------------------------------------
-    # IMPORTANT:
-    # Contractor must belong to the selected project
-    # --------------------------------------------------------
 
     if contractor.project_id is None:
         raise HTTPException(
@@ -109,19 +124,11 @@ def create_worker_assignment(
             )
         )
 
-    # --------------------------------------------------------
-    # Closed projects cannot receive new workers
-    # --------------------------------------------------------
-
     if project.status == "Closed":
         raise HTTPException(
             status_code=400,
             detail="Closed project cannot be modified"
         )
-
-    # --------------------------------------------------------
-    # Prevent multiple active assignments
-    # --------------------------------------------------------
 
     existing_assignment = db.query(
         WorkerAssignment
@@ -140,10 +147,6 @@ def create_worker_assignment(
             )
         )
 
-    # --------------------------------------------------------
-    # Create assignment
-    # --------------------------------------------------------
-
     new_assignment = WorkerAssignment(
         worker_id=assignment.worker_id,
         contractor_id=assignment.contractor_id,
@@ -156,15 +159,15 @@ def create_worker_assignment(
 
     db.add(new_assignment)
 
-    # Update worker's current contractor
     worker.contractor_id = assignment.contractor_id
 
     db.commit()
     db.refresh(new_assignment)
 
-    # --------------------------------------------------------
-    # MODULE 8 - CREATE NOTIFICATION
-    # --------------------------------------------------------
+    # ========================================================
+    # MODULE 8 - WORKER ASSIGNMENT NOTIFICATION
+    # Notify ONLY the responsible Project Manager
+    # ========================================================
 
     worker_name = (
         getattr(worker, "name", None)
@@ -178,26 +181,21 @@ def create_worker_assignment(
         or f"Project #{project.id}"
     )
 
-    # Notify ADMIN and MANAGER roles.
-    create_notification(
+    manager_email = get_project_manager_email(
         db=db,
-        title="Worker Assigned",
-        message=(
-            f"{worker_name} has been assigned to "
-            f"{project_name}."
-        ),
-        recipient="ADMIN"
+        project_id=assignment.project_id
     )
 
-    create_notification(
-        db=db,
-        title="Worker Assigned",
-        message=(
-            f"{worker_name} has been assigned to "
-            f"{project_name}."
-        ),
-        recipient="MANAGER"
-    )
+    if manager_email:
+        create_notification(
+            db=db,
+            title="Worker Assigned",
+            message=(
+                f"{worker_name} has been assigned to "
+                f"{project_name}."
+            ),
+            recipient=manager_email
+        )
 
     return new_assignment
 
@@ -299,10 +297,6 @@ def close_worker_assignment(
     db.commit()
     db.refresh(assignment)
 
-    # --------------------------------------------------------
-    # MODULE 8 - CREATE NOTIFICATION
-    # --------------------------------------------------------
-
     worker = db.query(
         Worker
     ).filter(
@@ -327,25 +321,26 @@ def close_worker_assignment(
         or f"Project #{assignment.project_id}"
     )
 
-    create_notification(
+    # ========================================================
+    # MODULE 8 - WORKER ASSIGNMENT CLOSED NOTIFICATION
+    # Notify ONLY the responsible Project Manager
+    # ========================================================
+
+    manager_email = get_project_manager_email(
         db=db,
-        title="Worker Assignment Closed",
-        message=(
-            f"{worker_name}'s assignment to "
-            f"{project_name} has been closed."
-        ),
-        recipient="ADMIN"
+        project_id=assignment.project_id
     )
 
-    create_notification(
-        db=db,
-        title="Worker Assignment Closed",
-        message=(
-            f"{worker_name}'s assignment to "
-            f"{project_name} has been closed."
-        ),
-        recipient="MANAGER"
-    )
+    if manager_email:
+        create_notification(
+            db=db,
+            title="Worker Assignment Closed",
+            message=(
+                f"{worker_name}'s assignment to "
+                f"{project_name} has been closed."
+            ),
+            recipient=manager_email
+        )
 
     return assignment
 
@@ -367,10 +362,6 @@ def get_worker_assignment_history(
     )
 ):
 
-    # --------------------------------------------------------
-    # Check worker
-    # --------------------------------------------------------
-
     worker = db.query(
         Worker
     ).filter(
@@ -382,10 +373,6 @@ def get_worker_assignment_history(
             status_code=404,
             detail="Worker not found"
         )
-
-    # --------------------------------------------------------
-    # Return assignment history
-    # --------------------------------------------------------
 
     return db.query(
         WorkerAssignment

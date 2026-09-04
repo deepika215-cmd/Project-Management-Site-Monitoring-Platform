@@ -1,3 +1,4 @@
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -9,9 +10,11 @@ from app.core.auth import get_current_user
 from app.models.project import Project
 from app.models.project_milestone import ProjectMilestone
 from app.models.project_history import ProjectHistory
+from app.models.project_engineer_assignment import ProjectEngineerAssignment
 from app.models.daily_progress import DailyProgress
 from app.models.user import User
 from app.models.payroll import Payroll
+from app.models.notification import Notification
 
 from app.schemas.project_schema import (
     ProjectCreate,
@@ -24,6 +27,8 @@ from app.schemas.project_tracking import ProjectTrackingResponse
 
 from app.schemas.project_history import ProjectHistoryResponse
 
+from app.services.notification_service import create_notification
+
 
 router = APIRouter(
     prefix="/projects",
@@ -31,9 +36,92 @@ router = APIRouter(
 )
 
 
-# ---------------------------------------------------------
-# Create Project
-# ---------------------------------------------------------
+# =========================================================
+# HELPER: GET PROJECT NOTIFICATION RECIPIENTS
+# =========================================================
+
+def get_project_notification_recipients(
+    db: Session,
+    project_id: int
+):
+    """
+    Get notification recipients for a project.
+
+    Recipients:
+    - Project Manager
+    - Assigned active Site Engineers
+
+    Returns a set of email addresses so duplicate
+    recipients are automatically removed.
+    """
+
+    recipients = set()
+
+    # -----------------------------------------------------
+    # Get project
+    # -----------------------------------------------------
+
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    if not project:
+        return recipients
+
+    # -----------------------------------------------------
+    # Project Manager
+    # -----------------------------------------------------
+
+    if project.manager_id:
+
+        manager = (
+            db.query(User)
+            .filter(
+                User.id == project.manager_id,
+                User.role == "MANAGER",
+                User.is_active == True
+            )
+            .first()
+        )
+
+        if manager and manager.email:
+            recipients.add(manager.email)
+
+    # -----------------------------------------------------
+    # Assigned Site Engineers
+    # -----------------------------------------------------
+
+    assignments = (
+        db.query(ProjectEngineerAssignment)
+        .filter(
+            ProjectEngineerAssignment.project_id == project_id
+        )
+        .all()
+    )
+
+    for assignment in assignments:
+
+        engineer = (
+            db.query(User)
+            .filter(
+                User.id == assignment.engineer_id,
+                User.role == "ENGINEER",
+                User.is_active == True
+            )
+            .first()
+        )
+
+        if engineer and engineer.email:
+            recipients.add(engineer.email)
+
+    return recipients
+
+
+# =========================================================
+# CREATE PROJECT
+# =========================================================
 
 @router.post("/", response_model=ProjectResponse)
 def create_project(
@@ -109,8 +197,6 @@ def create_project(
     # -----------------------------------------------------
     # Create project
     # -----------------------------------------------------
-    # New projects must always start in Planning.
-    # Ignore any status sent by the client.
 
     new_project = Project(
         project_name=project.project_name,
@@ -125,7 +211,6 @@ def create_project(
         status="Planning",
         manager_id=project.manager_id,
 
-        # Closure conditions start as incomplete
         inspection_approved=False,
         financial_settlement_complete=False,
         pending_issues_resolved=False,
@@ -155,9 +240,9 @@ def create_project(
     return new_project
 
 
-# ---------------------------------------------------------
-# Get All Projects
-# ---------------------------------------------------------
+# =========================================================
+# GET ALL PROJECTS
+# =========================================================
 
 @router.get("/", response_model=list[ProjectResponse])
 def get_projects(
@@ -167,9 +252,186 @@ def get_projects(
     return db.query(Project).all()
 
 
-# ---------------------------------------------------------
-# Project Tracking
-# ---------------------------------------------------------
+# =========================================================
+# PROJECT DEADLINE NOTIFICATIONS
+#
+# Upcoming:
+#   Today through the next 7 days.
+#
+# Missed:
+#   End date has passed and project is not
+#   Completed or Closed.
+#
+# Recipients:
+#   Project Manager
+#   Assigned active Engineers
+#
+# Duplicate notifications are prevented.
+# =========================================================
+
+@router.get("/deadline-notifications")
+def generate_project_deadline_notifications(
+    db: Session = Depends(get_db)
+):
+
+    today = date.today()
+
+    projects = (
+        db.query(Project)
+        .all()
+    )
+
+    notifications_created = 0
+    upcoming_count = 0
+    missed_count = 0
+
+    # -----------------------------------------------------
+    # Process each project
+    # -----------------------------------------------------
+
+    for project in projects:
+
+        # -------------------------------------------------
+        # Ignore projects without an end date
+        # -------------------------------------------------
+
+        if not project.end_date:
+            continue
+
+        # -------------------------------------------------
+        # Completed and Closed projects do not need
+        # deadline alerts.
+        # -------------------------------------------------
+
+        if project.status in ["Completed", "Closed"]:
+            continue
+
+        # -------------------------------------------------
+        # Calculate remaining days
+        # -------------------------------------------------
+
+        days_remaining = (
+            project.end_date - today
+        ).days
+
+        notification_title = None
+        notification_message = None
+
+        # =================================================
+        # MISSED PROJECT DEADLINE
+        # =================================================
+
+        if days_remaining < 0:
+
+            notification_title = "Project Deadline Missed"
+
+            notification_message = (
+                f"Project #{project.id} - "
+                f"{project.project_name} was due on "
+                f"{project.end_date} and has not been completed."
+            )
+
+            missed_count += 1
+
+        # =================================================
+        # UPCOMING PROJECT DEADLINE
+        # =================================================
+
+        elif days_remaining <= 7:
+
+            notification_title = (
+                "Project Deadline Approaching"
+            )
+
+            if days_remaining == 0:
+
+                deadline_text = "today"
+
+            elif days_remaining == 1:
+
+                deadline_text = "tomorrow"
+
+            else:
+
+                deadline_text = (
+                    f"in {days_remaining} days"
+                )
+
+            notification_message = (
+                f"Project #{project.id} - "
+                f"{project.project_name} is due "
+                f"{deadline_text} on {project.end_date}."
+            )
+
+            upcoming_count += 1
+
+        # -------------------------------------------------
+        # More than 7 days away
+        # -------------------------------------------------
+
+        else:
+            continue
+
+        # =================================================
+        # GET PROJECT USERS
+        # =================================================
+
+        recipients = get_project_notification_recipients(
+            db=db,
+            project_id=project.id
+        )
+
+        # =================================================
+        # CREATE NOTIFICATIONS
+        # =================================================
+
+        for recipient in recipients:
+
+            # -------------------------------------------------
+            # Duplicate prevention
+            # -------------------------------------------------
+
+            existing_notification = (
+                db.query(Notification)
+                .filter(
+                    Notification.title == notification_title,
+                    Notification.message == notification_message,
+                    Notification.recipient == recipient
+                )
+                .first()
+            )
+
+            if existing_notification:
+                continue
+
+            notification = Notification(
+                title=notification_title,
+                message=notification_message,
+                recipient=recipient,
+                status="Unread"
+            )
+
+            db.add(notification)
+
+            notifications_created += 1
+
+    db.commit()
+
+    return {
+        "message": (
+            "Project deadline notifications "
+            "processed successfully"
+        ),
+        "today": today,
+        "upcoming_projects": upcoming_count,
+        "missed_projects": missed_count,
+        "notifications_created": notifications_created
+    }
+
+
+# =========================================================
+# PROJECT TRACKING
+# =========================================================
 
 @router.get(
     "/{project_id}/tracking",
@@ -212,9 +474,6 @@ def get_project_tracking(
 
     # -----------------------------------------------------
     # Actual construction progress
-    #
-    # Progress is calculated from the latest Daily Progress
-    # record for each work category.
     # -----------------------------------------------------
 
     daily_progress_records = (
@@ -260,19 +519,15 @@ def get_project_tracking(
     }
 
 
-# ---------------------------------------------------------
-# Budget & Cost Integration
-# ---------------------------------------------------------
+# =========================================================
+# BUDGET & COST INTEGRATION
+# =========================================================
 
 @router.get("/{project_id}/budget-cost")
 def get_project_budget_cost(
     project_id: int,
     db: Session = Depends(get_db)
 ):
-
-    # -----------------------------------------------------
-    # Find project
-    # -----------------------------------------------------
 
     project = db.query(Project).filter(
         Project.id == project_id
@@ -284,20 +539,7 @@ def get_project_budget_cost(
             detail="Project not found"
         )
 
-    # -----------------------------------------------------
-    # Project Budget
-    # -----------------------------------------------------
-
     budget = project.budget or 0
-
-    # -----------------------------------------------------
-    # Calculate Actual Labour Cost
-    #
-    # Payroll records are connected to projects using
-    # project_id.
-    #
-    # estimated_pay is calculated by the Payroll API.
-    # -----------------------------------------------------
 
     payroll_records = db.query(Payroll).filter(
         Payroll.project_id == project_id
@@ -311,31 +553,9 @@ def get_project_budget_cost(
         2
     )
 
-    # -----------------------------------------------------
-    # Material Cost
-    #
-    # Current Inventory / Material models do not contain
-    # price or cost information.
-    #
-    # Therefore we do not invent a material cost.
-    # -----------------------------------------------------
-
     actual_material_cost = 0.0
 
-    # -----------------------------------------------------
-    # Procurement Cost
-    #
-    # Current Procurement model does not contain price,
-    # unit cost, or total cost.
-    #
-    # Therefore procurement cost cannot be calculated yet.
-    # -----------------------------------------------------
-
     actual_procurement_cost = 0.0
-
-    # -----------------------------------------------------
-    # Total Actual Cost
-    # -----------------------------------------------------
 
     total_actual_cost = round(
         actual_labour_cost
@@ -344,18 +564,10 @@ def get_project_budget_cost(
         2
     )
 
-    # -----------------------------------------------------
-    # Remaining Budget
-    # -----------------------------------------------------
-
     remaining_budget = round(
         budget - total_actual_cost,
         2
     )
-
-    # -----------------------------------------------------
-    # Budget Utilization Percentage
-    # -----------------------------------------------------
 
     budget_utilization_percentage = 0.0
 
@@ -365,10 +577,6 @@ def get_project_budget_cost(
             (total_actual_cost / budget) * 100,
             2
         )
-
-    # -----------------------------------------------------
-    # Return Budget & Cost Summary
-    # -----------------------------------------------------
 
     return {
         "project_id": project.id,
@@ -384,11 +592,14 @@ def get_project_budget_cost(
     }
 
 
-# ---------------------------------------------------------
-# Get Project By ID
-# ---------------------------------------------------------
+# =========================================================
+# GET PROJECT BY ID
+# =========================================================
 
-@router.get("/{project_id}", response_model=ProjectResponse)
+@router.get(
+    "/{project_id}",
+    response_model=ProjectResponse
+)
 def get_project(
     project_id: int,
     db: Session = Depends(get_db)
@@ -407,11 +618,14 @@ def get_project(
     return project
 
 
-# ---------------------------------------------------------
-# Update Project
-# ---------------------------------------------------------
+# =========================================================
+# UPDATE PROJECT
+# =========================================================
 
-@router.put("/{project_id}", response_model=ProjectResponse)
+@router.put(
+    "/{project_id}",
+    response_model=ProjectResponse
+)
 def update_project(
     project_id: int,
     project_data: ProjectCreate,
@@ -534,12 +748,16 @@ def update_project(
         "manager_id": project_data.manager_id
     }
 
+    changed_fields = []
+
     for field in fields_to_check:
 
         old_value = getattr(project, field)
         new_value = new_values[field]
 
         if old_value != new_value:
+
+            changed_fields.append(field)
 
             history = ProjectHistory(
                 project_id=project.id,
@@ -563,8 +781,6 @@ def update_project(
     # -----------------------------------------------------
     # Update fields
     # -----------------------------------------------------
-    # Status and closure conditions are intentionally NOT
-    # updated here.
 
     project.project_name = project_data.project_name
     project.project_code = project_data.project_code
@@ -580,12 +796,72 @@ def update_project(
     db.commit()
     db.refresh(project)
 
+    # =====================================================
+    # MODULE 8 - PROJECT UPDATE NOTIFICATION
+    # =====================================================
+
+    print(
+        "MODULE 8 changed_fields:",
+        changed_fields
+    )
+
+    print(
+        "MODULE 8 project_id:",
+        project.id
+    )
+
+    if changed_fields:
+
+        recipients = get_project_notification_recipients(
+            db=db,
+            project_id=project.id
+        )
+
+        print(
+            "MODULE 8 notification recipients:",
+            recipients
+        )
+
+        changed_fields_text = ", ".join(
+            changed_fields
+        )
+
+        for recipient in recipients:
+
+            print(
+                "MODULE 8 creating notification for:",
+                recipient
+            )
+
+            create_notification(
+                db=db,
+                title="Project Updated",
+                message=(
+                    f"Project #{project.id} - "
+                    f"{project.project_name} was updated. "
+                    f"Changed fields: "
+                    f"{changed_fields_text}."
+                ),
+                recipient=recipient
+            )
+
+        print(
+            "MODULE 8 project update notifications created"
+        )
+
+    else:
+
+        print(
+            "MODULE 8: No project fields changed. "
+            "Notification not created."
+        )
+
     return project
 
 
-# ---------------------------------------------------------
-# Update Project Status
-# ---------------------------------------------------------
+# =========================================================
+# UPDATE PROJECT STATUS
+# =========================================================
 
 @router.put(
     "/{project_id}/status",
@@ -695,12 +971,38 @@ def update_project_status(
     db.commit()
     db.refresh(project)
 
+    # =====================================================
+    # MODULE 8 - PROJECT STATUS NOTIFICATION
+    # =====================================================
+
+    recipients = get_project_notification_recipients(
+        db=db,
+        project_id=project.id
+    )
+
+    # -----------------------------------------------------
+    # Create notifications
+    # -----------------------------------------------------
+
+    for recipient in recipients:
+
+        create_notification(
+            db=db,
+            title="Project Status Updated",
+            message=(
+                f"Project #{project.id} - "
+                f"{project.project_name} status changed "
+                f"from {current_status} to {new_status}."
+            ),
+            recipient=recipient
+        )
+
     return project
 
 
-# ---------------------------------------------------------
-# Update Project Closure Conditions
-# ---------------------------------------------------------
+# =========================================================
+# UPDATE PROJECT CLOSURE CONDITIONS
+# =========================================================
 
 @router.put(
     "/{project_id}/closure-validation",
@@ -801,9 +1103,9 @@ def update_project_closure_validation(
     return project
 
 
-# ---------------------------------------------------------
-# Close Project
-# ---------------------------------------------------------
+# =========================================================
+# CLOSE PROJECT
+# =========================================================
 
 @router.put(
     "/{project_id}/close",
@@ -954,9 +1256,9 @@ def close_project(
     return project
 
 
-# ---------------------------------------------------------
-# Get Project History
-# ---------------------------------------------------------
+# =========================================================
+# GET PROJECT HISTORY
+# =========================================================
 
 @router.get(
     "/{project_id}/history",
@@ -1007,9 +1309,9 @@ def get_project_history(
     return history
 
 
-# ---------------------------------------------------------
-# Delete Project
-# ---------------------------------------------------------
+# =========================================================
+# DELETE PROJECT
+# =========================================================
 
 @router.delete("/{project_id}")
 def delete_project(

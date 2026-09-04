@@ -16,11 +16,48 @@ from app.schemas.attendance_schema import (
     AttendanceSummaryResponse,
 )
 
+from app.services.notification_service import create_notification
+
 
 router = APIRouter(
     prefix="/attendance",
     tags=["Attendance"],
 )
+
+
+# ============================================================
+# MODULE 8 - GET RESPONSIBLE PROJECT MANAGER
+# ============================================================
+
+def get_project_manager_email(
+    db: Session,
+    project_id: int,
+):
+    project = (
+        db.query(Project)
+        .filter(Project.id == project_id)
+        .first()
+    )
+
+    if not project:
+        return None
+
+    if not project.manager_id:
+        return None
+
+    manager = (
+        db.query(User)
+        .filter(
+            User.id == project.manager_id,
+            User.role == "MANAGER",
+        )
+        .first()
+    )
+
+    if not manager:
+        return None
+
+    return manager.email
 
 
 # ============================================================
@@ -128,6 +165,79 @@ def create_attendance(
     db.commit()
     db.refresh(new_attendance)
 
+    # --------------------------------------------------------
+    # MODULE 8 - ATTENDANCE ALERT
+    #
+    # Generate notifications for:
+    # ABSENT
+    # LATE
+    # HALF_DAY
+    #
+    # Notification goes only to the responsible
+    # Project Manager.
+    # --------------------------------------------------------
+
+    attendance_status = (
+        new_attendance.status or ""
+    ).strip().upper()
+
+    if (
+        attendance_status in [
+            "ABSENT",
+            "LATE",
+            "HALF_DAY",
+            "HALF-DAY",
+            "HALFDAY",
+        ]
+        and new_attendance.project_id is not None
+    ):
+
+        worker_name = (
+            getattr(worker, "name", None)
+            or f"Worker #{worker.id}"
+        )
+
+        title_map = {
+            "ABSENT": "Attendance Alert",
+            "LATE": "Late Attendance Alert",
+            "HALF_DAY": "Half-Day Attendance Alert",
+            "HALF-DAY": "Half-Day Attendance Alert",
+            "HALFDAY": "Half-Day Attendance Alert",
+        }
+
+        title = title_map.get(
+            attendance_status,
+            "Attendance Alert"
+        )
+
+        message = (
+            f"{worker_name} was marked "
+            f"{new_attendance.status} "
+            f"on {new_attendance.date}."
+        )
+
+        message += (
+            f" Project: #{new_attendance.project_id}."
+        )
+
+        # ----------------------------------------------------
+        # Find responsible Project Manager
+        # ----------------------------------------------------
+
+        manager_email = get_project_manager_email(
+            db=db,
+            project_id=new_attendance.project_id,
+        )
+
+        if manager_email:
+
+            create_notification(
+                db=db,
+                title=title,
+                message=message,
+                recipient=manager_email,
+            )
+
     return new_attendance
 
 
@@ -147,17 +257,9 @@ def get_attendance_summary(
     )
 ):
 
-    # --------------------------------------------------------
-    # Get all attendance records
-    # --------------------------------------------------------
-
     attendance_records = db.query(
         Attendance
     ).all()
-
-    # --------------------------------------------------------
-    # If no attendance records exist
-    # --------------------------------------------------------
 
     if not attendance_records:
         return AttendanceSummaryResponse(
@@ -170,10 +272,6 @@ def get_attendance_summary(
             attendance_percentage=0.0
         )
 
-    # --------------------------------------------------------
-    # Initialize counters
-    # --------------------------------------------------------
-
     total_records = len(attendance_records)
 
     present_count = 0
@@ -183,13 +281,11 @@ def get_attendance_summary(
 
     total_working_hours = 0.0
 
-    # --------------------------------------------------------
-    # Calculate summary
-    # --------------------------------------------------------
-
     for record in attendance_records:
 
-        status = (record.status or "").strip().upper()
+        status = (
+            record.status or ""
+        ).strip().upper()
 
         if status == "PRESENT":
             present_count += 1
@@ -200,18 +296,16 @@ def get_attendance_summary(
         elif status == "LATE":
             late_count += 1
 
-        elif status in ["HALF_DAY", "HALF-DAY", "HALFDAY"]:
+        elif status in [
+            "HALF_DAY",
+            "HALF-DAY",
+            "HALFDAY"
+        ]:
             half_day_count += 1
 
-        # Add working hours
-        total_working_hours += record.working_hours or 0.0
-
-    # --------------------------------------------------------
-    # Calculate attendance percentage
-    #
-    # Present + Late + Half Day are treated as attended
-    # records.
-    # --------------------------------------------------------
+        total_working_hours += (
+            record.working_hours or 0.0
+        )
 
     attended_records = (
         present_count
@@ -222,10 +316,6 @@ def get_attendance_summary(
     attendance_percentage = (
         attended_records / total_records
     ) * 100
-
-    # --------------------------------------------------------
-    # Return summary
-    # --------------------------------------------------------
 
     return AttendanceSummaryResponse(
         total_records=total_records,
@@ -406,14 +496,92 @@ def update_attendance(
         )
 
     # --------------------------------------------------------
+    # Save old attendance status
+    # --------------------------------------------------------
+
+    old_status = attendance.status
+
+    # --------------------------------------------------------
     # Update
     # --------------------------------------------------------
 
     for key, value in attendance_data.model_dump().items():
-        setattr(attendance, key, value)
+        setattr(
+            attendance,
+            key,
+            value
+        )
 
     db.commit()
     db.refresh(attendance)
+
+    # --------------------------------------------------------
+    # MODULE 8 - ATTENDANCE ALERT ON UPDATE
+    #
+    # If attendance is changed to ABSENT, LATE or HALF_DAY,
+    # notify the responsible Project Manager.
+    # --------------------------------------------------------
+
+    new_status = (
+        attendance.status or ""
+    ).strip().upper()
+
+    if (
+        old_status != attendance.status
+        and new_status in [
+            "ABSENT",
+            "LATE",
+            "HALF_DAY",
+            "HALF-DAY",
+            "HALFDAY",
+        ]
+        and attendance.project_id is not None
+    ):
+
+        worker_name = (
+            getattr(worker, "name", None)
+            or f"Worker #{worker.id}"
+        )
+
+        title_map = {
+            "ABSENT": "Attendance Alert",
+            "LATE": "Late Attendance Alert",
+            "HALF_DAY": "Half-Day Attendance Alert",
+            "HALF-DAY": "Half-Day Attendance Alert",
+            "HALFDAY": "Half-Day Attendance Alert",
+        }
+
+        title = title_map.get(
+            new_status,
+            "Attendance Alert"
+        )
+
+        message = (
+            f"{worker_name}'s attendance was updated to "
+            f"{attendance.status} on {attendance.date}."
+        )
+
+        message += (
+            f" Project: #{attendance.project_id}."
+        )
+
+        # ----------------------------------------------------
+        # Find responsible Project Manager
+        # ----------------------------------------------------
+
+        manager_email = get_project_manager_email(
+            db=db,
+            project_id=attendance.project_id,
+        )
+
+        if manager_email:
+
+            create_notification(
+                db=db,
+                title=title,
+                message=message,
+                recipient=manager_email,
+            )
 
     return attendance
 
@@ -423,7 +591,9 @@ def update_attendance(
 # Allowed roles: ADMIN, MANAGER
 # ============================================================
 
-@router.delete("/{attendance_id}")
+@router.delete(
+    "/{attendance_id}"
+)
 def delete_attendance(
     attendance_id: int,
     db: Session = Depends(get_db),

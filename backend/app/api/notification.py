@@ -52,9 +52,14 @@ def create_notification(
 # ============================================================
 # GET MY NOTIFICATIONS
 #
-# The recipient field currently stores a string.
-# We therefore use the logged-in user's email, name, or role
-# as possible recipient values.
+# Users can only see notifications addressed to:
+# - their email
+# - their name
+# - their role
+# - ALL
+#
+# Allowed roles:
+# ADMIN, MANAGER, ENGINEER, CLIENT, WORKER
 # ============================================================
 
 @router.get(
@@ -91,7 +96,10 @@ def get_my_notifications(
 
 
 # ============================================================
-# GET UNREAD MY NOTIFICATIONS
+# GET MY UNREAD NOTIFICATIONS
+#
+# Allowed roles:
+# ADMIN, MANAGER, ENGINEER, CLIENT, WORKER
 # ============================================================
 
 @router.get(
@@ -129,6 +137,96 @@ def get_my_unread_notifications(
 
 
 # ============================================================
+# GET MY UNREAD NOTIFICATION COUNT
+#
+# Allowed roles:
+# ADMIN, MANAGER, ENGINEER, CLIENT, WORKER
+# ============================================================
+
+@router.get(
+    "/my/unread/count",
+    response_model=dict
+)
+def get_my_unread_notification_count(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        role_required([
+            "ADMIN",
+            "MANAGER",
+            "ENGINEER",
+            "CLIENT",
+            "WORKER",
+        ])
+    ),
+):
+    count = (
+        db.query(Notification)
+        .filter(
+            Notification.recipient.in_([
+                current_user.email,
+                current_user.name,
+                current_user.role,
+                "ALL",
+            ]),
+            Notification.status == "Unread",
+        )
+        .count()
+    )
+
+    return {
+        "unread_count": count
+    }
+
+
+# ============================================================
+# MARK ALL MY NOTIFICATIONS AS READ
+#
+# Allowed roles:
+# ADMIN, MANAGER, ENGINEER, CLIENT, WORKER
+# ============================================================
+
+@router.put(
+    "/my/read-all",
+    response_model=dict
+)
+def mark_all_my_notifications_as_read(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(
+        role_required([
+            "ADMIN",
+            "MANAGER",
+            "ENGINEER",
+            "CLIENT",
+            "WORKER",
+        ])
+    ),
+):
+    notifications = (
+        db.query(Notification)
+        .filter(
+            Notification.recipient.in_([
+                current_user.email,
+                current_user.name,
+                current_user.role,
+                "ALL",
+            ]),
+            Notification.status == "Unread",
+        )
+        .all()
+    )
+
+    for notification in notifications:
+        notification.status = "Read"
+
+    db.commit()
+
+    return {
+        "message": "All notifications marked as read",
+        "updated_count": len(notifications),
+    }
+
+
+# ============================================================
 # GET ALL NOTIFICATIONS
 # Allowed roles: ADMIN, MANAGER
 # ============================================================
@@ -152,6 +250,12 @@ def get_notifications(
 
 # ============================================================
 # GET NOTIFICATION BY ID
+#
+# ADMIN/MANAGER:
+#     Can access any notification.
+#
+# ENGINEER/CLIENT/WORKER:
+#     Can access only their own notification.
 # ============================================================
 
 @router.get(
@@ -183,9 +287,12 @@ def get_notification(
             detail="Notification not found",
         )
 
-    # Admin and Manager can access notifications.
-    # Other users can only access their own notification.
+    # --------------------------------------------------------
+    # ADMIN and MANAGER can access any notification
+    # --------------------------------------------------------
+
     if current_user.role not in ["ADMIN", "MANAGER"]:
+
         allowed_recipients = [
             current_user.email,
             current_user.name,
@@ -245,8 +352,11 @@ def update_notification(
 # ============================================================
 # MARK NOTIFICATION AS READ
 #
-# A user can mark their own notification as read.
-# ADMIN/MANAGER can mark any notification as read.
+# ADMIN/MANAGER:
+#     Can mark any notification as read.
+#
+# ENGINEER/CLIENT/WORKER:
+#     Can mark only their own notification as read.
 # ============================================================
 
 @router.put(
@@ -278,9 +388,13 @@ def mark_notification_as_read(
             detail="Notification not found",
         )
 
-    # Non-admin/manager users can only mark
-    # their own notifications as read.
+    # --------------------------------------------------------
+    # Non-admin/manager users can only mark their own
+    # notifications as read.
+    # --------------------------------------------------------
+
     if current_user.role not in ["ADMIN", "MANAGER"]:
+
         allowed_recipients = [
             current_user.email,
             current_user.name,
@@ -300,51 +414,6 @@ def mark_notification_as_read(
     db.refresh(notification)
 
     return notification
-
-
-# ============================================================
-# MARK ALL MY NOTIFICATIONS AS READ
-# ============================================================
-
-@router.put(
-    "/my/read-all",
-    response_model=dict
-)
-def mark_all_my_notifications_as_read(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(
-        role_required([
-            "ADMIN",
-            "MANAGER",
-            "ENGINEER",
-            "CLIENT",
-            "WORKER",
-        ])
-    ),
-):
-    notifications = (
-        db.query(Notification)
-        .filter(
-            Notification.recipient.in_([
-                current_user.email,
-                current_user.name,
-                current_user.role,
-                "ALL",
-            ]),
-            Notification.status == "Unread",
-        )
-        .all()
-    )
-
-    for notification in notifications:
-        notification.status = "Read"
-
-    db.commit()
-
-    return {
-        "message": "All notifications marked as read",
-        "updated_count": len(notifications),
-    }
 
 
 # ============================================================
