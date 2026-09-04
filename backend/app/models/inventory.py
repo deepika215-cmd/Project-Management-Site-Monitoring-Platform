@@ -24,4 +24,12 @@ class Inventory(Base):
         ForeignKey("projects.id")
     )
 
+    resource_id = Column(
+        Integer,
+        ForeignKey("resources.id"),
+        nullable=True
+    )
+
     project = relationship("Project")
+
+    resource = relationship("Resource")

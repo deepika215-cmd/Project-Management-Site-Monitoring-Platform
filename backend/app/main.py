@@ -14,6 +14,9 @@ from app.models.project_milestone import ProjectMilestone
 from app.models.project_engineer_assignment import ProjectEngineerAssignment
 
 from app.models.resource import Resource
+from app.models.resource_category import ResourceCategory
+from app.models.resource_allocation import ResourceAllocation
+from app.models.resource_utilization import ResourceUtilization
 from app.models.machinery import Machinery
 from app.models.maintenance import Maintenance
 from app.models.inventory import Inventory
@@ -62,12 +65,34 @@ from app.api.auth import router as auth_router
 from app.api.project import router as project_router
 from app.api.milestone import router as milestone_router
 
-# Project Engineer Assignment
+
+# ============================================================
+# PROJECT ENGINEER ASSIGNMENT
+# ============================================================
+
 from app.api.project_engineer_assignment import (
     router as project_engineer_assignment_router
 )
 
+
+# ============================================================
+# RESOURCE MANAGEMENT
+# ============================================================
+
 from app.api.resource import router as resource_router
+
+from app.api.resource_category import (
+    router as resource_category_router
+)
+
+from app.api.resource_allocation import (
+    router as resource_allocation_router
+)
+
+from app.api.resource_utilization import (
+    router as resource_utilization_router
+)
+
 from app.api.machinery import router as machinery_router
 from app.api.maintenance import router as maintenance_router
 from app.api.inventory import router as inventory_router
@@ -79,8 +104,12 @@ from app.api.inventory import router as inventory_router
 
 from app.api.worker import router as worker_router
 from app.api.contractor import router as contractor_router
-from app.api.worker_assignment import router as worker_assignment_router
-from app.api.workforce_category import router as workforce_category_router
+from app.api.worker_assignment import (
+    router as worker_assignment_router
+)
+from app.api.workforce_category import (
+    router as workforce_category_router
+)
 from app.api.attendance import router as attendance_router
 from app.api.shift import router as shift_router
 from app.api.payroll import router as payroll_router
@@ -93,6 +122,12 @@ from app.api.payroll import router as payroll_router
 from app.api.procurement import router as procurement_router
 from app.api.notification import router as notification_router
 from app.api.report import router as report_router
+
+
+# ============================================================
+# ANALYTICS
+# ============================================================
+
 from app.api.analytics import router as analytics_router
 
 
@@ -112,9 +147,15 @@ from app.api.site_activity_log import router as site_activity_log_router
 # ============================================================
 
 from app.api.material import router as material_router
-from app.api.material_request import router as material_request_router
-from app.api.material_allocation import router as material_allocation_router
-from app.api.stock_movement import router as stock_movement_router
+from app.api.material_request import (
+    router as material_request_router
+)
+from app.api.material_allocation import (
+    router as material_allocation_router
+)
+from app.api.stock_movement import (
+    router as stock_movement_router
+)
 
 
 # ============================================================
@@ -177,6 +218,9 @@ app.include_router(milestone_router)
 # ============================================================
 
 app.include_router(resource_router)
+app.include_router(resource_category_router)
+app.include_router(resource_allocation_router)
+app.include_router(resource_utilization_router)
 app.include_router(machinery_router)
 app.include_router(maintenance_router)
 
@@ -208,6 +252,12 @@ app.include_router(payroll_router)
 app.include_router(procurement_router)
 app.include_router(notification_router)
 app.include_router(report_router)
+
+
+# ============================================================
+# ANALYTICS
+# ============================================================
+
 app.include_router(analytics_router)
 
 
@@ -248,3 +298,5 @@ def home():
     return {
         "message": "BuildTrack Backend Running Successfully"
     }
+
+

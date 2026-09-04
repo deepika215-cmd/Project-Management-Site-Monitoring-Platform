@@ -26,7 +26,20 @@ def create_machinery(
     machinery: MachineryCreate,
     db: Session = Depends(get_db)
 ):
+    # Check equipment ID uniqueness if provided
+    if machinery.equipment_id:
+        existing = db.query(Machinery).filter(
+            Machinery.equipment_id == machinery.equipment_id
+        ).first()
+
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail="Equipment ID already exists"
+            )
+
     new_machinery = Machinery(
+        equipment_id=machinery.equipment_id,
         name=machinery.name,
         machinery_type=machinery.machinery_type,
         location=machinery.location,
@@ -96,6 +109,20 @@ def update_machinery(
             detail="Machinery not found"
         )
 
+    # Check equipment ID uniqueness
+    if machinery_data.equipment_id:
+        existing = db.query(Machinery).filter(
+            Machinery.equipment_id == machinery_data.equipment_id,
+            Machinery.id != machinery_id
+        ).first()
+
+        if existing:
+            raise HTTPException(
+                status_code=400,
+                detail="Equipment ID already exists"
+            )
+
+    machinery.equipment_id = machinery_data.equipment_id
     machinery.name = machinery_data.name
     machinery.machinery_type = machinery_data.machinery_type
     machinery.location = machinery_data.location

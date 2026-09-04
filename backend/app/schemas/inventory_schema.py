@@ -13,6 +13,7 @@ class InventoryResponse(BaseModel):
     unit: str | None = None
     supplier: str | None = None
     project_id: int | None = None
+    resource_id: int | None = None
 
     class Config:
         from_attributes = True

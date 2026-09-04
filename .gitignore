@@ -13,8 +13,7 @@ frontend/.angular/
 # Environment variables
 .env
 
-# Database
-backend/buildtrack.db
-
 # Backup files
 *.backup
+
+

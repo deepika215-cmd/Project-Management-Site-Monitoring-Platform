@@ -12,6 +12,8 @@ from app.models.procurement import Procurement
 from app.models.project_milestone import ProjectMilestone
 from app.models.daily_progress import DailyProgress
 from app.models.report import Report
+from app.models.material import Material
+from app.models.stock_movement import StockMovement
 
 from app.schemas.analytics_schema import (
     AnalyticsResponse,
@@ -173,25 +175,6 @@ def project_progress(
 
         # ----------------------------------------------------
         # Calculate actual construction progress
-        #
-        # Example:
-        #
-        # Foundation:
-        # 40% -> 60% -> 80%
-        #
-        # Structure:
-        # 30% -> 50%
-        #
-        # Electrical:
-        # 20%
-        #
-        # Latest values:
-        # Foundation = 80%
-        # Structure = 50%
-        # Electrical = 20%
-        #
-        # Overall:
-        # (80 + 50 + 20) / 3 = 50%
         # ----------------------------------------------------
 
         progress = 0.0
@@ -304,24 +287,62 @@ def inventory_status(
     db: Session = Depends(get_db)
 ):
     """
-    Returns inventory quantity, used quantity
+    Returns inventory quantity, consumed quantity
     and remaining quantity.
+
+    The Inventory model does not contain a 'used' column.
+    Therefore, consumed quantity is calculated from
+    StockMovement records.
     """
 
-    inventory = db.query(Inventory).all()
+    inventory_items = db.query(Inventory).all()
 
     result = []
 
-    for item in inventory:
+    for item in inventory_items:
 
         quantity = item.quantity or 0
-        used = item.used or 0
 
-        remaining = quantity - used
+        # ----------------------------------------------------
+        # Find matching Material
+        # ----------------------------------------------------
+
+        material = db.query(Material).filter(
+            Material.name == item.item_name
+        ).first()
+
+        used = 0
+
+        # ----------------------------------------------------
+        # Calculate consumed quantity from StockMovement
+        # ----------------------------------------------------
+
+        if material:
+
+            consumed_movements = db.query(
+                StockMovement
+            ).filter(
+                StockMovement.material_id == material.id,
+                StockMovement.movement_type == "CONSUMED"
+            ).all()
+
+            used = sum(
+                movement.quantity or 0
+                for movement in consumed_movements
+            )
+
+        # ----------------------------------------------------
+        # Calculate remaining inventory
+        # ----------------------------------------------------
+
+        remaining = max(
+            quantity - used,
+            0
+        )
 
         result.append({
             "inventory_id": item.id,
-            "item_name": item.material_name,
+            "item_name": item.item_name,
             "quantity": quantity,
             "used": used,
             "remaining": remaining

@@ -3,6 +3,7 @@ from typing import Optional
 
 
 class MachineryCreate(BaseModel):
+    equipment_id: str
     name: str
     machinery_type: str
     location: Optional[str] = None
@@ -14,6 +15,7 @@ class MachineryCreate(BaseModel):
 
 class MachineryResponse(BaseModel):
     id: int
+    equipment_id: Optional[str]
     name: str
     machinery_type: str
     location: Optional[str]

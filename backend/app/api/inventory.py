@@ -5,6 +5,7 @@ from app.database.database import SessionLocal
 from app.models.inventory import Inventory
 from app.models.material import Material
 from app.models.stock_movement import StockMovement
+from app.models.resource import Resource
 
 from app.schemas.inventory_schema import (
     InventoryResponse,
@@ -59,13 +60,32 @@ def create_inventory(
             detail="Quantity cannot be negative"
         )
 
+    resource_id = inventory_data.get("resource_id")
+
+    # --------------------------------------------------------
+    # Validate Resource if provided
+    # --------------------------------------------------------
+
+    if resource_id is not None:
+
+        resource = db.query(Resource).filter(
+            Resource.id == resource_id
+        ).first()
+
+        if not resource:
+            raise HTTPException(
+                status_code=404,
+                detail="Resource not found"
+            )
+
     new_inventory = Inventory(
         item_name=inventory_data.get("item_name"),
         category=inventory_data.get("category"),
         quantity=inventory_data.get("quantity", 0),
         unit=inventory_data.get("unit"),
         supplier=inventory_data.get("supplier"),
-        project_id=inventory_data.get("project_id")
+        project_id=inventory_data.get("project_id"),
+        resource_id=resource_id
     )
 
     if not new_inventory.item_name:
@@ -113,15 +133,12 @@ def get_low_stock_inventory(
             Material.name == inventory.item_name
         ).first()
 
-        # If no matching material exists,
-        # minimum stock information is unavailable.
         if not material:
             continue
 
         minimum_stock = material.minimum_stock or 0
         available_stock = inventory.quantity or 0
 
-        # Low stock condition
         if available_stock <= minimum_stock:
 
             if available_stock == 0:
@@ -306,13 +323,34 @@ def update_inventory(
                 detail="Quantity cannot be negative"
             )
 
+    # --------------------------------------------------------
+    # Validate Resource if being updated
+    # --------------------------------------------------------
+
+    if "resource_id" in inventory_data:
+
+        resource_id = inventory_data["resource_id"]
+
+        if resource_id is not None:
+
+            resource = db.query(Resource).filter(
+                Resource.id == resource_id
+            ).first()
+
+            if not resource:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Resource not found"
+                )
+
     allowed_fields = [
         "item_name",
         "category",
         "quantity",
         "unit",
         "supplier",
-        "project_id"
+        "project_id",
+        "resource_id"
     ]
 
     for field in allowed_fields:
