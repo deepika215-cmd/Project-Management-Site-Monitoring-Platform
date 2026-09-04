@@ -77,6 +77,8 @@ import { Attendance } from './pages/attendance/attendance';
 import { Reports } from './pages/reports/reports';
 import { Analytics } from './pages/analytics/analytics';
 
+import { Budget } from './pages/budget/budget';
+
 // =====================================================
 // PROCUREMENT REQUESTS
 // =====================================================
@@ -88,7 +90,6 @@ import { Requests } from './pages/procurement/requests/requests';
 // =====================================================
 
 export const routes: Routes = [
-
   // =====================================================
   // DEFAULT
   // =====================================================
@@ -96,7 +97,7 @@ export const routes: Routes = [
   {
     path: '',
     redirectTo: 'login',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   // =====================================================
@@ -105,22 +106,22 @@ export const routes: Routes = [
 
   {
     path: 'login',
-    component: Login
+    component: Login,
   },
 
   {
     path: 'register',
-    component: Register
+    component: Register,
   },
 
   {
     path: 'forgot-password',
-    component: ForgotPassword
+    component: ForgotPassword,
   },
 
   {
     path: 'reset-password',
-    component: ResetPassword
+    component: ResetPassword,
   },
 
   // =====================================================
@@ -130,55 +131,37 @@ export const routes: Routes = [
   {
     path: 'admin-dashboard',
     component: AdminDashboard,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
 
   {
     path: 'project-manager-dashboard',
     component: ProjectManagerDashboard,
-    canActivate: [
-      authGuard,
-      roleGuard(['PROJECT_MANAGER'])
-    ]
+    canActivate: [authGuard, roleGuard(['PROJECT_MANAGER'])],
   },
 
   {
     path: 'site-engineer-dashboard',
     component: SiteEngineerDashboard,
-    canActivate: [
-      authGuard,
-      roleGuard(['SITE_ENGINEER'])
-    ]
+    canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])],
   },
 
   {
     path: 'contractor-dashboard',
     component: ContractorDashboard,
-    canActivate: [
-      authGuard,
-      roleGuard(['CONTRACTOR'])
-    ]
+    canActivate: [authGuard, roleGuard(['CONTRACTOR'])],
   },
 
   {
     path: 'worker-dashboard',
     component: WorkerDashboard,
-    canActivate: [
-      authGuard,
-      roleGuard(['WORKER'])
-    ]
+    canActivate: [authGuard, roleGuard(['WORKER'])],
   },
 
   {
     path: 'client-dashboard',
     component: ClientDashboard,
-    canActivate: [
-      authGuard,
-      roleGuard(['CLIENT'])
-    ]
+    canActivate: [authGuard, roleGuard(['CLIENT'])],
   },
 
   // =====================================================
@@ -188,10 +171,7 @@ export const routes: Routes = [
   {
     path: 'user-management',
     component: UserManagement,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
 
   // =====================================================
@@ -201,7 +181,7 @@ export const routes: Routes = [
   {
     path: 'profile',
     component: Profile,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -211,13 +191,13 @@ export const routes: Routes = [
   {
     path: 'resource-allocation',
     component: ResourceAllocation,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   {
     path: 'resources/resource-allocation',
     component: ResourceAllocation,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -227,55 +207,43 @@ export const routes: Routes = [
   {
     path: 'projects',
     component: ProjectList,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   {
     path: 'projects/create-project',
     component: CreateProject,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN', 'PROJECT_MANAGER'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])],
   },
 
   {
     path: 'projects/milestones',
     component: Milestones,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN', 'PROJECT_MANAGER'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])],
   },
 
   {
     path: 'projects/project-details/:id',
     component: ProjectDetails,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   {
     path: 'projects/project-status',
     component: ProjectStatus,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN', 'PROJECT_MANAGER'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])],
   },
 
   {
     path: 'projects/schedule',
     component: Schedule,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   {
     path: 'projects/update-project/:id',
     component: UpdateProject,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN', 'PROJECT_MANAGER'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])],
   },
 
   // =====================================================
@@ -285,13 +253,13 @@ export const routes: Routes = [
   {
     path: 'site-engineer-projects',
     component: SiteEngineerProjects,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   {
     path: 'site-engineer-milestones',
     component: SiteEngineerMilestones,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -301,7 +269,7 @@ export const routes: Routes = [
   {
     path: 'inventory',
     component: Inventory,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -311,7 +279,7 @@ export const routes: Routes = [
   {
     path: 'workforce',
     component: Workforce,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -321,7 +289,7 @@ export const routes: Routes = [
   {
     path: 'attendance',
     component: Attendance,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -330,10 +298,8 @@ export const routes: Routes = [
 
   {
     path: 'procurement',
-    loadComponent: () =>
-      import('./pages/procurement/procurement')
-        .then(m => m.Procurement),
-    canActivate: [authGuard]
+    loadComponent: () => import('./pages/procurement/procurement').then((m) => m.Procurement),
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -343,7 +309,7 @@ export const routes: Routes = [
   {
     path: 'procurement/requests',
     component: Requests,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -352,10 +318,8 @@ export const routes: Routes = [
 
   {
     path: 'procurement/vendors',
-    loadComponent: () =>
-      import('./pages/procurement/vendors/vendors')
-        .then(m => m.Vendors),
-    canActivate: [authGuard]
+    loadComponent: () => import('./pages/procurement/vendors/vendors').then((m) => m.Vendors),
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -365,9 +329,8 @@ export const routes: Routes = [
   {
     path: 'procurement/purchase-orders',
     loadComponent: () =>
-      import('./pages/procurement/purchase-orders/purchase-orders')
-        .then(m => m.PurchaseOrders),
-    canActivate: [authGuard]
+      import('./pages/procurement/purchase-orders/purchase-orders').then((m) => m.PurchaseOrders),
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -376,10 +339,8 @@ export const routes: Routes = [
 
   {
     path: 'procurement/invoices',
-    loadComponent: () =>
-      import('./pages/procurement/invoices/invoices')
-        .then(m => m.Invoices),
-    canActivate: [authGuard]
+    loadComponent: () => import('./pages/procurement/invoices/invoices').then((m) => m.Invoices),
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -389,11 +350,11 @@ export const routes: Routes = [
   {
     path: 'procurement/categories',
     loadComponent: () =>
-      import('./pages/procurement/categories/categories')
-        .then(m => m.Categories),
-    canActivate: [authGuard]
+      import('./pages/procurement/categories/categories').then((m) => m.Categories),
+    canActivate: [authGuard],
   },
 
+  
   // =====================================================
   // REPORTS
   // =====================================================
@@ -401,7 +362,7 @@ export const routes: Routes = [
   {
     path: 'reports',
     component: Reports,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -411,7 +372,17 @@ export const routes: Routes = [
   {
     path: 'analytics',
     component: Analytics,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+  },
+
+  // =====================================================
+  // BUDGET MANAGEMENT
+  // =====================================================
+
+  {
+    path: 'budget',
+    component: Budget,
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -421,7 +392,7 @@ export const routes: Routes = [
   {
     path: 'notifications',
     component: Notifications,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -434,7 +405,7 @@ export const routes: Routes = [
   {
     path: 'notification-details/:id',
     component: NotificationDetails,
-    canActivate: [authGuard]
+    canActivate: [authGuard],
   },
 
   // =====================================================
@@ -444,10 +415,7 @@ export const routes: Routes = [
   {
     path: 'admin-notifications',
     component: AdminNotifications,
-    canActivate: [
-      authGuard,
-      roleGuard(['ADMIN'])
-    ]
+    canActivate: [authGuard, roleGuard(['ADMIN'])],
   },
 
   // =====================================================
@@ -457,10 +425,7 @@ export const routes: Routes = [
   {
     path: 'contractor-notifications',
     component: ContractorNotifications,
-    canActivate: [
-      authGuard,
-      roleGuard(['CONTRACTOR'])
-    ]
+    canActivate: [authGuard, roleGuard(['CONTRACTOR'])],
   },
 
   // =====================================================
@@ -470,10 +435,7 @@ export const routes: Routes = [
   {
     path: 'client-notifications',
     component: ClientNotifications,
-    canActivate: [
-      authGuard,
-      roleGuard(['CLIENT'])
-    ]
+    canActivate: [authGuard, roleGuard(['CLIENT'])],
   },
 
   // =====================================================
@@ -483,10 +445,7 @@ export const routes: Routes = [
   {
     path: 'worker-notifications',
     component: WorkerNotifications,
-    canActivate: [
-      authGuard,
-      roleGuard(['WORKER'])
-    ]
+    canActivate: [authGuard, roleGuard(['WORKER'])],
   },
 
   // =====================================================
@@ -496,10 +455,7 @@ export const routes: Routes = [
   {
     path: 'site-engineer-notifications',
     component: SiteEngineerNotifications,
-    canActivate: [
-      authGuard,
-      roleGuard(['SITE_ENGINEER'])
-    ]
+    canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])],
   },
 
   // =====================================================
@@ -509,43 +465,43 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     redirectTo: 'project-manager-dashboard',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'projects/create',
     redirectTo: 'projects/create-project',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'projects/status',
     redirectTo: 'projects/project-status',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'projects/details/:id',
     redirectTo: 'projects/project-details/:id',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'resources',
     redirectTo: 'resource-allocation',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'resources/equipment-tracking',
     redirectTo: 'resource-allocation',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   {
     path: 'resources/resource-utilization',
     redirectTo: 'resource-allocation',
-    pathMatch: 'full'
+    pathMatch: 'full',
   },
 
   // =====================================================
@@ -554,7 +510,6 @@ export const routes: Routes = [
 
   {
     path: '**',
-    redirectTo: 'login'
-  }
-
+    redirectTo: 'login',
+  },
 ];

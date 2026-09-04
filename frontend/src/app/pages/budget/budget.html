@@ -1,0 +1,710 @@
+<div class="budget-page">
+
+  <!-- =====================================================
+       PAGE HEADER
+  ====================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h1>Budget Management</h1>
+
+      <p>
+        Monitor project budgets, expenses and remaining funds.
+      </p>
+    </div>
+
+    <button
+      class="add-budget-btn"
+      type="button"
+      (click)="openAddModal()">
+
+      <span class="plus">+</span>
+
+      Add Budget
+
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       SUMMARY CARDS
+  ====================================================== -->
+
+  <div class="summary-grid">
+
+    <!-- TOTAL BUDGET -->
+
+    <div class="summary-card">
+
+      <div class="summary-icon budget-icon">
+        ₹
+      </div>
+
+      <div class="summary-content">
+
+        <span class="summary-label">
+          Total Budget
+        </span>
+
+        <strong>
+          {{ formatCurrency(totalBudget) }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- TOTAL SPENT -->
+
+    <div class="summary-card">
+
+      <div class="summary-icon spent-icon">
+        ₹
+      </div>
+
+      <div class="summary-content">
+
+        <span class="summary-label">
+          Total Spent
+        </span>
+
+        <strong>
+          {{ formatCurrency(totalSpent) }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- REMAINING -->
+
+    <div class="summary-card">
+
+      <div class="summary-icon remaining-icon">
+        ₹
+      </div>
+
+      <div class="summary-content">
+
+        <span class="summary-label">
+          Remaining
+        </span>
+
+        <strong>
+          {{ formatCurrency(remainingBudget) }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- UTILIZATION -->
+
+    <div class="summary-card">
+
+      <div class="summary-icon utilization-icon">
+        %
+      </div>
+
+      <div class="summary-content">
+
+        <span class="summary-label">
+          Utilization
+        </span>
+
+        <strong>
+          {{ utilization }}%
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       SEARCH / FILTER SECTION
+  ====================================================== -->
+
+  <div class="filter-section">
+
+    <div class="search-box">
+
+      <span class="search-icon">
+        ⌕
+      </span>
+
+      <input
+        type="text"
+        placeholder="Search budget..."
+        [(ngModel)]="searchText">
+
+    </div>
+
+
+    <select
+      [(ngModel)]="selectedProject">
+
+      <option>
+        All Projects
+      </option>
+
+      <option>
+        Residential Building
+      </option>
+
+      <option>
+        Highway Project
+      </option>
+
+      <option>
+        Commercial Complex
+      </option>
+
+    </select>
+
+
+    <select
+      [(ngModel)]="selectedStatus">
+
+      <option>
+        All Status
+      </option>
+
+      <option>
+        On Track
+      </option>
+
+      <option>
+        Warning
+      </option>
+
+      <option>
+        Critical
+      </option>
+
+    </select>
+
+
+    <button
+      class="clear-btn"
+      type="button"
+      (click)="clearFilters()">
+
+      Clear
+
+    </button>
+
+  </div>
+
+
+  <!-- =====================================================
+       BUDGET OVERVIEW
+  ====================================================== -->
+
+  <div class="budget-container">
+
+    <div class="overview-header">
+
+      <div>
+
+        <h2>
+          Budget Overview
+        </h2>
+
+        <p>
+          {{ filteredBudgets.length }} budget item(s)
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TABLE
+    ==================================================== -->
+
+    <div class="table-wrapper">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              CATEGORY
+            </th>
+
+            <th>
+              DESCRIPTION
+            </th>
+
+            <th>
+              PROJECT
+            </th>
+
+            <th>
+              BUDGET
+            </th>
+
+            <th>
+              SPENT
+            </th>
+
+            <th>
+              REMAINING
+            </th>
+
+            <th>
+              PROGRESS
+            </th>
+
+            <th>
+              STATUS
+            </th>
+
+            <th>
+              ACTIONS
+            </th>
+
+          </tr>
+
+        </thead>
+
+
+        <tbody>
+
+          <!-- =================================================
+               DATA ROW
+          ================================================== -->
+
+          <tr
+            *ngFor="let item of filteredBudgets">
+
+            <!-- CATEGORY -->
+
+            <td>
+
+              <strong class="category-name">
+                {{ item.category }}
+              </strong>
+
+            </td>
+
+
+            <!-- DESCRIPTION -->
+
+            <td>
+
+              <span class="description">
+                {{ item.description }}
+              </span>
+
+            </td>
+
+
+            <!-- PROJECT -->
+
+            <td>
+
+              <span class="project-name">
+                {{ item.project }}
+              </span>
+
+            </td>
+
+
+            <!-- BUDGET -->
+
+            <td>
+
+              <strong>
+                {{ formatCurrency(item.budget) }}
+              </strong>
+
+            </td>
+
+
+            <!-- SPENT -->
+
+            <td>
+
+              <span>
+                {{ formatCurrency(item.spent) }}
+              </span>
+
+            </td>
+
+
+            <!-- REMAINING -->
+
+            <td>
+
+              <strong
+                [class.danger-text]="getRemaining(item) <= 50000">
+
+                {{ formatCurrency(getRemaining(item)) }}
+
+              </strong>
+
+            </td>
+
+
+            <!-- PROGRESS -->
+
+            <td>
+
+              <div class="progress-wrapper">
+
+                <div class="progress-top">
+
+                  <span>
+                    {{ getProgress(item) }}%
+                  </span>
+
+                </div>
+
+                <div class="progress-bar">
+
+                  <div
+                    class="progress-fill"
+                    [style.width.%]="getProgress(item)">
+                  </div>
+
+                </div>
+
+              </div>
+
+            </td>
+
+
+            <!-- STATUS -->
+
+            <td>
+
+              <span
+                class="status-badge"
+                [ngClass]="{
+                  'on-track': item.status === 'On Track',
+                  'warning': item.status === 'Warning',
+                  'critical': item.status === 'Critical'
+                }">
+
+                {{ item.status }}
+
+              </span>
+
+            </td>
+
+
+            <!-- ACTIONS -->
+
+            <td>
+
+              <div class="action-buttons">
+
+                <button
+                  type="button"
+                  class="edit-btn"
+                  title="Edit"
+                  (click)="openEditModal(item)">
+
+                  ✎
+
+                </button>
+
+                <button
+                  type="button"
+                  class="delete-btn"
+                  title="Delete"
+                  (click)="deleteBudget(item.id)">
+
+                  ♙
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+
+          <!-- =================================================
+               EMPTY
+          ================================================== -->
+
+          <tr
+            *ngIf="filteredBudgets.length === 0">
+
+            <td
+              colspan="9"
+              class="empty-row">
+
+              No budget records found.
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     ADD / EDIT MODAL
+========================================================== -->
+
+<div
+  class="modal-overlay"
+  *ngIf="showModal"
+  (click)="closeModal()">
+
+  <div
+    class="modal"
+    (click)="$event.stopPropagation()">
+
+
+    <!-- MODAL HEADER -->
+
+    <div class="modal-header">
+
+      <div>
+
+        <h2>
+          {{ isEditing ? 'Edit Budget' : 'Add Budget' }}
+        </h2>
+
+        <p>
+          {{ isEditing
+            ? 'Update budget information'
+            : 'Create a new project budget'
+          }}
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="close-btn"
+        (click)="closeModal()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <!-- MODAL BODY -->
+
+    <div class="modal-body">
+
+
+      <!-- CATEGORY -->
+
+      <div class="form-group">
+
+        <label>
+          Category <span>*</span>
+        </label>
+
+        <select
+          [(ngModel)]="form.category">
+
+          <option value="">
+            Select Category
+          </option>
+
+          <option>
+            Labor
+          </option>
+
+          <option>
+            Material
+          </option>
+
+          <option>
+            Equipment
+          </option>
+
+          <option>
+            Transportation
+          </option>
+
+          <option>
+            Maintenance
+          </option>
+
+          <option>
+            Administrative
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- DESCRIPTION -->
+
+      <div class="form-group">
+
+        <label>
+          Description <span>*</span>
+        </label>
+
+        <input
+          type="text"
+          placeholder="Enter description"
+          [(ngModel)]="form.description">
+
+      </div>
+
+
+      <!-- PROJECT -->
+
+      <div class="form-group">
+
+        <label>
+          Project <span>*</span>
+        </label>
+
+        <select
+          [(ngModel)]="form.project">
+
+          <option value="">
+            Select Project
+          </option>
+
+          <option>
+            Residential Building
+          </option>
+
+          <option>
+            Highway Project
+          </option>
+
+          <option>
+            Commercial Complex
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- BUDGET / SPENT -->
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            Budget Amount <span>*</span>
+          </label>
+
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="form.budget">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Spent Amount
+          </label>
+
+          <input
+            type="number"
+            min="0"
+            [(ngModel)]="form.spent">
+
+        </div>
+
+      </div>
+
+
+      <!-- PREVIEW -->
+
+      <div class="form-preview">
+
+        <div>
+
+          <span>
+            Remaining
+          </span>
+
+          <strong>
+            {{ formatCurrency(
+              Number(form.budget) - Number(form.spent)
+            ) }}
+          </strong>
+
+        </div>
+
+        <div>
+
+          <span>
+            Utilization
+          </span>
+
+          <strong>
+            {{
+              form.budget > 0
+                ? ((form.spent / form.budget) * 100).toFixed(0)
+                : 0
+            }}%
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- MODAL FOOTER -->
+
+    <div class="modal-footer">
+
+      <button
+        type="button"
+        class="cancel-btn"
+        (click)="closeModal()">
+
+        Cancel
+
+      </button>
+
+      <button
+        type="button"
+        class="save-btn"
+        (click)="saveBudget()">
+
+        {{ isEditing ? 'Update Budget' : 'Save Budget' }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
