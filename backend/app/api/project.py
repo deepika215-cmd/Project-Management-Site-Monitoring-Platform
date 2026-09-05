@@ -14,6 +14,8 @@ from app.models.project_engineer_assignment import ProjectEngineerAssignment
 from app.models.daily_progress import DailyProgress
 from app.models.user import User
 from app.models.payroll import Payroll
+from app.models.maintenance import Maintenance
+from app.models.machinery import Machinery
 from app.models.notification import Notification
 
 from app.schemas.project_schema import (
@@ -56,10 +58,6 @@ def get_project_notification_recipients(
     """
 
     recipients = set()
-
-    # -----------------------------------------------------
-    # Get project
-    # -----------------------------------------------------
 
     project = (
         db.query(Project)
@@ -254,19 +252,6 @@ def get_projects(
 
 # =========================================================
 # PROJECT DEADLINE NOTIFICATIONS
-#
-# Upcoming:
-#   Today through the next 7 days.
-#
-# Missed:
-#   End date has passed and project is not
-#   Completed or Closed.
-#
-# Recipients:
-#   Project Manager
-#   Assigned active Engineers
-#
-# Duplicate notifications are prevented.
 # =========================================================
 
 @router.get("/deadline-notifications")
@@ -291,24 +276,11 @@ def generate_project_deadline_notifications(
 
     for project in projects:
 
-        # -------------------------------------------------
-        # Ignore projects without an end date
-        # -------------------------------------------------
-
         if not project.end_date:
             continue
 
-        # -------------------------------------------------
-        # Completed and Closed projects do not need
-        # deadline alerts.
-        # -------------------------------------------------
-
         if project.status in ["Completed", "Closed"]:
             continue
-
-        # -------------------------------------------------
-        # Calculate remaining days
-        # -------------------------------------------------
 
         days_remaining = (
             project.end_date - today
@@ -344,15 +316,12 @@ def generate_project_deadline_notifications(
             )
 
             if days_remaining == 0:
-
                 deadline_text = "today"
 
             elif days_remaining == 1:
-
                 deadline_text = "tomorrow"
 
             else:
-
                 deadline_text = (
                     f"in {days_remaining} days"
                 )
@@ -364,10 +333,6 @@ def generate_project_deadline_notifications(
             )
 
             upcoming_count += 1
-
-        # -------------------------------------------------
-        # More than 7 days away
-        # -------------------------------------------------
 
         else:
             continue
@@ -386,10 +351,6 @@ def generate_project_deadline_notifications(
         # =================================================
 
         for recipient in recipients:
-
-            # -------------------------------------------------
-            # Duplicate prevention
-            # -------------------------------------------------
 
             existing_notification = (
                 db.query(Notification)
@@ -539,7 +500,15 @@ def get_project_budget_cost(
             detail="Project not found"
         )
 
+    # -----------------------------------------------------
+    # Project budget
+    # -----------------------------------------------------
+
     budget = project.budget or 0
+
+    # -----------------------------------------------------
+    # Labour Cost
+    # -----------------------------------------------------
 
     payroll_records = db.query(Payroll).filter(
         Payroll.project_id == project_id
@@ -553,21 +522,70 @@ def get_project_budget_cost(
         2
     )
 
+    # -----------------------------------------------------
+    # Material Cost
+    #
+    # No material price/cost field currently exists.
+    # -----------------------------------------------------
+
     actual_material_cost = 0.0
 
+    # -----------------------------------------------------
+    # Procurement Cost
+    #
+    # No procurement unit price/cost field currently exists.
+    # -----------------------------------------------------
+
     actual_procurement_cost = 0.0
+
+    # -----------------------------------------------------
+    # Maintenance Cost
+    # -----------------------------------------------------
+
+    maintenance_records = (
+        db.query(Maintenance)
+        .join(
+            Machinery,
+            Machinery.id == Maintenance.machinery_id
+        )
+        .filter(
+            Machinery.project_id == project_id
+        )
+        .all()
+    )
+
+    actual_maintenance_cost = round(
+        sum(
+            maintenance.cost or 0
+            for maintenance in maintenance_records
+        ),
+        2
+    )
+
+    # -----------------------------------------------------
+    # Total Actual Cost
+    # -----------------------------------------------------
 
     total_actual_cost = round(
         actual_labour_cost
         + actual_material_cost
-        + actual_procurement_cost,
+        + actual_procurement_cost
+        + actual_maintenance_cost,
         2
     )
+
+    # -----------------------------------------------------
+    # Remaining Budget
+    # -----------------------------------------------------
 
     remaining_budget = round(
         budget - total_actual_cost,
         2
     )
+
+    # -----------------------------------------------------
+    # Budget Utilization Percentage
+    # -----------------------------------------------------
 
     budget_utilization_percentage = 0.0
 
@@ -578,6 +596,10 @@ def get_project_budget_cost(
             2
         )
 
+    # -----------------------------------------------------
+    # Return Budget & Cost Information
+    # -----------------------------------------------------
+
     return {
         "project_id": project.id,
         "project_name": project.project_name,
@@ -585,6 +607,7 @@ def get_project_budget_cost(
         "actual_labour_cost": actual_labour_cost,
         "actual_material_cost": actual_material_cost,
         "actual_procurement_cost": actual_procurement_cost,
+        "actual_maintenance_cost": actual_maintenance_cost,
         "total_actual_cost": total_actual_cost,
         "remaining_budget": remaining_budget,
         "budget_utilization_percentage":
@@ -644,6 +667,31 @@ def update_project(
         )
 
     # -----------------------------------------------------
+    # Authorization
+    #
+    # ADMIN can update any project.
+    # MANAGER can update only assigned projects.
+    # -----------------------------------------------------
+
+    if current_user.role not in ["ADMIN", "MANAGER"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Only ADMIN or MANAGER can update projects"
+        )
+
+    if (
+        current_user.role == "MANAGER"
+        and project.manager_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Access Denied: "
+                "You are not assigned to this project."
+            )
+        )
+
+    # -----------------------------------------------------
     # Closed projects cannot be modified
     # -----------------------------------------------------
 
@@ -651,16 +699,6 @@ def update_project(
         raise HTTPException(
             status_code=400,
             detail="Closed project cannot be modified"
-        )
-
-    # -----------------------------------------------------
-    # Authorization
-    # -----------------------------------------------------
-
-    if current_user.role not in ["ADMIN", "MANAGER"]:
-        raise HTTPException(
-            status_code=403,
-            detail="Only ADMIN or MANAGER can update projects"
         )
 
     # -----------------------------------------------------
@@ -884,11 +922,11 @@ def update_project_status(
             detail="Project not found"
         )
 
-    current_status = project.status
-    new_status = status_data.status
-
     # -----------------------------------------------------
-    # Only ADMIN or MANAGER can change project status
+    # Authorization
+    #
+    # ADMIN can change any project.
+    # MANAGER can change only assigned projects.
     # -----------------------------------------------------
 
     if current_user.role not in ["ADMIN", "MANAGER"]:
@@ -896,6 +934,21 @@ def update_project_status(
             status_code=403,
             detail="Only ADMIN or MANAGER can change project status"
         )
+
+    if (
+        current_user.role == "MANAGER"
+        and project.manager_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Access Denied: "
+                "You are not assigned to this project."
+            )
+        )
+
+    current_status = project.status
+    new_status = status_data.status
 
     # -----------------------------------------------------
     # Closed projects cannot be modified
@@ -980,10 +1033,6 @@ def update_project_status(
         project_id=project.id
     )
 
-    # -----------------------------------------------------
-    # Create notifications
-    # -----------------------------------------------------
-
     for recipient in recipients:
 
         create_notification(
@@ -1026,17 +1075,10 @@ def update_project_closure_validation(
         )
 
     # -----------------------------------------------------
-    # Closed projects cannot be modified
-    # -----------------------------------------------------
-
-    if project.status == "Closed":
-        raise HTTPException(
-            status_code=400,
-            detail="Closed project cannot be modified"
-        )
-
-    # -----------------------------------------------------
     # Authorization
+    #
+    # ADMIN can update any project.
+    # MANAGER can update only assigned projects.
     # -----------------------------------------------------
 
     if current_user.role not in ["ADMIN", "MANAGER"]:
@@ -1046,6 +1088,28 @@ def update_project_closure_validation(
                 "Only ADMIN or MANAGER can update "
                 "project closure conditions"
             )
+        )
+
+    if (
+        current_user.role == "MANAGER"
+        and project.manager_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Access Denied: "
+                "You are not assigned to this project."
+            )
+        )
+
+    # -----------------------------------------------------
+    # Closed projects cannot be modified
+    # -----------------------------------------------------
+
+    if project.status == "Closed":
+        raise HTTPException(
+            status_code=400,
+            detail="Closed project cannot be modified"
         )
 
     # -----------------------------------------------------
@@ -1128,13 +1192,28 @@ def close_project(
         )
 
     # -----------------------------------------------------
-    # Only ADMIN or MANAGER can close projects
+    # Authorization
+    #
+    # ADMIN can close any project.
+    # MANAGER can close only assigned projects.
     # -----------------------------------------------------
 
     if current_user.role not in ["ADMIN", "MANAGER"]:
         raise HTTPException(
             status_code=403,
             detail="Only ADMIN or MANAGER can close projects"
+        )
+
+    if (
+        current_user.role == "MANAGER"
+        and project.manager_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Access Denied: "
+                "You are not assigned to this project."
+            )
         )
 
     # -----------------------------------------------------
@@ -1187,7 +1266,10 @@ def close_project(
     if not project.inspection_approved:
         raise HTTPException(
             status_code=400,
-            detail="Project cannot be closed because inspection is not approved"
+            detail=(
+                "Project cannot be closed because "
+                "inspection is not approved"
+            )
         )
 
     # -----------------------------------------------------
@@ -1281,7 +1363,7 @@ def get_project_history(
         )
 
     # -----------------------------------------------------
-    # Only authorized users can view project history
+    # Role authorization
     # -----------------------------------------------------
 
     if current_user.role not in [
@@ -1293,6 +1375,46 @@ def get_project_history(
             status_code=403,
             detail="You are not authorized to view project history"
         )
+
+    # -----------------------------------------------------
+    # Project-level authorization
+    #
+    # ADMIN can view any project history.
+    # MANAGER can view only assigned projects.
+    # ENGINEER can view only assigned projects.
+    # -----------------------------------------------------
+
+    if (
+        current_user.role == "MANAGER"
+        and project.manager_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Access Denied: "
+                "You are not assigned to this project."
+            )
+        )
+
+    if current_user.role == "ENGINEER":
+
+        engineer_assignment = (
+            db.query(ProjectEngineerAssignment)
+            .filter(
+                ProjectEngineerAssignment.project_id == project_id,
+                ProjectEngineerAssignment.engineer_id == current_user.id
+            )
+            .first()
+        )
+
+        if not engineer_assignment:
+            raise HTTPException(
+                status_code=403,
+                detail=(
+                    "Access Denied: "
+                    "You are not assigned to this project."
+                )
+            )
 
     # -----------------------------------------------------
     # Get history
