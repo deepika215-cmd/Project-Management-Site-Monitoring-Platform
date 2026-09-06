@@ -1,59 +1,43 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey, Date
-from sqlalchemy.orm import relationship
+from datetime import date
+from typing import Optional
 
-from app.database.database import Base
+from pydantic import BaseModel
 
 
-class Expense(Base):
-    __tablename__ = "expenses"
+class ExpenseCreate(BaseModel):
+    project_id: int
+    budget_id: Optional[int] = None
+    category_id: Optional[int] = None
+    expense_name: str
+    amount: float
+    description: Optional[str] = None
+    expense_date: Optional[date] = None
+    payment_status: str = "Pending"
+    supplier: Optional[str] = None
 
-    id = Column(Integer, primary_key=True, index=True)
 
-    project_id = Column(
-        Integer,
-        ForeignKey("projects.id"),
-        nullable=False,
-        index=True,
-    )
+class ExpenseUpdate(BaseModel):
+    budget_id: Optional[int] = None
+    category_id: Optional[int] = None
+    expense_name: Optional[str] = None
+    amount: Optional[float] = None
+    description: Optional[str] = None
+    expense_date: Optional[date] = None
+    payment_status: Optional[str] = None
+    supplier: Optional[str] = None
 
-    budget_id = Column(
-        Integer,
-        ForeignKey("budgets.id"),
-        nullable=True,
-        index=True,
-    )
 
-    category_id = Column(
-        Integer,
-        ForeignKey("budget_categories.id"),
-        nullable=True,
-        index=True,
-    )
+class ExpenseResponse(BaseModel):
+    id: int
+    project_id: int
+    budget_id: Optional[int] = None
+    category_id: Optional[int] = None
+    expense_name: str
+    amount: float
+    description: Optional[str] = None
+    expense_date: Optional[date] = None
+    payment_status: str
+    supplier: Optional[str] = None
 
-    expense_name = Column(String(200), nullable=False)
-
-    amount = Column(Float, nullable=False, default=0.0)
-
-    description = Column(String(500), nullable=True)
-
-    expense_date = Column(Date, nullable=True)
-
-    payment_status = Column(
-        String(50),
-        nullable=False,
-        default="Pending",
-    )
-
-    supplier = Column(String(200), nullable=True)
-
-    category = relationship(
-        "BudgetCategory",
-        back_populates="expenses",
-    )
-
-    budget = relationship(
-        "Budget",
-        back_populates="expenses",
-    )
-
-    project = relationship("Project")
+    class Config:
+        from_attributes = True

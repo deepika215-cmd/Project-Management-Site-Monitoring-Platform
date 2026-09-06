@@ -23,6 +23,14 @@ from app.models.payroll import Payroll
 from app.models.maintenance import Maintenance
 from app.models.machinery import Machinery
 
+# ============================================================
+# MODULE 11 FINANCIAL MODELS
+# ============================================================
+
+from app.models.budget import Budget
+from app.models.expense import Expense
+from app.models.cost_estimate import CostEstimate
+
 from app.core.permissions import role_required
 
 from app.schemas.analytics_schema import (
@@ -802,90 +810,75 @@ def manager_dashboard(
 
     # ========================================================
     # BUDGET UTILIZATION
+    # MODULE 11 → MODULE 9
     # ========================================================
 
-    total_budget = 0.0
-    total_labour_cost = 0.0
-    total_material_cost = 0.0
-    total_procurement_cost = 0.0
-    total_maintenance_cost = 0.0
-
-    for project in projects:
-
-        project_budget = float(
-            getattr(
-                project,
-                "budget",
-                0
-            ) or 0
-        )
-
-        total_budget += project_budget
-
-        # ----------------------------------------------------
-        # LABOUR COST
-        # ----------------------------------------------------
-
-        payroll_records = (
-            db.query(Payroll)
-            .filter(
-                Payroll.project_id
-                == project.id
+    budgets = (
+        db.query(Budget)
+        .filter(
+            Budget.project_id.in_(
+                project_ids
             )
-            .all()
         )
+        .all()
+    )
 
-        total_labour_cost += sum(
+    total_budget = round(
+        sum(
             float(
-                payroll.estimated_pay or 0
+                budget.allocated_amount or 0
             )
-            for payroll
-            in payroll_records
+            for budget in budgets
+        ),
+        2
+    )
+
+    expenses = (
+        db.query(Expense)
+        .filter(
+            Expense.project_id.in_(
+                project_ids
+            )
         )
-
-        # ----------------------------------------------------
-        # MATERIAL COST
-        # ----------------------------------------------------
-
-        total_material_cost += 0.0
-
-        # ----------------------------------------------------
-        # PROCUREMENT COST
-        # ----------------------------------------------------
-
-        total_procurement_cost += 0.0
-
-        # ----------------------------------------------------
-        # MAINTENANCE COST
-        # ----------------------------------------------------
-
-        maintenance_records = (
-            db.query(Maintenance)
-            .join(
-                Machinery,
-                Maintenance.machinery_id
-                == Machinery.id
-            )
-            .filter(
-                Machinery.project_id
-                == project.id
-            )
-            .all()
-        )
-
-        total_maintenance_cost += sum(
-            float(
-                maintenance.cost or 0
-            )
-            for maintenance
-            in maintenance_records
-        )
+        .all()
+    )
 
     total_actual_cost = round(
-        total_labour_cost
-        + total_material_cost
-        + total_procurement_cost
-        + total_maintenance_cost,
+        sum(
+            float(
+                expense.amount or 0
+            )
+            for expense in expenses
+        ),
+        2
+    )
+
+    # Cost estimates are retrieved from Module 11
+    # so the dashboard remains integrated with the
+    # complete financial data flow.
+    #
+    # The current dashboard response schema does not
+    # expose estimated cost, therefore this value is
+    # calculated here for financial integration and
+    # future dashboard expansion.
+
+    cost_estimates = (
+        db.query(CostEstimate)
+        .filter(
+            CostEstimate.project_id.in_(
+                project_ids
+            )
+        )
+        .all()
+    )
+
+    total_estimated_cost = round(
+        sum(
+            float(
+                estimate.estimated_amount or 0
+            )
+            for estimate in cost_estimates
+        ),
         2
     )
 
@@ -906,6 +899,10 @@ def manager_dashboard(
             ) * 100,
             2
         )
+
+    # Prevent unused-variable confusion while retaining
+    # Module 11 estimated-cost integration.
+    _ = total_estimated_cost
 
     # ========================================================
     # WORKFORCE
@@ -1167,90 +1164,60 @@ def project_dashboard(
 
     # ========================================================
     # BUDGET
+    # MODULE 11 → MODULE 9
     # ========================================================
 
-    total_budget = float(
-        getattr(
-            project,
-            "budget",
-            0
-        ) or 0
-    )
-
-    # --------------------------------------------------------
-    # LABOUR COST
-    # --------------------------------------------------------
-
-    payroll_records = (
-        db.query(Payroll)
+    budgets = (
+        db.query(Budget)
         .filter(
-            Payroll.project_id == project.id
+            Budget.project_id == project.id
         )
         .all()
     )
 
-    actual_labour_cost = sum(
-        float(
-            payroll.estimated_pay or 0
-        )
-        for payroll
-        in payroll_records
+    total_budget = round(
+        sum(
+            float(
+                budget.allocated_amount or 0
+            )
+            for budget in budgets
+        ),
+        2
     )
 
-    # --------------------------------------------------------
-    # MATERIAL COST
-    # --------------------------------------------------------
-    #
-    # Current Material/Inventory models do not contain
-    # price/cost fields.
-    #
-    # Therefore no artificial material cost is calculated.
-    #
-
-    actual_material_cost = 0.0
-
-    # --------------------------------------------------------
-    # PROCUREMENT COST
-    # --------------------------------------------------------
-    #
-    # Current Procurement model does not contain
-    # unit-price/cost fields.
-    #
-    # Therefore no artificial procurement cost is calculated.
-    #
-
-    actual_procurement_cost = 0.0
-
-    # --------------------------------------------------------
-    # MAINTENANCE COST
-    # --------------------------------------------------------
-
-    maintenance_records = (
-        db.query(Maintenance)
-        .join(
-            Machinery,
-            Maintenance.machinery_id
-            == Machinery.id
-        )
+    expenses = (
+        db.query(Expense)
         .filter(
-            Machinery.project_id == project.id
+            Expense.project_id == project.id
         )
         .all()
-    )
-
-    actual_maintenance_cost = sum(
-        float(
-            maintenance.cost or 0
-        )
-        for maintenance
-        in maintenance_records
     )
 
     total_actual_cost = round(
-        actual_labour_cost
-        + actual_material_cost
-        + actual_procurement_cost
-        + actual_maintenance_cost,
+        sum(
+            float(
+                expense.amount or 0
+            )
+            for expense in expenses
+        ),
+        2
+    )
+
+    cost_estimates = (
+        db.query(CostEstimate)
+        .filter(
+            CostEstimate.project_id == project.id
+        )
+        .all()
+    )
+
+    total_estimated_cost = round(
+        sum(
+            float(
+                estimate.estimated_amount or 0
+            )
+            for estimate in cost_estimates
+        ),
         2
     )
 
@@ -1271,6 +1238,9 @@ def project_dashboard(
             ) * 100,
             2
         )
+
+    # Retained for future dashboard schema expansion.
+    _ = total_estimated_cost
 
     # ========================================================
     # WORKFORCE
