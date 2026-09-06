@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -58,6 +59,16 @@ from app.models.site_activity_log import SiteActivityLog
 
 
 # ============================================================
+# BUDGET & COST MANAGEMENT MODELS
+# ============================================================
+
+from app.models.budget import Budget
+from app.models.budget_category import BudgetCategory
+from app.models.cost_estimate import CostEstimate
+from app.models.expense import Expense
+
+
+# ============================================================
 # IMPORT ROUTERS
 # ============================================================
 
@@ -112,12 +123,15 @@ from app.api.inventory import router as inventory_router
 
 from app.api.worker import router as worker_router
 from app.api.contractor import router as contractor_router
+
 from app.api.worker_assignment import (
     router as worker_assignment_router
 )
+
 from app.api.workforce_category import (
     router as workforce_category_router
 )
+
 from app.api.attendance import router as attendance_router
 from app.api.shift import router as shift_router
 from app.api.payroll import router as payroll_router
@@ -143,11 +157,25 @@ from app.api.analytics import router as analytics_router
 # MODULE 3 — SITE PROGRESS MONITORING ROUTERS
 # ============================================================
 
-from app.api.daily_progress import router as daily_progress_router
-from app.api.weekly_progress import router as weekly_progress_router
-from app.api.delay_record import router as delay_record_router
-from app.api.progress_photo import router as progress_photo_router
-from app.api.site_activity_log import router as site_activity_log_router
+from app.api.daily_progress import (
+    router as daily_progress_router
+)
+
+from app.api.weekly_progress import (
+    router as weekly_progress_router
+)
+
+from app.api.delay_record import (
+    router as delay_record_router
+)
+
+from app.api.progress_photo import (
+    router as progress_photo_router
+)
+
+from app.api.site_activity_log import (
+    router as site_activity_log_router
+)
 
 
 # ============================================================
@@ -155,12 +183,15 @@ from app.api.site_activity_log import router as site_activity_log_router
 # ============================================================
 
 from app.api.material import router as material_router
+
 from app.api.material_request import (
     router as material_request_router
 )
+
 from app.api.material_allocation import (
     router as material_allocation_router
 )
+
 from app.api.stock_movement import (
     router as stock_movement_router
 )
@@ -171,6 +202,35 @@ from app.api.stock_movement import (
 # ============================================================
 
 from app.api.document import router as document_router
+
+
+# ============================================================
+# BUDGET & COST MANAGEMENT ROUTERS
+# ============================================================
+
+from app.api.budget import (
+    router as budget_router
+)
+
+from app.api.budget_category import (
+    router as budget_category_router
+)
+
+from app.api.cost_estimate import (
+    router as cost_estimate_router
+)
+
+from app.api.expense import (
+    router as expense_router
+)
+
+from app.api.budget_monitoring import (
+    router as budget_monitoring_router
+)
+
+from app.api.cost_comparison import (
+    router as cost_comparison_router
+)
 
 
 # ============================================================
@@ -305,6 +365,18 @@ app.include_router(document_router)
 
 
 # ============================================================
+# BUDGET & COST MANAGEMENT
+# ============================================================
+
+app.include_router(budget_category_router)
+app.include_router(budget_router)
+app.include_router(cost_estimate_router)
+app.include_router(expense_router)
+app.include_router(budget_monitoring_router)
+app.include_router(cost_comparison_router)
+
+
+# ============================================================
 # HOME ROUTE
 # ============================================================
 
@@ -313,3 +385,4 @@ def home():
     return {
         "message": "BuildTrack Backend Running Successfully"
     }
+
