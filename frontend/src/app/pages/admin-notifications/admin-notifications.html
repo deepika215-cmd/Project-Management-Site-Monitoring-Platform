@@ -1,74 +1,64 @@
-<div class="page-container"><app-sidebar active="notifications"></app-sidebar><main class="main-content">
+<div class="notifications-page">
+  <app-sidebar active="notifications"></app-sidebar>
 
-        <header class="page-header">
+  <main class="main-content">
+    <header class="notifications-header">
+      <div>
+        <p class="breadcrumb">Dashboard / Notifications</p>
+        <h1>🔔 Admin Notifications</h1>
+        <p class="subtitle">Project, procurement, attendance, deadline and system alerts.</p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="primary-btn" (click)="generate()" [disabled]="generating || loading">{{ generating ? 'Generating...' : 'Generate System Alerts' }}</button>
+        <button type="button" class="secondary-btn" (click)="markAllRead()" [disabled]="loading || !notifications.length">Mark all read</button>
+        <button type="button" class="secondary-btn" (click)="load()" [disabled]="loading">↻ Refresh</button>
+      </div>
+    </header>
 
-            <div>
-                <h1>Admin Notifications</h1>
-                <p>Stay updated with the latest activities in BuildTrack.</p>
-            </div>
+    <div class="alert success" *ngIf="message">{{ message }}</div>
+    <div class="alert error" *ngIf="error">{{ error }}</div>
 
-        </header>
+    <section class="stats-row" *ngIf="!loading">
+      <article class="stat-card">
+        <h3>{{ notifications.length }}</h3>
+        <p>Total Notifications</p>
+      </article>
+      <article class="stat-card">
+        <h3>{{ unread() }}</h3>
+        <p>Unread</p>
+      </article>
+    </section>
 
-        <!-- Statistics -->
-        <section class="stats-row">
+    <div class="loading-card" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
 
-            <div class="stat-card">
+    <section class="notifications-grid" *ngIf="!loading">
+      <article
+        class="notification-card"
+        *ngFor="let n of notifications; trackBy: trackByNotification"
+        [class.unread]="(n.status || '').toLowerCase() === 'unread'"
+        (click)="read(n)"
+      >
+        <div class="card-icon" [ngClass]="iconClass(n)">{{ iconFor(n) }}</div>
+        <div class="notification-content">
+          <div class="notification-title-row">
+            <h3>{{ n.title || 'Notification' }}</h3>
+            <span class="status-pill" [class.read]="(n.status || '').toLowerCase() === 'read'">
+              {{ n.status || 'Unread' }}
+            </span>
+          </div>
+          <p>{{ n.message || 'No message available.' }}</p>
+          <small *ngIf="n.created_at">{{ n.created_at }}</small>
+          <small *ngIf="n.recipient">Recipient: {{ n.recipient }}</small>
+        </div>
+      </article>
 
-                <div class="stat-icon blue">🔔</div>
-
-                <div>
-                    <h3>{{ notifications.length }}</h3>
-                    <span>Total Notifications</span>
-                </div>
-
-            </div>
-
-            <div class="stat-card">
-
-                <div class="stat-icon orange">📩</div>
-
-                <div>
-                    <h3>2</h3>
-                    <span>Unread</span>
-                </div>
-
-            </div>
-
-            <div class="stat-card">
-
-                <div class="stat-icon red">⚠️</div>
-
-                <div>
-                    <h3>1</h3>
-                    <span>High Priority</span>
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- Notification List -->
-        <section class="dashboard-section">
-
-            <h2>Recent Notifications</h2>
-
-            <div
-                class="activity-item"
-                *ngFor="let notification of notifications">
-
-                <div>
-                    <strong>{{ notification.title }}</strong>
-                    <p>{{ notification.message }}</p>
-                </div>
-
-                <span>
-                    {{ notification.time }}
-                </span>
-
-            </div>
-
-        </section>
-
-    </main>
-
+      <div class="empty-state" *ngIf="!notifications.length">
+        <h3>No notifications</h3>
+        <p>You do not have any notifications right now.</p>
+      </div>
+    </section>
+  </main>
 </div>

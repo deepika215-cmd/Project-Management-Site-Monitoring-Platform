@@ -1,34 +1,105 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from typing import Optional, Literal
+
+
+UserRole = Literal[
+    "ADMIN",
+    "PROJECT_MANAGER",
+    "SITE_ENGINEER",
+    "CONTRACTOR",
+    "WORKER",
+    "CLIENT",
+]
+
+
+def _validate_password_strength(value: str) -> str:
+    if not any(char.isupper() for char in value):
+        raise ValueError("Password must contain at least one uppercase letter")
+    if not any(char.islower() for char in value):
+        raise ValueError("Password must contain at least one lowercase letter")
+    if not any(char.isdigit() for char in value):
+        raise ValueError("Password must contain at least one number")
+    if not any(not char.isalnum() for char in value):
+        raise ValueError("Password must contain at least one special character")
+    return value
+
+
+def _normalise_role(value: str) -> str:
+    value = (value or "").strip().upper()
+    legacy = {
+        "MANAGER": "PROJECT_MANAGER",
+        "PROJECT MANAGER": "PROJECT_MANAGER",
+        "SITE ENGINEER": "SITE_ENGINEER",
+        "ENGINEER": "SITE_ENGINEER",
+    }
+    return legacy.get(value, value)
 
 
 class UserCreate(BaseModel):
-    name: str
+    name: str = Field(..., min_length=2, max_length=100)
     email: EmailStr
-    password: str
-    phone: str
-    role: str
+    password: str = Field(..., min_length=8, max_length=128)
+    phone: str = Field(..., min_length=7, max_length=20)
+    role: UserRole
+    employee_id: Optional[str] = Field(default=None, max_length=50)
+    department: Optional[str] = Field(default=None, max_length=100)
+    address: Optional[str] = Field(default=None, max_length=300)
+
+    @field_validator("name", "phone", "employee_id", "department", "address", mode="before")
+    @classmethod
+    def strip_optional_strings(cls, value):
+        if value is None:
+            return value
+        value = str(value).strip()
+        return value or None
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def validate_role(cls, value: str) -> str:
+        return _normalise_role(value)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return _validate_password_strength(value)
 
 
-# Used for editing an existing user. Password is intentionally optional:
-# an admin editing a user's role/status shouldn't have to re-supply a
-# password every time. If provided, it is re-hashed and updated.
 class UserUpdate(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=2, max_length=100)
     email: Optional[EmailStr] = None
-    phone: Optional[str] = None
-    role: Optional[str] = None
+    phone: Optional[str] = Field(default=None, min_length=7, max_length=20)
+    role: Optional[UserRole] = None
     is_active: Optional[bool] = None
-    password: Optional[str] = None
+    password: Optional[str] = Field(default=None, min_length=8, max_length=128)
+    employee_id: Optional[str] = Field(default=None, max_length=50)
+    department: Optional[str] = Field(default=None, max_length=100)
+    address: Optional[str] = Field(default=None, max_length=300)
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def validate_role(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return _normalise_role(value)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        return _validate_password_strength(value)
 
 
 class UserResponse(BaseModel):
     id: int
     name: str
     email: EmailStr
-    phone: str
+    phone: Optional[str] = None
     role: str
     is_active: bool
+    employee_id: Optional[str] = None
+    department: Optional[str] = None
+    address: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -38,18 +109,24 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-# Self-service profile update: a logged-in user editing their own
-# name/phone/email. Role and is_active are deliberately excluded here —
-# those stay admin-only via UserUpdate / the /users endpoints.
+
 class ProfileUpdate(BaseModel):
-    name: Optional[str] = None
-    phone: Optional[str] = None
+    name: Optional[str] = Field(default=None, min_length=2, max_length=100)
+    phone: Optional[str] = Field(default=None, min_length=7, max_length=20)
     email: Optional[EmailStr] = None
+    employee_id: Optional[str] = Field(default=None, max_length=50)
+    department: Optional[str] = Field(default=None, max_length=100)
+    address: Optional[str] = Field(default=None, max_length=300)
 
 
 class ChangePasswordRequest(BaseModel):
     current_password: str
-    new_password: str
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return _validate_password_strength(value)
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -58,5 +135,13 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    new_password: str
+    new_password: str = Field(..., min_length=8, max_length=128)
 
+    @field_validator("new_password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return _validate_password_strength(value)
+
+
+class TestEmailRequest(BaseModel):
+    email: EmailStr

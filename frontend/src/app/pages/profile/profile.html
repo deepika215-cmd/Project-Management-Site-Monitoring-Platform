@@ -5,7 +5,7 @@
     <header class="page-header">
       <div>
         <span class="eyebrow">ACCOUNT</span>
-        <h1>My Profile</h1>
+        <h1>👤 My Profile</h1>
         <p>View and update your account details and password.</p>
       </div>
       <button type="button" class="refresh-btn" (click)="loadProfile()" [disabled]="loading || savingProfile || savingPassword">↻ Refresh</button>
@@ -17,7 +17,7 @@
     <ng-container *ngIf="!loading && user">
       <section class="profile-card">
         <div class="card-header">
-          <div><h2>Account Details</h2><p>Your details are loaded from the authenticated FastAPI account.</p></div>
+          <div><h2>👤 Account Details</h2><p>Your details are loaded from the authenticated FastAPI account.</p></div>
           <button *ngIf="!editMode" type="button" class="edit-btn" (click)="startEdit()">Edit</button>
         </div>
 
@@ -26,7 +26,7 @@
           <div class="detail"><span class="label">Email</span><span class="value">{{ user?.email }}</span></div>
           <div class="detail"><span class="label">Phone</span><span class="value">{{ user?.phone || '-' }}</span></div>
           <div class="detail"><span class="label">Role</span><span class="value role-badge">{{ user?.role }}</span></div>
-          <div class="detail"><span class="label">Status</span><span class="status" [class.active]="user?.is_active" [class.inactive]="!user?.is_active">{{ user?.is_active ? 'Active' : 'Inactive' }}</span></div>
+          <div class="detail"><span class="label">Status</span><span class="status" [class.active]="user?.is_active !== false" [class.inactive]="user?.is_active === false">{{ user?.is_active === false ? 'Inactive' : 'Active' }}</span></div>
         </div>
 
         <form *ngIf="editMode" (ngSubmit)="saveProfile()">
@@ -36,7 +36,7 @@
             <div class="form-group"><label>Phone</label><input type="text" [(ngModel)]="profileForm.phone" name="phone"></div>
           </div>
           <div class="form-actions">
-            <button type="button" class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+            <button type="button" class="cancel-btn" (click)="cancelEdit()">✖️ Cancel</button>
             <button type="submit" class="save-btn" [disabled]="savingProfile">{{ savingProfile ? 'Saving...' : 'Save Changes' }}</button>
           </div>
         </form>
@@ -44,7 +44,7 @@
 
       <section class="profile-card">
         <div class="card-header">
-          <div><h2>Password</h2><p>Change the password for the currently logged-in account.</p></div>
+          <div><h2>🔐 Password</h2><p>Change the password for the currently logged-in account.</p></div>
           <button *ngIf="!changingPassword" type="button" class="edit-btn" (click)="startChangePassword()">Change Password</button>
         </div>
 
@@ -57,7 +57,7 @@
             <div class="form-group"><label>Confirm New Password</label><input type="password" [(ngModel)]="passwordForm.confirmPassword" name="confirmPassword" required></div>
           </div>
           <div class="form-actions">
-            <button type="button" class="cancel-btn" (click)="cancelChangePassword()">Cancel</button>
+            <button type="button" class="cancel-btn" (click)="cancelChangePassword()">✖️ Cancel</button>
             <button type="submit" class="save-btn" [disabled]="savingPassword">{{ savingPassword ? 'Updating...' : 'Update Password' }}</button>
           </div>
         </form>

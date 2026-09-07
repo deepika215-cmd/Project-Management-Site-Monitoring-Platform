@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 
 from app.database.database import Base
@@ -7,31 +7,121 @@ from app.database.database import Base
 class Project(Base):
     __tablename__ = "projects"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        index=True
+    )
 
-    project_name = Column(String(200), nullable=False)
+    project_name = Column(
+        String(200),
+        nullable=False
+    )
 
-    description = Column(Text)
+    # Unique code identifying the project
+    project_code = Column(
+        String(50),
+        nullable=True
+    )
 
-    location = Column(String(200))
+    # Project category
+    # Examples:
+    # Residential
+    # Commercial
+    # Industrial
+    # Infrastructure
+    # Government
+    project_category = Column(
+        String(100),
+        nullable=True
+    )
 
-    start_date = Column(Date)
+    # Project priority
+    # Examples:
+    # Low
+    # Medium
+    # High
+    # Critical
+    priority = Column(
+        String(50),
+        nullable=True
+    )
 
-    end_date = Column(Date)
+    description = Column(
+        Text
+    )
 
-    budget = Column(Integer)
+    location = Column(
+        String(200)
+    )
 
-    status = Column(String(50), default="Planning")
+    start_date = Column(
+        Date
+    )
 
+    end_date = Column(
+        Date
+    )
+
+    budget = Column(
+        Integer
+    )
+
+    status = Column(
+        String(50),
+        default="Planning"
+    )
+
+    # Project closure validation fields
+
+    # All required inspections must be approved
+    inspection_approved = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    # All financial settlements must be completed
+    financial_settlement_complete = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    # All pending project issues must be resolved
+    pending_issues_resolved = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    # Client must accept the completed project
+    client_accepted = Column(
+        Boolean,
+        default=False,
+        nullable=False
+    )
+
+    # Project Manager
     manager_id = Column(
         Integer,
         ForeignKey("users.id")
     )
 
-    manager = relationship("User")
+    manager = relationship(
+        "User"
+    )
 
+    # Project milestones
     milestones = relationship(
         "ProjectMilestone",
+        back_populates="project",
+        cascade="all, delete-orphan"
+    )
+
+    # Site Engineer assignments
+    engineer_assignments = relationship(
+        "ProjectEngineerAssignment",
         back_populates="project",
         cascade="all, delete-orphan"
     )

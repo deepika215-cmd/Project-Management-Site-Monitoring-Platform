@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../services/api';
+import { timeout } from 'rxjs';
 import { AppSidebarComponent } from '../../shared/app-sidebar.component';
 
 interface User {
@@ -63,7 +64,7 @@ export class UserManagement implements OnInit {
     { value: 'CLIENT', label: 'Client' }
   ];
 
-  constructor(private api: Api) {}
+  constructor(private api: Api, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -74,11 +75,12 @@ export class UserManagement implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    this.api.getUsers().subscribe({
+    this.api.getUsers().pipe(timeout(8000)).subscribe({
       next: (data: any) => {
         this.users = Array.isArray(data) ? data : [];
         this.applyFilters();
         this.loading = false;
+        this.cdr.detectChanges();
       },
 
       error: (error: any) => {
@@ -90,6 +92,7 @@ export class UserManagement implements OnInit {
         } else {
           this.errorMessage = 'Unable to load users from the backend.';
         }
+        this.cdr.detectChanges();
       }
     });
   }

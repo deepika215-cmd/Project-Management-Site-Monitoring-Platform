@@ -1,0 +1,4 @@
+name,role,phone,email,category,skill_type,contractor_id,joining_date,status
+Ravi Kumar,Worker,9876543210,ravi@gmail.com,Skilled Worker,Masonry,,2026-08-01,Active
+Suresh Kumar,Worker,9876543211,suresh@gmail.com,Skilled Worker,Carpentry,,2026-08-02,Active
+Anil Kumar,Worker,9876543212,anil@gmail.com,Unskilled Worker,General,,2026-08-03,Active

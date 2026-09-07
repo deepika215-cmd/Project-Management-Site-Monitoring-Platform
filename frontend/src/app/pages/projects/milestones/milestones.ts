@@ -23,6 +23,15 @@ interface Milestone {
   styleUrl: './milestones.css'
 })
 export class Milestones implements OnInit {
+  get currentRole(): string {
+    try { return String(JSON.parse(localStorage.getItem('currentUser') || '{}')?.role || '').toUpperCase(); }
+    catch { return ''; }
+  }
+  isAdmin(): boolean { return this.currentRole === 'ADMIN'; }
+  isProjectManager(): boolean { return this.currentRole === 'PROJECT_MANAGER'; }
+  canCreateProject(): boolean { return this.isAdmin() || this.isProjectManager(); }
+  createProjectLink(): string { return this.isProjectManager() ? '/project-manager/create-project' : '/projects/create-project'; }
+
   selectedProject = 0;
   projects: any[] = [];
   milestones: Milestone[] = [];

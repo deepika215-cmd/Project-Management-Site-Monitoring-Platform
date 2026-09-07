@@ -1,37 +1,43 @@
-from datetime import date
+from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
+from app.core.permissions import role_required
 from app.models.maintenance import Maintenance
 from app.models.machinery import Machinery
+from app.models.notification import Notification
+
 from app.schemas.maintenance_schema import (
     MaintenanceCreate,
     MaintenanceResponse,
     MaintenanceStatusUpdate,
-    MaintenanceCompletion
+    MaintenanceCompletion,
 )
 
 
 router = APIRouter(
     prefix="/maintenance",
-    tags=["Maintenance"]
+    tags=["Maintenance"],
+    dependencies=[Depends(role_required(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER']))],
 )
 
 
-# =========================================================
-# Create Maintenance
-# =========================================================
+# ============================================================
+# CREATE MAINTENANCE
+# ============================================================
 
 @router.post("/", response_model=MaintenanceResponse)
 def create_maintenance(
     maintenance: MaintenanceCreate,
     db: Session = Depends(get_db)
 ):
-    machinery = db.query(Machinery).filter(
-        Machinery.id == maintenance.machinery_id
-    ).first()
+    machinery = (
+        db.query(Machinery)
+        .filter(Machinery.id == maintenance.machinery_id)
+        .first()
+    )
 
     if not machinery:
         raise HTTPException(
@@ -57,20 +63,146 @@ def create_maintenance(
     return new_maintenance
 
 
-# =========================================================
-# Get All Maintenance Records
-# =========================================================
+# ============================================================
+# GET ALL MAINTENANCE
+# ============================================================
 
 @router.get("/", response_model=list[MaintenanceResponse])
 def get_maintenance(
     db: Session = Depends(get_db)
 ):
-    return db.query(Maintenance).all()
+    return (
+        db.query(Maintenance)
+        .order_by(Maintenance.id.desc())
+        .all()
+    )
 
 
-# =========================================================
-# Get Maintenance By ID
-# =========================================================
+# ============================================================
+# GET UPCOMING MAINTENANCE
+# ============================================================
+
+@router.get(
+    "/upcoming",
+    response_model=list[MaintenanceResponse]
+)
+def get_upcoming_maintenance(
+    db: Session = Depends(get_db)
+):
+    return (
+        db.query(Maintenance)
+        .filter(
+            Maintenance.scheduled_date >= date.today(),
+            Maintenance.status != "Completed"
+        )
+        .order_by(Maintenance.scheduled_date)
+        .all()
+    )
+
+
+# ============================================================
+# AUTOMATIC MAINTENANCE NOTIFICATIONS
+#
+# Creates notifications for maintenance scheduled within
+# the next 7 days.
+#
+# Notifications are created for:
+# ADMIN
+# MANAGER
+#
+# Duplicate notifications are prevented.
+# ============================================================
+
+@router.get("/notifications")
+def get_maintenance_notifications(
+    db: Session = Depends(get_db)
+):
+    today = date.today()
+    notification_end_date = today + timedelta(days=7)
+
+    upcoming_maintenance = (
+        db.query(Maintenance)
+        .filter(
+            Maintenance.scheduled_date >= today,
+            Maintenance.scheduled_date <= notification_end_date,
+            Maintenance.status != "Completed"
+        )
+        .order_by(Maintenance.scheduled_date)
+        .all()
+    )
+
+    created_notifications = []
+
+    for maintenance in upcoming_maintenance:
+
+        machinery = (
+            db.query(Machinery)
+            .filter(Machinery.id == maintenance.machinery_id)
+            .first()
+        )
+
+        machinery_name = (
+            machinery.name
+            if machinery
+            else f"Machinery {maintenance.machinery_id}"
+        )
+
+        title = "Maintenance Due Soon"
+
+        message = (
+            f"Maintenance for {machinery_name} is scheduled on "
+            f"{maintenance.scheduled_date}. "
+            f"Maintenance type: {maintenance.maintenance_type}."
+        )
+
+        for recipient in ["ADMIN", "PROJECT_MANAGER"]:
+
+            existing_notification = (
+                db.query(Notification)
+                .filter(
+                    Notification.title == title,
+                    Notification.message == message,
+                    Notification.recipient == recipient
+                )
+                .first()
+            )
+
+            if existing_notification:
+                continue
+
+            notification = Notification(
+                title=title,
+                message=message,
+                recipient=recipient,
+                status="Unread"
+            )
+
+            db.add(notification)
+            db.flush()
+
+            created_notifications.append(notification)
+
+    db.commit()
+
+    return {
+        "message": "Maintenance notifications processed successfully",
+        "notifications_created": len(created_notifications),
+        "notifications": [
+            {
+                "id": notification.id,
+                "title": notification.title,
+                "message": notification.message,
+                "recipient": notification.recipient,
+                "status": notification.status
+            }
+            for notification in created_notifications
+        ]
+    }
+
+
+# ============================================================
+# GET MAINTENANCE BY ID
+# ============================================================
 
 @router.get(
     "/{maintenance_id}",
@@ -80,9 +212,11 @@ def get_maintenance_by_id(
     maintenance_id: int,
     db: Session = Depends(get_db)
 ):
-    maintenance = db.query(Maintenance).filter(
-        Maintenance.id == maintenance_id
-    ).first()
+    maintenance = (
+        db.query(Maintenance)
+        .filter(Maintenance.id == maintenance_id)
+        .first()
+    )
 
     if not maintenance:
         raise HTTPException(
@@ -93,9 +227,9 @@ def get_maintenance_by_id(
     return maintenance
 
 
-# =========================================================
-# Update Maintenance
-# =========================================================
+# ============================================================
+# UPDATE MAINTENANCE
+# ============================================================
 
 @router.put(
     "/{maintenance_id}",
@@ -106,9 +240,11 @@ def update_maintenance(
     maintenance_data: MaintenanceCreate,
     db: Session = Depends(get_db)
 ):
-    maintenance = db.query(Maintenance).filter(
-        Maintenance.id == maintenance_id
-    ).first()
+    maintenance = (
+        db.query(Maintenance)
+        .filter(Maintenance.id == maintenance_id)
+        .first()
+    )
 
     if not maintenance:
         raise HTTPException(
@@ -116,9 +252,11 @@ def update_maintenance(
             detail="Maintenance record not found"
         )
 
-    machinery = db.query(Machinery).filter(
-        Machinery.id == maintenance_data.machinery_id
-    ).first()
+    machinery = (
+        db.query(Machinery)
+        .filter(Machinery.id == maintenance_data.machinery_id)
+        .first()
+    )
 
     if not machinery:
         raise HTTPException(
@@ -141,9 +279,9 @@ def update_maintenance(
     return maintenance
 
 
-# =========================================================
-# Update Maintenance Status
-# =========================================================
+# ============================================================
+# UPDATE MAINTENANCE STATUS
+# ============================================================
 
 @router.put(
     "/{maintenance_id}/status",
@@ -154,9 +292,11 @@ def update_maintenance_status(
     status_data: MaintenanceStatusUpdate,
     db: Session = Depends(get_db)
 ):
-    maintenance = db.query(Maintenance).filter(
-        Maintenance.id == maintenance_id
-    ).first()
+    maintenance = (
+        db.query(Maintenance)
+        .filter(Maintenance.id == maintenance_id)
+        .first()
+    )
 
     if not maintenance:
         raise HTTPException(
@@ -172,9 +312,9 @@ def update_maintenance_status(
     return maintenance
 
 
-# =========================================================
-# Complete Maintenance
-# =========================================================
+# ============================================================
+# COMPLETE MAINTENANCE
+# ============================================================
 
 @router.put(
     "/{maintenance_id}/complete",
@@ -185,9 +325,11 @@ def complete_maintenance(
     completion_data: MaintenanceCompletion,
     db: Session = Depends(get_db)
 ):
-    maintenance = db.query(Maintenance).filter(
-        Maintenance.id == maintenance_id
-    ).first()
+    maintenance = (
+        db.query(Maintenance)
+        .filter(Maintenance.id == maintenance_id)
+        .first()
+    )
 
     if not maintenance:
         raise HTTPException(
@@ -204,37 +346,20 @@ def complete_maintenance(
     return maintenance
 
 
-# =========================================================
-# Upcoming Maintenance
-# =========================================================
-
-@router.get(
-    "/upcoming",
-    response_model=list[MaintenanceResponse]
-)
-def get_upcoming_maintenance(
-    db: Session = Depends(get_db)
-):
-    return db.query(Maintenance).filter(
-        Maintenance.scheduled_date >= date.today(),
-        Maintenance.status != "Completed"
-    ).order_by(
-        Maintenance.scheduled_date
-    ).all()
-
-
-# =========================================================
-# Delete Maintenance
-# =========================================================
+# ============================================================
+# DELETE MAINTENANCE
+# ============================================================
 
 @router.delete("/{maintenance_id}")
 def delete_maintenance(
     maintenance_id: int,
     db: Session = Depends(get_db)
 ):
-    maintenance = db.query(Maintenance).filter(
-        Maintenance.id == maintenance_id
-    ).first()
+    maintenance = (
+        db.query(Maintenance)
+        .filter(Maintenance.id == maintenance_id)
+        .first()
+    )
 
     if not maintenance:
         raise HTTPException(

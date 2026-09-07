@@ -1,18 +1,12 @@
 <div class="page-container">
-  <aside class="sidebar">
-    <div class="logo">
-      <h2>BuildTrack</h2><span>Construction Management</span>
-    </div>
-    <nav><a routerLink="/client-dashboard" class="active">Dashboard</a><a routerLink="/projects">Project Overview</a><a
-        routerLink="/notifications">Notifications</a></nav>
-    <div class="sidebar-bottom"><a routerLink="/profile">Profile</a><a routerLink="/login">Logout</a></div>
-  </aside>
-  <main class="main-content">
+  <app-sidebar active="dashboard"></app-sidebar>
+
+  <main class="main-content dashboard-page colorful-dashboard">
     <header class="page-header">
       <div>
-        <h1>Client Dashboard</h1>
+        <h1><span class="title-icon">🏢</span> Client Dashboard</h1>
         <p>Track project status, progress and budgets using live backend data.</p>
-      </div>
+      </div><div class="header-actions"><button class="secondary-btn" type="button" (click)="load()">🔄 Refresh</button><a class="primary-btn" routerLink="/projects">📁 View Projects</a></div>
     </header>
     <div class="error-banner" *ngIf="error">{{ error }}</div>
     <div class="loading" *ngIf="loading">Loading project data...</div>
@@ -44,11 +38,10 @@
     </section>
 
     <section class="dashboard-section" *ngIf="!loading">
-      <h2>Project Overview</h2>
-      <p class="note">The current backend does not expose a client-to-project ownership field, so this view shows
-        projects returned by the project API rather than inventing client assignments.</p>
+      <h2>🏗️ Project Overview</h2>
+      <p class="note">This dashboard uses the same demo project records as the other roles for presentation consistency.</p>
       <div class="activity-item" *ngFor="let project of projects">
-        <div><strong>{{ project.project_name }}</strong>
+        <div><strong>🏗️ {{ project.project_name }}</strong>
           <p>{{ project.location }} · Budget {{ project.budget | currency:'INR':'symbol':'1.0-0' }}</p>
           <div class="progress-bar">
             <div class="progress" [style.width.%]="project.progress"></div>
@@ -60,7 +53,7 @@
     </section>
 
     <section class="dashboard-section" *ngIf="!loading">
-      <h2>Budget Summary</h2>
+      <h2>₹ Budget Summary</h2>
       <div class="activity-item"><strong>Total project budget returned by API</strong><span>{{ totalBudget |
           currency:'INR':'symbol':'1.0-0' }}</span></div>
     </section>

@@ -235,7 +235,7 @@
   .sidebar {
     position: static;
     width: 100%;
-    min-height: auto;
+    min-height: unset;
   }
 
   .sidebar-bottom {

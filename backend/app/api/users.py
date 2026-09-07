@@ -29,9 +29,11 @@ def create_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(ADMIN_ONLY)
 ):
+    email = str(user.email).strip().lower()
+
     existing_user = (
         db.query(User)
-        .filter(User.email == user.email)
+        .filter(User.email == email)
         .first()
     )
 
@@ -42,11 +44,14 @@ def create_user(
         )
 
     new_user = User(
-        name=user.name,
-        email=user.email,
+        name=user.name.strip(),
+        email=email,
         password=hash_password(user.password),
-        phone=user.phone,
-        role=user.role,
+        phone=user.phone.strip(),
+        role=str(user.role).strip().upper(),
+        employee_id=user.employee_id,
+        department=user.department,
+        address=user.address,
         is_active=True
     )
 
@@ -123,7 +128,8 @@ def update_user(
     # Prevent duplicate email addresses
     # --------------------------------------------------------
 
-    if "email" in update_data:
+    if "email" in update_data and update_data["email"]:
+        update_data["email"] = str(update_data["email"]).strip().lower()
         duplicate = (
             db.query(User)
             .filter(

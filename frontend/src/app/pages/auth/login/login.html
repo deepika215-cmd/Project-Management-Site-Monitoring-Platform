@@ -30,13 +30,24 @@
 
         <label>Password</label>
 
-        <input
-          type="password"
-          [(ngModel)]="password"
-          name="password"
-          placeholder="Enter your password"
-          required
-        >
+        <div class="password-input-wrap">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          >
+
+          <button
+            type="button"
+            class="password-toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
 
       </div>
 

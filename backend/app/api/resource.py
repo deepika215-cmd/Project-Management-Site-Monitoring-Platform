@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -8,8 +7,10 @@ from app.schemas.resource_schema import (
     ResourceCreate,
     ResourceResponse,
     ResourceAllocation,
-    ResourceUtilization
+    ResourceUtilization,
+    ResourceAvailability
 )
+from app.core.permissions import role_required
 
 router = APIRouter(
     prefix="/resources",
@@ -19,14 +20,18 @@ router = APIRouter(
 
 # =========================================================
 # Create Resource
+# ADMIN / MANAGER only
 # =========================================================
 
-@router.post("/", response_model=ResourceResponse)
+@router.post(
+    "/",
+    response_model=ResourceResponse,
+    dependencies=[Depends(role_required(["ADMIN", "PROJECT_MANAGER"]))]
+)
 def create_resource(
     resource: ResourceCreate,
     db: Session = Depends(get_db)
 ):
-    # Validate quantity
     if resource.quantity < 0:
         raise HTTPException(
             status_code=400,
@@ -51,9 +56,20 @@ def create_resource(
 
 # =========================================================
 # Get All Resources
+# CLIENT can read
 # =========================================================
 
-@router.get("/", response_model=list[ResourceResponse])
+@router.get(
+    "/",
+    response_model=list[ResourceResponse],
+    dependencies=[
+        Depends(
+            role_required(
+                ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "WORKER", "CLIENT"]
+            )
+        )
+    ]
+)
 def get_resources(
     db: Session = Depends(get_db)
 ):
@@ -61,10 +77,73 @@ def get_resources(
 
 
 # =========================================================
-# Get Resource By ID
+# Resource Availability
+# All authenticated roles can read
 # =========================================================
 
-@router.get("/{resource_id}", response_model=ResourceResponse)
+@router.get(
+    "/availability",
+    response_model=list[ResourceAvailability],
+    dependencies=[
+        Depends(
+            role_required(
+                ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "WORKER", "CLIENT"]
+            )
+        )
+    ]
+)
+def get_resource_availability(
+    db: Session = Depends(get_db)
+):
+    resources = db.query(Resource).all()
+
+    availability = []
+
+    for resource in resources:
+
+        available_quantity = (
+            resource.quantity - resource.allocated_quantity
+        )
+
+        if available_quantity == resource.quantity:
+            availability_status = "Available"
+
+        elif available_quantity > 0:
+            availability_status = "Partially Available"
+
+        else:
+            availability_status = "Fully Allocated"
+
+        availability.append({
+            "resource_id": resource.id,
+            "resource_name": resource.name,
+            "type": resource.type,
+            "project_id": resource.project_id,
+            "total_quantity": resource.quantity,
+            "allocated_quantity": resource.allocated_quantity,
+            "available_quantity": available_quantity,
+            "status": availability_status
+        })
+
+    return availability
+
+
+# =========================================================
+# Get Resource By ID
+# All authenticated roles can read
+# =========================================================
+
+@router.get(
+    "/{resource_id}",
+    response_model=ResourceResponse,
+    dependencies=[
+        Depends(
+            role_required(
+                ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "WORKER", "CLIENT"]
+            )
+        )
+    ]
+)
 def get_resource(
     resource_id: int,
     db: Session = Depends(get_db)
@@ -84,9 +163,14 @@ def get_resource(
 
 # =========================================================
 # Update Resource
+# ADMIN / MANAGER only
 # =========================================================
 
-@router.put("/{resource_id}", response_model=ResourceResponse)
+@router.put(
+    "/{resource_id}",
+    response_model=ResourceResponse,
+    dependencies=[Depends(role_required(["ADMIN", "PROJECT_MANAGER"]))]
+)
 def update_resource(
     resource_id: int,
     resource_data: ResourceCreate,
@@ -102,8 +186,6 @@ def update_resource(
             detail="Resource not found"
         )
 
-    # Do not allow total quantity to become
-    # smaller than currently allocated quantity
     if resource_data.quantity < resource.allocated_quantity:
         raise HTTPException(
             status_code=400,
@@ -119,6 +201,15 @@ def update_resource(
     resource.status = resource_data.status
     resource.project_id = resource_data.project_id
 
+    if resource.allocated_quantity == 0:
+        resource.status = "Available"
+
+    elif resource.allocated_quantity == resource.quantity:
+        resource.status = "Fully Allocated"
+
+    else:
+        resource.status = "Partially Allocated"
+
     db.commit()
     db.refresh(resource)
 
@@ -127,11 +218,13 @@ def update_resource(
 
 # =========================================================
 # Allocate Resource
+# ADMIN / MANAGER only
 # =========================================================
 
 @router.put(
     "/{resource_id}/allocate",
-    response_model=ResourceResponse
+    response_model=ResourceResponse,
+    dependencies=[Depends(role_required(["ADMIN", "PROJECT_MANAGER"]))]
 )
 def allocate_resource(
     resource_id: int,
@@ -152,7 +245,6 @@ def allocate_resource(
         resource.quantity - resource.allocated_quantity
     )
 
-    # Check availability
     if allocation.quantity > available_quantity:
         raise HTTPException(
             status_code=400,
@@ -164,11 +256,12 @@ def allocate_resource(
 
     resource.allocated_quantity += allocation.quantity
 
-    # Update status
     if resource.allocated_quantity == resource.quantity:
         resource.status = "Fully Allocated"
+
     elif resource.allocated_quantity > 0:
         resource.status = "Partially Allocated"
+
     else:
         resource.status = "Available"
 
@@ -180,11 +273,13 @@ def allocate_resource(
 
 # =========================================================
 # Release Resource
+# ADMIN / MANAGER only
 # =========================================================
 
 @router.put(
     "/{resource_id}/release",
-    response_model=ResourceResponse
+    response_model=ResourceResponse,
+    dependencies=[Depends(role_required(["ADMIN", "PROJECT_MANAGER"]))]
 )
 def release_resource(
     resource_id: int,
@@ -201,7 +296,6 @@ def release_resource(
             detail="Resource not found"
         )
 
-    # Cannot release more than allocated
     if allocation.quantity > resource.allocated_quantity:
         raise HTTPException(
             status_code=400,
@@ -214,11 +308,12 @@ def release_resource(
 
     resource.allocated_quantity -= allocation.quantity
 
-    # Update status
     if resource.allocated_quantity == 0:
         resource.status = "Available"
+
     elif resource.allocated_quantity < resource.quantity:
         resource.status = "Partially Allocated"
+
     else:
         resource.status = "Fully Allocated"
 
@@ -230,11 +325,19 @@ def release_resource(
 
 # =========================================================
 # Resource Utilization
+# All authenticated roles can read
 # =========================================================
 
 @router.get(
     "/{resource_id}/utilization",
-    response_model=ResourceUtilization
+    response_model=ResourceUtilization,
+    dependencies=[
+        Depends(
+            role_required(
+                ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "WORKER", "CLIENT"]
+            )
+        )
+    ]
 )
 def get_resource_utilization(
     resource_id: int,
@@ -257,7 +360,6 @@ def get_resource_utilization(
         total_quantity - allocated_quantity
     )
 
-    # Calculate utilization percentage
     if total_quantity > 0:
         utilization_percentage = round(
             (allocated_quantity / total_quantity) * 100,
@@ -279,9 +381,13 @@ def get_resource_utilization(
 
 # =========================================================
 # Delete Resource
+# ADMIN / MANAGER only
 # =========================================================
 
-@router.delete("/{resource_id}")
+@router.delete(
+    "/{resource_id}",
+    dependencies=[Depends(role_required(["ADMIN", "PROJECT_MANAGER"]))]
+)
 def delete_resource(
     resource_id: int,
     db: Session = Depends(get_db)
@@ -296,7 +402,6 @@ def delete_resource(
             detail="Resource not found"
         )
 
-    # Prevent deletion of allocated resources
     if resource.allocated_quantity > 0:
         raise HTTPException(
             status_code=400,
@@ -310,4 +415,5 @@ def delete_resource(
     db.commit()
 
     return {
-        "message": "Resource deleted successfully"}
+        "message": "Resource deleted successfully"
+    }

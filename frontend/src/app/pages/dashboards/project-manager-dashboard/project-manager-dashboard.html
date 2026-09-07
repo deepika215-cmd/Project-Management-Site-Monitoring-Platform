@@ -1,60 +1,73 @@
 <div class="page-container">
   <app-sidebar active="dashboard"></app-sidebar>
-
-  <main class="main-content">
-    <header class="page-header">
-      <div>
-        <h1>Project Manager Dashboard</h1>
-        <p>Live project, resource and workforce overview from BuildTrack.</p>
+  <main class="main-content dashboard-page colorful-dashboard">
+    <header class="page-header dashboard-hero pm-dashboard-hero">
+      <div class="hero-copy">
+        <h1><span class="title-icon">📋</span> Project Manager Dashboard</h1>
+        <p>Project progress, budget, workforce, resources and procurement in one place.</p>
       </div>
-      <button class="create-project-btn" routerLink="/projects/create-project">+ Create Project</button>
+
+      <div class="pm-top-actions">
+        <button class="secondary-btn" type="button" (click)="loadDashboard()">🔄 Refresh</button>
+        <a class="secondary-btn" routerLink="/projects">📁 View Projects</a>
+        <a class="primary-btn" routerLink="/project-manager/create-project">➕ Create Project</a>
+      </div>
     </header>
 
-    <div class="error-banner" *ngIf="error">{{ error }}</div>
-    <div class="loading" *ngIf="loading">Loading dashboard data...</div>
-
-    <section class="stats-grid" *ngIf="!loading">
-      <div class="stat-card"><div class="card-icon blue">📁</div><div><h2>{{ totalProjects }}</h2><span>Projects</span></div></div>
-      <div class="stat-card"><div class="card-icon green">✅</div><div><h2>{{ milestoneCompletion }}%</h2><span>Milestone Progress</span></div></div>
-      <div class="stat-card"><div class="card-icon orange">⏰</div><div><h2>{{ upcomingDeadlines.length }}</h2><span>Upcoming Deadlines</span></div></div>
-      <div class="stat-card"><div class="card-icon red">⚠️</div><div><h2>{{ delayedProjects }}</h2><span>Overdue Projects</span></div></div>
-    </section>
-
-    <section class="dashboard-card" *ngIf="!loading">
-      <div class="section-title"><h2>Projects</h2><a routerLink="/projects">View all</a></div>
-      <div class="table-wrap" *ngIf="projects.length; else noProjects">
-        <table>
-          <thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Deadline</th></tr></thead>
-          <tbody>
-            <tr *ngFor="let project of projects">
-              <td><a [routerLink]="['/projects/project-details', project.id]">{{ project.project_name }}</a></td>
-              <td><span class="status" [ngClass]="statusClass(project.status)">{{ project.status }}</span></td>
-              <td><div class="progress-bar"><div class="progress" [style.width.%]="project.progress"></div></div>{{ project.progress }}%</td>
-              <td [class.overdue]="isOverdue(project)">{{ project.end_date | date:'dd MMM yyyy' }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <section class="pm-project-toolbar" aria-label="Project selection">
+      <div>
+        <span class="toolbar-label">🎯 Active Project</span>
+        <p>Select a project to update the dashboard cards below.</p>
       </div>
-      <ng-template #noProjects><p>No projects are available from the backend.</p></ng-template>
+      <select [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange()" aria-label="Select project">
+        <option [ngValue]="null">All assigned projects</option>
+        <option *ngFor="let project of projects" [ngValue]="project.id">{{ project.project_name }}</option>
+      </select>
     </section>
 
-    <div class="dashboard-grid" *ngIf="!loading">
-      <section class="dashboard-card">
-        <h2>Upcoming Deadlines</h2>
-        <div class="list-item" *ngFor="let project of upcomingDeadlines">
-          <div><strong>{{ project.project_name }}</strong><p>{{ project.end_date | date:'dd MMM yyyy' }}</p></div>
-          <span class="badge" [class.danger]="isOverdue(project)" [class.warning]="!isOverdue(project)">{{ deadlineLabel(project) }}</span>
-        </div>
-        <p *ngIf="!upcomingDeadlines.length">No upcoming deadlines are available.</p>
+    <div class="error-banner" *ngIf="error">⚠️ {{ error }}</div><div class="loading" *ngIf="loading">⏳ Loading dashboard data...</div>
+
+    <ng-container *ngIf="!loading">
+      <section class="stats-grid">
+        <div class="stat-card icon-card"><div class="stat-icon blue">🏗️</div><div><span>Assigned Projects</span><strong>{{ projects.length }}</strong><small>Accessible to this account</small></div></div>
+        <div class="stat-card icon-card"><div class="stat-icon green">📊</div><div><span>Project Progress</span><strong>{{ selectedProject ? selectedProject.progress : 0 }}%</strong><small>{{ selectedProject?.status || 'Select a project' }}</small></div></div>
+        <div class="stat-card icon-card"><div class="stat-icon orange">🚜</div><div><span>Resource Utilization</span><strong>{{ resourceUtilization }}%</strong><small>{{ projectResources.length }} resource records</small></div></div>
+        <div class="stat-card icon-card"><div class="stat-icon purple">👷</div><div><span>Workforce Attendance</span><strong>{{ attendanceAverage }}%</strong><small>{{ projectWorkforce.length }} workforce records</small></div></div>
+        <div class="stat-card icon-card"><div class="stat-icon teal">📦</div><div><span>Pending Procurement</span><strong>{{ pendingProcurements }}</strong><small>{{ projectProcurements.length }} procurement records</small></div></div>
       </section>
 
-      <section class="dashboard-card">
-        <h2>Live Workforce & Resources</h2>
-        <div class="metric-row"><span>Workers in analytics</span><strong>{{ totalWorkers }}</strong></div>
-        <div class="metric-row"><span>Engineers identified</span><strong>{{ totalEngineers }}</strong></div>
-        <div class="metric-row"><span>Contractors identified</span><strong>{{ totalContractors }}</strong></div>
-        <div class="metric-row"><span>Resource utilization</span><strong>{{ resourceUtilization }}%</strong></div>
+      <section class="panel icon-panel" *ngIf="selectedProject; else chooseProject">
+        <div class="panel-head"><div><h2>📊 Project Progress</h2><p>{{ selectedProject.project_name }} · {{ selectedProject.status }}</p></div><a [routerLink]="['/projects/project-details', selectedProject.id]">Project details →</a></div>
+        <div class="progress-overview"><div class="progress-number">{{ selectedProject.progress }}%</div><div class="progress-block"><div class="progress-track large"><div [style.width.%]="selectedProject.progress"></div></div><div class="milestone-meta"><span>Overall completion</span><span>{{ selectedProject.start_date | date:'dd MMM yyyy' }} → {{ selectedProject.end_date | date:'dd MMM yyyy' }}</span></div></div></div>
       </section>
-    </div>
+      <ng-template #chooseProject><section class="panel icon-panel"><p class="empty">Select an assigned project to view project-specific analytics.</p></section></ng-template>
+
+      <div class="dashboard-grid">
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>₹ Budget Utilization</h2><p>Financial values from Module 11 Budget & Cost Management.</p></div><a routerLink="/budget">Budget & Cost →</a></div>
+          <div class="budget-grid"><div><span>Planned Budget</span><strong>{{ money(dashboardBudgetPlanned) }}</strong></div><div><span>Utilized</span><strong>{{ money(dashboardBudgetSpent) }}</strong></div><div><span>Remaining</span><strong>{{ money(dashboardBudgetRemaining) }}</strong></div></div>
+          <p class="data-note" *ngIf="selectedProject && dashboardBudgetSpent == null">Utilized and remaining values will appear automatically when the Module 11 backend exposes actual expense data; no demo value is hard-coded.</p>
+        </section>
+
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>👷 Workforce Status</h2><p>Attendance and workforce information for the selected project.</p></div><a routerLink="/attendance">Attendance →</a></div>
+          <div class="metric-row"><span>Attendance average</span><strong>{{ attendanceAverage }}%</strong></div><div class="metric-row"><span>Workforce records</span><strong>{{ projectWorkforce.length }}</strong></div>
+          <div class="mini-bar"><div [style.width.%]="attendanceAverage"></div></div>
+        </section>
+      </div>
+
+      <div class="dashboard-grid">
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>🚜 Resource Utilization</h2><p>Allocation and availability from Resource Management.</p></div><a routerLink="/resource-allocation">Resources →</a></div>
+          <div class="metric-row"><span>Average utilization</span><strong>{{ resourceUtilization }}%</strong></div><div class="mini-bar"><div [style.width.%]="resourceUtilization"></div></div>
+          <div class="list-row" *ngFor="let resource of projectResources | slice:0:5"><span>🚜 {{ resource.resource_name || resource.name || 'Resource' }}</span><strong>{{ pct(resource.utilization ?? resource.utilization_percentage) }}%</strong></div><p class="empty" *ngIf="!projectResources.length">No resource records available.</p>
+        </section>
+
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>📦 Procurement Overview</h2><p>Requests, orders and current procurement status.</p></div><a routerLink="/procurement">Procurement →</a></div>
+          <div class="list-row" *ngFor="let item of projectProcurements | slice:0:6"><div><strong>📦 {{ item.item_name || item.title || item.vendor_name || 'Procurement item' }}</strong><small>{{ item.request_type || item.category || '' }}</small></div><span class="status-pill">{{ item.status || 'Pending' }}</span></div><p class="empty" *ngIf="!projectProcurements.length">No procurement records available.</p>
+        </section>
+      </div>
+    </ng-container>
   </main>
 </div>

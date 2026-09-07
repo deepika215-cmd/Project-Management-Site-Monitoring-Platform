@@ -1,53 +1,31 @@
 <div class="page-container">
-    <aside class="sidebar">
-        <div class="logo">
-            <h2>BuildTrack</h2><span>Construction Management</span>
-        </div>
-        <nav><a routerLink="/contractor-dashboard" class="active">Dashboard</a><a routerLink="/projects">Projects</a><a
-                routerLink="/procurement">Procurement</a><a routerLink="/inventory">Materials</a><a
-                routerLink="/notifications">Notifications</a></nav>
-        <div class="sidebar-bottom"><a routerLink="/profile">Profile</a><a routerLink="/login">Logout</a></div>
-    </aside>
-    <main class="main-content">
-        <header class="page-header">
+  <app-sidebar active="dashboard"></app-sidebar>
+
+  <main class="main-content dashboard-page colorful-dashboard">
+        <header class="page-header dashboard-hero">
             <div>
-                <h1>Contractor Dashboard</h1>
-                <p>Project and procurement overview using existing BuildTrack APIs.</p>
-            </div>
+                <h1><span class="title-icon">👷</span> Contractor Dashboard</h1>
+                <p>Workforce, attendance and work-progress overview for the contractor role.</p>
+            </div><div class="header-actions"><button class="secondary-btn" type="button" (click)="load()">🔄 Refresh</button><a class="primary-btn" routerLink="/projects">📁 View Projects</a></div>
         </header>
-        <div class="error-banner" *ngIf="error">{{ error }}</div>
-        <div class="loading" *ngIf="loading">Loading contractor data...</div>
+        <div class="error-banner" *ngIf="error">⚠️ {{ error }}</div>
+        <div class="loading" *ngIf="loading">⏳ Loading contractor data...</div>
         <section class="stats-row" *ngIf="!loading">
-            <div class="stat-card">
-                <h3>{{ projects.length }}</h3><span>Projects Returned</span>
-            </div>
-            <div class="stat-card">
-                <h3>{{ activeCount }}</h3><span>Active Projects</span>
-            </div>
-            <div class="stat-card">
-                <h3>{{ completedCount }}</h3><span>Completed Projects</span>
-            </div>
-            <div class="stat-card">
-                <h3>{{ pendingProcurementCount }}</h3><span>Pending Procurement</span>
-            </div>
+            <div class="stat-card icon-card"><div class="stat-icon blue">🏗️</div><div><h3>{{ projects.length }}</h3><span>Projects Returned</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon orange">🚧</div><div><h3>{{ activeCount }}</h3><span>Active Projects</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon green">✅</div><div><h3>{{ completedCount }}</h3><span>Completed Projects</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon purple">📋</div><div><h3>{{ assignmentCount }}</h3><span>Assignments</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon teal">🕒</div><div><h3>{{ todayAttendanceCount }}</h3><span>Today Attendance</span></div></div>
         </section>
-        <section class="dashboard-section" *ngIf="!loading">
-            <h2>Project Overview</h2>
-            <p class="note">The current backend does not expose contractor-to-project assignment, so the dashboard
-                displays project records returned by the API instead of inventing contract assignments.</p>
+        <section class="dashboard-section icon-panel" *ngIf="!loading">
+            <h2>🏗️ Project Overview</h2>
+            <p class="note">This dashboard uses the same demo project records, worker assignments and attendance data used across the presentation.</p>
             <div class="activity-item" *ngFor="let project of projects">
-                <div><strong>{{ project.project_name }}</strong>
+                <div><strong>🏗️ {{ project.project_name }}</strong>
                     <p>{{ project.location }} · {{ project.end_date | date:'dd MMM yyyy' }}</p>
                 </div><span [ngClass]="statusClass(project.status)">{{ project.status }}</span>
             </div>
         </section>
-        <section class="dashboard-section" *ngIf="!loading">
-            <h2>Procurement Overview</h2>
-            <div class="activity-item" *ngFor="let item of procurements">
-                <div><strong>{{ item.item_name }}</strong>
-                    <p>{{ item.supplier }} · Quantity {{ item.quantity }}</p>
-                </div><span>{{ item.status }}</span>
-            </div>
-        </section>
+        <section class="dashboard-section icon-panel" *ngIf="!loading"><h2>👷 Contractor Workflow</h2><p class="note">Use Worker List, Attendance and Work Progress from the navigation. Assignment and attendance data reload from the backend whenever the dashboard opens or refreshes.</p></section>
     </main>
 </div>

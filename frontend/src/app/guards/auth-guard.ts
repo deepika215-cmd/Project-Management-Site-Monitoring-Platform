@@ -12,6 +12,16 @@ function tokenIsValid(token: string): boolean {
   }
 }
 
+
+function dashboardForRole(role: string): string {
+  const routes: Record<string, string> = {
+    ADMIN: '/admin-dashboard', PROJECT_MANAGER: '/project-manager-dashboard',
+    SITE_ENGINEER: '/site-engineer-dashboard', CONTRACTOR: '/contractor-dashboard',
+    WORKER: '/worker-dashboard', CLIENT: '/client-dashboard'
+  };
+  return routes[(role || '').toUpperCase()] || '/profile';
+}
+
 export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
   const token = localStorage.getItem('token');
@@ -46,7 +56,26 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => () => {
       localStorage.setItem('currentUser', JSON.stringify(user));
       return normalized.includes((user?.role || '').toUpperCase())
         ? true
-        : router.createUrlTree(['/profile']);
+        : router.createUrlTree([dashboardForRole(user?.role || '')]);
+    }),
+    catchError(() => of(router.createUrlTree(['/login'])))
+  );
+};
+
+
+export const dashboardGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  const api = inject(Api);
+  const token = localStorage.getItem('token');
+  if (!token || !tokenIsValid(token)) return router.createUrlTree(['/login']);
+  try {
+    const role = JSON.parse(localStorage.getItem('currentUser') || '{}')?.role || '';
+    if (role) return router.createUrlTree([dashboardForRole(role)]);
+  } catch { /* fetch below */ }
+  return api.getCurrentUser().pipe(
+    map((user: any) => {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      return router.createUrlTree([dashboardForRole(user?.role || '')]);
     }),
     catchError(() => of(router.createUrlTree(['/login'])))
   );

@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ProjectService } from '../../../services/project';
 import { Api } from '../../../services/api';
+import { finalize, timeout } from 'rxjs/operators';
 import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 
 @Component({
@@ -16,93 +17,51 @@ import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
 export class CreateProject implements OnInit {
   project = {
     name: '', location: '', description: '', budget: null as number | null,
-    startDate: '', completionDate: '', status: 'Planning', managerId: 0, manager: ''
+    startDate: '', completionDate: '', status: 'Planning', managerId: 0
   };
-
+  managers: any[] = [];
   loading = false;
-  loadingManager = true;
+  loadingManagers = true;
   errorMessage = '';
   successMessage = '';
 
-  constructor(
-    private router: Router,
-    private projectService: ProjectService,
-    private api: Api
-  ) {}
+  constructor(private router: Router, private projectService: ProjectService, private api: Api, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void {
-    this.loadManager();
-  }
+  ngOnInit(): void { this.loadProjectManagers(); }
 
-  private loadManager(): void {
-    const cached = localStorage.getItem('currentUser');
-    if (cached) {
-      try {
-        this.setManager(JSON.parse(cached));
-      } catch {
-        // A fresh /auth/me request below is the source of truth.
-      }
-    }
-
-    if (!localStorage.getItem('token')) {
-      this.loadingManager = false;
-      this.errorMessage = 'You must be logged in before creating a project.';
-      return;
-    }
-
-    this.api.getCurrentUser().subscribe({
-      next: user => {
-        this.setManager(user);
-        this.loadingManager = false;
-        if (!this.project.managerId) {
-          this.errorMessage = 'The authenticated user could not be assigned as project manager.';
-        }
+  private loadProjectManagers(): void {
+    this.loadingManagers = true;
+    this.api.getUsers().subscribe({
+      next: users => {
+        this.managers = (Array.isArray(users) ? users : []).filter(user => String(user?.role || '').toUpperCase() === 'PROJECT_MANAGER' && user?.is_active !== false);
+        this.loadingManagers = false;
+        if (this.managers.length === 1) this.project.managerId = Number(this.managers[0].id);
+        if (!this.managers.length) this.errorMessage = 'No active Project Manager account is available. Create a Project Manager in User Management first.';
       },
       error: err => {
-        this.loadingManager = false;
-        this.errorMessage = err?.error?.detail || 'Unable to load the authenticated user. Please log in again.';
+        this.loadingManagers = false;
+        this.errorMessage = err?.error?.detail || 'Unable to load Project Managers.';
       }
     });
-  }
-
-  private setManager(user: any): void {
-    const id = Number(user?.id || 0);
-    if (id > 0) {
-      this.project.managerId = id;
-      this.project.manager = user?.name || user?.email || `User #${id}`;
-    }
   }
 
   createProject(): void {
     this.errorMessage = '';
     this.successMessage = '';
-
-    if (this.loadingManager || this.loading) return;
-
-    if (!this.project.managerId) {
-      this.errorMessage = 'Project manager information is not available. Please log in again.';
-      return;
-    }
-
+    if (this.loadingManagers || this.loading) return;
+    if (!this.project.managerId) { this.errorMessage = 'Please assign a Project Manager.'; return; }
     if (!this.project.name.trim() || !this.project.location.trim() || !this.project.startDate || !this.project.completionDate || this.project.budget === null) {
-      this.errorMessage = 'Please complete all required fields before creating the project.';
-      return;
+      this.errorMessage = 'Please complete all required fields before creating the project.'; return;
     }
-
-    if (Number(this.project.budget) < 0) {
-      this.errorMessage = 'Budget cannot be negative.';
-      return;
-    }
-
-    if (new Date(this.project.completionDate) < new Date(this.project.startDate)) {
-      this.errorMessage = 'End date cannot be before the start date.';
-      return;
-    }
+    if (Number(this.project.budget) < 0) { this.errorMessage = 'Budget cannot be negative.'; return; }
+    if (new Date(this.project.completionDate) < new Date(this.project.startDate)) { this.errorMessage = 'End date cannot be before the start date.'; return; }
 
     this.loading = true;
-
     this.projectService.createProject({
       project_name: this.project.name.trim(),
+      project_code: null as any,
+      project_category: 'Residential',
+      priority: 'Medium',
       description: this.project.description.trim() || 'No description provided',
       location: this.project.location.trim(),
       start_date: this.project.startDate,
@@ -110,20 +69,23 @@ export class CreateProject implements OnInit {
       budget: Number(this.project.budget),
       status: this.project.status,
       manager_id: Number(this.project.managerId)
-    }).subscribe({
-      next: created => {
+    }).pipe(
+      timeout(10000),
+      finalize(() => {
         this.loading = false;
-        this.successMessage = `Project "${created.project_name}" was saved successfully (ID ${created.id}).`;
-        // Navigate to the real list so the newly persisted record is fetched
-        // again from FastAPI instead of relying on local component state.
-        this.router.navigate(['/projects'], { queryParams: { created: created.id } });
-      },
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: created => { this.loading = false; this.router.navigate(['/projects'], { queryParams: { created: created.id } }); },
       error: err => {
         this.loading = false;
         const detail = err?.error?.detail;
-        this.errorMessage = Array.isArray(detail)
-          ? detail.map((item: any) => item?.msg || 'Invalid value').join(', ')
-          : detail || `Project creation failed (HTTP ${err?.status || 'unknown'}).`;
+        if (err?.name === 'TimeoutError') {
+          this.errorMessage = 'The server took too long to save the project. Please check the backend terminal and try again.';
+          this.cdr.detectChanges();
+          return;
+        }
+        this.errorMessage = Array.isArray(detail) ? detail.map((item: any) => item?.msg || 'Invalid value').join(', ') : detail || `Project creation failed (HTTP ${err?.status || 'unknown'}).`;
       }
     });
   }

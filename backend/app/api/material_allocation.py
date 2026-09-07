@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import SessionLocal
+from app.core.permissions import role_required
 
 from app.models.material_allocation import MaterialAllocation
 from app.models.material import Material
@@ -17,7 +18,8 @@ from app.schemas.material_allocation_schema import (
 
 router = APIRouter(
     prefix="/material-allocations",
-    tags=["Material Allocations"]
+    tags=["Material Allocations"],
+    dependencies=[Depends(role_required(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER']))],
 )
 
 
@@ -30,6 +32,10 @@ def get_db():
         db.close()
 
 
+# ============================================================
+# ALLOCATE MATERIAL
+# ============================================================
+
 @router.post(
     "/",
     response_model=MaterialAllocationResponse
@@ -39,18 +45,20 @@ def allocate_material(
     db: Session = Depends(get_db)
 ):
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Validate quantity
-    # -----------------------------
+    # --------------------------------------------------------
+
     if allocation.quantity <= 0:
         raise HTTPException(
             status_code=400,
             detail="Quantity must be greater than zero"
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Check project
-    # -----------------------------
+    # --------------------------------------------------------
+
     project = db.query(Project).filter(
         Project.id == allocation.project_id
     ).first()
@@ -61,9 +69,10 @@ def allocate_material(
             detail="Project not found"
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Check material
-    # -----------------------------
+    # --------------------------------------------------------
+
     material = db.query(Material).filter(
         Material.id == allocation.material_id
     ).first()
@@ -74,9 +83,10 @@ def allocate_material(
             detail="Material not found"
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Check approved material request
-    # -----------------------------
+    # --------------------------------------------------------
+
     from app.models.material_request import MaterialRequest
 
     approved_request = db.query(MaterialRequest).filter(
@@ -88,13 +98,16 @@ def allocate_material(
     if not approved_request:
         raise HTTPException(
             status_code=400,
-            detail="No approved material request exists for this project and material"
+            detail=(
+                "No approved material request exists "
+                "for this project and material"
+            )
         )
 
-    # -----------------------------
-    # Make sure allocation does not
-    # exceed approved request
-    # -----------------------------
+    # --------------------------------------------------------
+    # Calculate already allocated quantity
+    # --------------------------------------------------------
+
     existing_allocated = db.query(
         MaterialAllocation
     ).filter(
@@ -104,25 +117,33 @@ def allocate_material(
     ).all()
 
     already_allocated = sum(
-        item.quantity for item in existing_allocated
+        item.quantity
+        for item in existing_allocated
     )
 
     remaining_requested = (
-        approved_request.quantity - already_allocated
+        approved_request.quantity
+        - already_allocated
     )
+
+    # --------------------------------------------------------
+    # Make sure allocation does not exceed request
+    # --------------------------------------------------------
 
     if allocation.quantity > remaining_requested:
         raise HTTPException(
             status_code=400,
             detail=(
                 f"Allocation exceeds approved request. "
-                f"Remaining approved quantity: {remaining_requested}"
+                f"Remaining approved quantity: "
+                f"{remaining_requested}"
             )
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Find central inventory
-    # -----------------------------
+    # --------------------------------------------------------
+
     inventory = db.query(Inventory).filter(
         Inventory.item_name == material.name,
         Inventory.project_id.is_(None)
@@ -131,26 +152,35 @@ def allocate_material(
     if not inventory:
         raise HTTPException(
             status_code=404,
-            detail="Material is not available in central inventory"
+            detail=(
+                "Material is not available "
+                "in central inventory"
+            )
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Check available stock
-    # -----------------------------
+    # --------------------------------------------------------
+
     if inventory.quantity < allocation.quantity:
         raise HTTPException(
             status_code=400,
-            detail=f"Insufficient stock. Available: {inventory.quantity}"
+            detail=(
+                f"Insufficient stock. "
+                f"Available: {inventory.quantity}"
+            )
         )
 
-    # -----------------------------
-    # Reduce available stock
-    # -----------------------------
+    # --------------------------------------------------------
+    # Reduce central inventory
+    # --------------------------------------------------------
+
     inventory.quantity -= allocation.quantity
 
-    # -----------------------------
-    # Create allocation
-    # -----------------------------
+    # --------------------------------------------------------
+    # Create material allocation
+    # --------------------------------------------------------
+
     new_allocation = MaterialAllocation(
         project_id=allocation.project_id,
         material_id=allocation.material_id,
@@ -163,9 +193,10 @@ def allocate_material(
 
     db.add(new_allocation)
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Create stock movement
-    # -----------------------------
+    # --------------------------------------------------------
+
     movement = StockMovement(
         material_id=allocation.material_id,
         project_id=allocation.project_id,
@@ -196,9 +227,10 @@ def consume_material(
     db: Session = Depends(get_db)
 ):
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Find allocation
-    # -----------------------------
+    # --------------------------------------------------------
+
     allocation = db.query(
         MaterialAllocation
     ).filter(
@@ -211,18 +243,23 @@ def consume_material(
             detail="Material allocation not found"
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Check allocation status
-    # -----------------------------
+    # --------------------------------------------------------
+
     if allocation.status == "CONSUMED":
         raise HTTPException(
             status_code=400,
-            detail="This material allocation has already been consumed"
+            detail=(
+                "This material allocation "
+                "has already been consumed"
+            )
         )
 
-    # -----------------------------
-    # Find material
-    # -----------------------------
+    # --------------------------------------------------------
+    # Check material
+    # --------------------------------------------------------
+
     material = db.query(Material).filter(
         Material.id == allocation.material_id
     ).first()
@@ -233,20 +270,25 @@ def consume_material(
             detail="Material not found"
         )
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Change allocation status
-    # -----------------------------
+    # --------------------------------------------------------
+
     allocation.status = "CONSUMED"
 
-    # -----------------------------
+    # --------------------------------------------------------
     # Record consumption movement
-    # -----------------------------
+    # --------------------------------------------------------
+
     movement = StockMovement(
         material_id=allocation.material_id,
         project_id=allocation.project_id,
         movement_type="CONSUMED",
         quantity=allocation.quantity,
-        remarks=f"Consumed for {allocation.work_activity}"
+        remarks=(
+            f"Consumed for "
+            f"{allocation.work_activity}"
+        )
     )
 
     db.add(movement)
@@ -255,7 +297,10 @@ def consume_material(
 
     db.refresh(allocation)
 
-    # ============================================================
+    return allocation
+
+
+# ============================================================
 # GET ALL MATERIAL ALLOCATIONS
 # ============================================================
 
@@ -272,5 +317,3 @@ def get_material_allocations(
     ).order_by(
         MaterialAllocation.id.desc()
     ).all()
-
-    return allocation
