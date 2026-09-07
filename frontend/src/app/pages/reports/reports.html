@@ -1,57 +1,14 @@
-<div class="page-container"><app-sidebar active="reports"></app-sidebar>
-    <main class="main-content">
-        <header class="page-header">
-            <div>
-                <h1>Reports & Documentation</h1>
-                <p>Manage report records using the existing report API.</p>
-            </div><button class="primary" (click)="openCreate()">+ New Report</button>
-        </header>
-        <div class="error" *ngIf="error">{{ error }}</div>
-        <div class="loading" *ngIf="loading">Loading reports...</div>
-        <section class="form-card" *ngIf="showForm">
-            <h2>{{ editingId ? 'Edit Report' : 'Create Report' }}</h2>
-            <div class="form-grid"><label>Title<input [(ngModel)]="form.title" /></label><label>Type<select
-                        [(ngModel)]="form.report_type">
-                        <option>Project Progress</option>
-                        <option>Resource Utilization</option>
-                        <option>Budget</option>
-                        <option>Workforce</option>
-                        <option>Procurement</option>
-                    </select></label><label>Status<select [(ngModel)]="form.status">
-                        <option>Draft</option>
-                        <option>Generated</option>
-                        <option>Published</option>
-                    </select></label><label class="wide">Description<textarea rows="4"
-                        [(ngModel)]="form.description"></textarea></label></div>
-            <!-- <div class="actions"><button class="primary" (click)="save()" [disabled]="saving">{{ saving ? 'Saving...' :
-                    'Save' }}</button><button (click)="cancel()">Cancel</button></div> -->
-            <button type="button" class="primary" (click)="save()" [disabled]="saving">
-                {{ saving ? 'Saving...' : 'Save' }}
-            </button>
+<div class="page-container"><app-sidebar active="reports"></app-sidebar><main class="main-content">
+  <header class="page-header"><div><h1>📑 Reports & Documentation</h1><p>Generate, preview and export database-driven project documentation.</p></div></header>
+  <div class="error" *ngIf="error">{{ error }}</div><div class="success" *ngIf="message">{{ message }}</div><div class="loading" *ngIf="loading">Loading reports...</div>
 
-            <button type="button" (click)="cancel()">Cancel</button>
-        </section>
-        <section class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Type</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let report of reports">
-                        <td>{{ report.title }}</td>
-                        <td>{{ report.report_type || '—' }}</td>
-                        <td>{{ report.status || '—' }}</td>
-                        <td><button (click)="edit(report)">Edit</button><button class="danger-btn"
-                                (click)="remove(report)">Delete</button></td>
-                    </tr>
-                </tbody>
-            </table>
-            <p *ngIf="!loading && !reports.length">No reports found.</p>
-        </section>
-    </main>
-</div>
+  <ng-container *ngIf="!loading">
+    <section class="type-grid"><button *ngFor="let type of reportTypes" [class.active]="selectedType===type" (click)="chooseType(type)"><strong>{{ type }}</strong><span *ngIf="type==='Project Progress'">Status, progress & milestones</span><span *ngIf="type==='Resource Utilization'">Allocation, usage & availability</span><span *ngIf="type==='Budget'">Planned, utilized & remaining</span><span *ngIf="type==='Workforce'">Allocation & attendance</span><span *ngIf="type==='Procurement'">Requests, orders & status</span></button></section>
+
+    <section class="filter-card"><div class="filter-head"><div><h2>⚙️ Report Configuration</h2><p>Choose the project and filters before generating the report.</p></div></div><div class="filter-grid"><label>Report Type<select [(ngModel)]="selectedType"><option *ngFor="let type of reportTypes">{{ type }}</option></select></label><label>Project<select [(ngModel)]="selectedProjectId"><option [ngValue]="null">All accessible projects</option><option *ngFor="let project of projects" [ngValue]="project.id">{{ project.project_name || project.name }}</option></select></label><label>From Date<input type="date" [(ngModel)]="dateFrom"></label><label>To Date<input type="date" [(ngModel)]="dateTo"></label><label class="wide">Optional Report Title<input [(ngModel)]="form.title" placeholder="Auto-generated if left blank"></label><label class="wide">Notes / Description<textarea rows="3" [(ngModel)]="form.description" placeholder="Optional report notes"></textarea></label></div><div class="actions"><button class="primary" (click)="generate()" [disabled]="saving">{{ saving ? 'Generating...' : 'Generate Report' }}</button></div></section>
+
+    <section class="table-card"><div class="section-head"><div><h2>{{ selectedType }} Reports</h2><p>{{ filteredReports.length }} matching report record(s).</p></div></div><div class="table-wrap" *ngIf="filteredReports.length; else noReports"><table><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody><tr *ngFor="let report of filteredReports"><td><strong>{{ report.title || 'Untitled report' }}</strong></td><td>{{ report.report_type || '—' }}</td><td><span class="status-pill">{{ report.status || 'Draft' }}</span></td><td>{{ report.created_at || report.createdAt | date:'dd MMM yyyy' }}</td><td class="row-actions"><button type="button" (click)="view(report)" [disabled]="actionReportId===report.id">{{ actionReportId===report.id && actionKind==='preview' ? 'Loading...' : 'View Report' }}</button><button type="button" (click)="export(report,'pdf')" [disabled]="actionReportId===report.id">{{ actionReportId===report.id && actionKind==='pdf' ? 'Preparing...' : 'Download PDF' }}</button><button type="button" (click)="export(report,'xlsx')" [disabled]="actionReportId===report.id">{{ actionReportId===report.id && actionKind==='xlsx' ? 'Preparing...' : 'Export Excel' }}</button><button type="button" class="danger" (click)="remove(report)" [disabled]="actionReportId===report.id">{{ actionReportId===report.id && actionKind==='delete' ? 'Deleting...' : 'Delete' }}</button></td></tr></tbody></table></div><ng-template #noReports><p class="empty">No reports match the selected filters.</p></ng-template></section>
+
+    <section class="preview-card" *ngIf="preview"><div class="section-head"><div><h2>{{ preview.title || 'Report Preview' }}</h2><p>Report view generated from backend data.</p></div><button type="button" (click)="preview=null">Close</button></div><div class="preview-summary" *ngIf="preview.description">{{ preview.description }}</div><ng-container *ngIf="preview.headers?.length; else rawPreview"><div class="table-wrap"><table><thead><tr><th *ngFor="let header of preview.headers">{{ header }}</th></tr></thead><tbody><tr *ngFor="let row of (preview.rows || [])"><td *ngFor="let cell of row">{{ cell }}</td></tr><tr *ngIf="!preview.rows?.length"><td [attr.colspan]="preview.headers.length" class="preview-empty">No matching {{ preview.report_type || selectedType | lowercase }} data is currently stored for the selected report. Add records in the related module and regenerate the report.</td></tr></tbody></table></div></ng-container><ng-template #rawPreview><div class="preview-empty">The backend returned this report without structured rows. There is currently no detailed data available to display.</div></ng-template></section>
+  </ng-container>
+</main></div>

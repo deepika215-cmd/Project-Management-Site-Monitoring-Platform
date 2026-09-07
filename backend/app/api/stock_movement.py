@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import SessionLocal
+from app.core.permissions import role_required
 from app.models.stock_movement import StockMovement
 from app.models.material import Material
 from app.models.inventory import Inventory
@@ -13,7 +14,8 @@ from app.schemas.stock_movement_schema import (
 
 router = APIRouter(
     prefix="/stock-movements",
-    tags=["Stock Movements"]
+    tags=["Stock Movements"],
+    dependencies=[Depends(role_required(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER']))],
 )
 
 

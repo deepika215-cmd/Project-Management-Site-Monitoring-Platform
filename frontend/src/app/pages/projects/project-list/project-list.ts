@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ProjectService, Project } from '../../../services/project';
 import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
+import { catchError, finalize, of, timeout } from 'rxjs';
 
 @Component({
   selector: 'app-project-list',
@@ -13,6 +14,22 @@ import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
   styleUrl: './project-list.css'
 })
 export class ProjectList implements OnInit {
+
+  get currentRole(): string {
+    try { return String(JSON.parse(localStorage.getItem('currentUser') || '{}')?.role || '').toUpperCase(); }
+    catch { return ''; }
+  }
+  isAdmin(): boolean { return this.currentRole === 'ADMIN'; }
+  isProjectManager(): boolean { return this.currentRole === 'PROJECT_MANAGER'; }
+  isSiteEngineer(): boolean { return this.currentRole === 'SITE_ENGINEER'; }
+  canCreateProject(): boolean { return this.isAdmin() || this.isProjectManager() || this.isSiteEngineer(); }
+  createProjectLink(): string {
+    if (this.isProjectManager()) return '/project-manager/create-project';
+    if (this.isSiteEngineer()) return '/site-engineer/create-project';
+    return '/projects/create-project';
+  }
+  canEditProject(): boolean { return this.isAdmin() || this.isProjectManager(); }
+
   searchText = '';
   selectedCategory = '';
   selectedStatus = '';
@@ -66,35 +83,32 @@ export class ProjectList implements OnInit {
   loadProjects(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.projectService.getProjects().subscribe({
-      next: data => {
-        const rows = Array.isArray(data) ? data : [];
-        this.projects = rows.map(p => this.projectService.toViewModel(p));
-        this.filteredProjects = [...this.projects];
-        this.loading = false;
-        this.filterProjects();
-        this.cdr.detectChanges();
-        this.loadProgressForProjects();
-      },
-      error: err => {
-        this.projects = [];
-        this.filteredProjects = [];
-        this.loading = false;
+    this.cdr.detectChanges();
+    this.projectService.getProjects().pipe(
+      timeout(10000),
+      catchError(err => {
         this.errorMessage = this.getError(err, 'Unable to load projects from the backend.');
+        return of([]);
+      }),
+      finalize(() => {
+        this.loading = false;
         this.cdr.detectChanges();
-      }
+      })
+    ).subscribe(data => {
+      const rows = Array.isArray(data) ? data : [];
+      this.projects = rows.map(p => this.projectService.toViewModel(p));
+      this.filteredProjects = [...this.projects];
+      this.filterProjects();
+      this.loadProgressForProjects();
     });
   }
 
   private loadProgressForProjects(): void {
     this.projects.forEach(project => {
-      this.projectService.getTracking(project.id).subscribe({
-        next: tracking => {
-          project.progress = Math.max(0, Math.min(100, Number(tracking?.progress ?? 0)));
-          this.filterProjects();
-          this.cdr.detectChanges();
-        },
-        error: () => { project.progress = 0; }
+      this.projectService.getTracking(project.id).pipe(timeout(8000), catchError(() => of(null))).subscribe(tracking => {
+        project.progress = Math.max(0, Math.min(100, Number(tracking?.progress ?? project.progress ?? 0)));
+        this.filterProjects();
+        this.cdr.detectChanges();
       });
     });
   }

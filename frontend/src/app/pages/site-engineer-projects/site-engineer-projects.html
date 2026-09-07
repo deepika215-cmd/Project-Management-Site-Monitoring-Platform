@@ -3,13 +3,10 @@
         <header class="page-header">
 
             <div>
-
-                <h1>Assigned Projects</h1>
-
+                <h1>📁 Assigned Projects</h1>
                 <p>Projects loaded from the existing project API.</p>
-
             </div>
-
+            <a class="create-project-btn" routerLink="/site-engineer/create-project">+ Create Project</a>
         </header><p *ngIf="error" class="error">{{error}}</p><p *ngIf="loading">Loading projects...</p>
 
         <!-- Statistics -->

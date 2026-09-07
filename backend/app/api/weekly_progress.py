@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.project import Project
 
 from app.database.database import get_db
+from app.core.permissions import role_required
 from app.models.weekly_progress import WeeklyProgress
 from app.schemas.weekly_progress_schema import (
     WeeklyProgressCreate,
@@ -12,6 +13,7 @@ from app.schemas.weekly_progress_schema import (
 router = APIRouter(
     prefix="/weekly-progress",
     tags=["Weekly Progress"],
+    dependencies=[Depends(role_required(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CONTRACTOR']))],
 )
 
 

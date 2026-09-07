@@ -29,6 +29,14 @@ export interface Project {
 export interface BackendProject {
   id: number;
   project_name: string;
+  project_code?: string | null;
+  code?: string | null;
+  name?: string | null;
+  project_category?: string;
+  category?: string;
+  priority?: string;
+  manager_name?: string | null;
+  managerName?: string | null;
   description: string;
   location: string;
   start_date: string;
@@ -79,28 +87,33 @@ export class ProjectService {
   }
 
   toViewModel(project: BackendProject): Project {
+    const p: any = project || {};
+    const start = p.start_date || p.startDate || '';
+    const end = p.end_date || p.endDate || p.completionDate || '';
+    const managerId = Number(p.manager_id ?? p.managerId ?? 0);
+    const managerName = p.manager_name || p.managerName || (managerId ? `Project Manager #${managerId}` : 'Project Manager');
     return {
-      id: project.id,
-      code: `BT-${String(project.id).padStart(3, '0')}`,
-      name: project.project_name,
-      category: 'Construction',
-      priority: 'Standard',
-      description: project.description,
-      clientName: 'Not provided by backend',
-      clientEmail: '',
-      clientPhone: '',
-      companyName: '',
-      location: project.location,
-      budget: project.budget,
-      startDate: project.start_date,
-      completionDate: project.end_date,
-      duration: this.calculateDuration(project.start_date, project.end_date),
-      manager: `User #${project.manager_id}`,
-      managerId: project.manager_id,
-      status: project.status,
-      phase: project.status === 'Planning' ? 'Planning' : 'Execution',
+      id: Number(p.id),
+      code: p.project_code || p.code || `BT-${String(p.id).padStart(3, '0')}`,
+      name: p.project_name || p.name || 'Unnamed project',
+      category: p.project_category || p.category || 'Construction',
+      priority: p.priority || p.project_priority || 'Standard',
+      description: p.description || '',
+      clientName: p.client_name || 'Demo Client',
+      clientEmail: p.client_email || '',
+      clientPhone: p.client_phone || '',
+      companyName: p.company_name || '',
+      location: p.location || '',
+      budget: Number(p.budget ?? 0),
+      startDate: start,
+      completionDate: end,
+      duration: this.calculateDuration(start, end),
+      manager: managerName,
+      managerId,
+      status: p.status || 'Planning',
+      phase: (p.status || '') === 'Planning' ? 'Planning' : 'Execution',
       visibility: 'Internal',
-      progress: 0
+      progress: Number(p.progress ?? 0)
     };
   }
 

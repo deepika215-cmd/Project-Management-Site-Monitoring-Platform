@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import get_db
+from app.core.permissions import role_required
 from app.models.progress_photo import ProgressPhoto
 from app.schemas.progress_photo_schema import (
     ProgressPhotoCreate,
@@ -11,7 +12,8 @@ from app.schemas.progress_photo_schema import (
 
 router = APIRouter(
     prefix="/progress-photos",
-    tags=["Progress Photographs"]
+    tags=["Progress Photographs"],
+    dependencies=[Depends(role_required(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CONTRACTOR']))],
 )
 
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database.database import SessionLocal
+from app.core.permissions import role_required
 from app.models.material_request import MaterialRequest
 from app.models.material import Material
 from app.models.project import Project
@@ -14,7 +15,8 @@ from app.schemas.material_request_schema import (
 
 router = APIRouter(
     prefix="/material-requests",
-    tags=["Material Requests"]
+    tags=["Material Requests"],
+    dependencies=[Depends(role_required(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER']))],
 )
 
 

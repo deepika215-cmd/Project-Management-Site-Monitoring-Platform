@@ -1,0 +1,79 @@
+<div class="page-container">
+  <app-sidebar active="budget"></app-sidebar>
+  <main class="main-content">
+    <header class="page-header">
+      <div><span class="eyebrow">Module 11</span><h1>₹ Budget & Cost Management</h1><p>Plan project budgets, estimate costs, record actual expenses, monitor utilization and prepare financial summaries.</p></div><button class="refresh-btn" type="button" (click)="refresh()" [disabled]="loading || saving">{{ loading ? 'Loading...' : 'Refresh' }}</button>
+      <div class="project-picker"><label>Project<select [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange()"><option [ngValue]="null">Select a project</option><option *ngFor="let project of projects" [ngValue]="project.id">{{ project.project_name || project.name }}</option></select></label></div>
+    </header>
+
+    <div class="notice warning" *ngIf="!backendReady">Module 11 frontend is ready, but the matching Budget & Cost backend endpoints are not available yet. Values will populate automatically when your backend team connects them.</div>
+    <div class="notice error" *ngIf="error">{{ error }}</div>
+    <div class="notice success" *ngIf="message">{{ message }}</div>
+    <div class="loading" *ngIf="loading">Loading financial data...</div>
+
+    <ng-container *ngIf="!loading">
+      <nav class="tabs" aria-label="Budget sections">
+        <button [class.active]="activeTab==='dashboard'" (click)="selectTab('dashboard')">Budget Dashboard</button>
+        <button [class.active]="activeTab==='planning'" (click)="selectTab('planning')">Budget Planning</button>
+        <button [class.active]="activeTab==='estimates'" (click)="selectTab('estimates')">Cost Estimation</button>
+        <button [class.active]="activeTab==='expenses'" (click)="selectTab('expenses')">Expenses</button>
+        <button [class.active]="activeTab==='monitoring'" (click)="selectTab('monitoring')">Monitoring</button>
+        <button [class.active]="activeTab==='report'" (click)="selectTab('report')">Financial Summary</button>
+        <button [class.active]="activeTab==='categories'" (click)="selectTab('categories')">Cost Categories</button>
+      </nav>
+
+      <section class="empty-state" *ngIf="!selectedProjectId"><h2>Select a project</h2><p>Choose an accessible project to view and manage its financial information.</p></section>
+
+      <ng-container *ngIf="selectedProjectId">
+        <section class="summary-grid" *ngIf="activeTab==='dashboard' || activeTab==='monitoring' || activeTab==='report'">
+          <article class="summary-card"><span>Total Planned Budget</span><strong>{{ money(totalBudget) }}</strong><small>Category-wise budget allocation</small></article>
+          <article class="summary-card"><span>Estimated Cost</span><strong>{{ money(estimatedCost) }}</strong><small>Recorded estimates</small></article>
+          <article class="summary-card"><span>Actual Amount Spent</span><strong>{{ money(amountSpent) }}</strong><small>Recorded expenses</small></article>
+          <article class="summary-card"><span>Remaining Budget</span><strong>{{ money(remainingBudget) }}</strong><small>{{ utilization }}% utilized</small></article>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='dashboard'">
+          <div class="section-head"><div><h2>{{ projectName() }} - Financial Overview</h2><p>Planned, estimated and actual costs by required BuildTrack cost category.</p></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Cost Category</th><th>Planned</th><th>Estimated</th><th>Actual</th><th>Remaining</th><th>Utilization</th></tr></thead><tbody><tr *ngFor="let category of categories"><td><strong>{{ category.label }}</strong></td><td>{{ money(categoryPlanned(category.key)) }}</td><td>{{ money(categoryEstimated(category.key)) }}</td><td>{{ money(categorySpent(category.key)) }}</td><td>{{ money(categoryRemaining(category.key)) }}</td><td><div class="util"><div class="track"><div [style.width.%]="categoryUtilization(category.key)"></div></div><span>{{ categoryUtilization(category.key) }}%</span></div></td></tr></tbody></table></div>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='planning'">
+          <div class="section-head"><div><h2>📊 Budget Planning</h2><p>Allocate the project budget across the six required cost categories.</p></div><span class="role-badge" *ngIf="!canEdit">View only</span></div>
+          <div class="form-grid"><label *ngFor="let category of categories">{{ category.label }}<input type="number" min="0" step="1000" [(ngModel)]="planForm[category.key]" [disabled]="!canEdit"></label></div>
+          <div class="plan-total"><span>Calculated Total Budget</span><strong>{{ money(formTotal) }}</strong></div>
+          <div class="actions" *ngIf="canEdit"><button class="primary" (click)="saveBudgetPlan()" [disabled]="saving">{{ saving ? 'Saving...' : 'Save Budget Plan' }}</button></div>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='estimates'">
+          <div class="section-head"><div><h2>🧮 Cost Estimation</h2><p>Record expected costs for project activities before comparing them with actual expenditure.</p></div><span class="role-badge" *ngIf="!canEdit">View only</span></div>
+          <div class="inline-form" *ngIf="canEdit"><label>Category<select [(ngModel)]="estimateForm.category"><option *ngFor="let c of categories" [value]="c.key">{{ c.label }}</option></select></label><label>Activity<input [(ngModel)]="estimateForm.activity" placeholder="e.g. Foundation labor"></label><label>Estimated Amount<input type="number" min="0" [(ngModel)]="estimateForm.estimated_amount"></label><label>Notes<input [(ngModel)]="estimateForm.notes" placeholder="Optional notes"></label><button class="primary" (click)="addEstimate()" [disabled]="saving">{{ saving ? 'Saving...' : 'Add Estimate' }}</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Category</th><th>Activity</th><th>Estimated Amount</th><th>Notes</th><th *ngIf="canEdit">Action</th></tr></thead><tbody><tr *ngFor="let item of estimates"><td>{{ categoryLabel(item.category) }}</td><td>{{ item.activity || item.description || '—' }}</td><td>{{ money(item.estimated_amount ?? item.amount) }}</td><td>{{ item.notes || '—' }}</td><td *ngIf="canEdit"><button class="danger-link" (click)="deleteEstimate(item)" [disabled]="deletingId === 'estimate-' + item.id">{{ deletingId === 'estimate-' + item.id ? 'Deleting...' : 'Delete' }}</button></td></tr></tbody></table><p class="empty" *ngIf="!estimates.length">No cost estimates are available for this project.</p></div>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='expenses'">
+          <div class="section-head"><div><h2>💸 Expense Management</h2><p>Record actual project expenditure against the correct project and cost category.</p></div><span class="role-badge" *ngIf="!canEdit">View only</span></div>
+          <div class="inline-form expense-form" *ngIf="canEdit"><label>Category<select [(ngModel)]="expenseForm.category"><option *ngFor="let c of categories" [value]="c.key">{{ c.label }}</option></select></label><label>Description<input [(ngModel)]="expenseForm.description" placeholder="Expense description"></label><label>Amount<input type="number" min="0" [(ngModel)]="expenseForm.amount"></label><label>Expense Date<input type="date" [(ngModel)]="expenseForm.expense_date"></label><label>Reference<input [(ngModel)]="expenseForm.reference" placeholder="Invoice/PO/reference"></label><label>Source<select [(ngModel)]="expenseForm.source_module"><option value="MANUAL">Manual</option><option value="WORKFORCE">Workforce</option><option value="INVENTORY">Material & Inventory</option><option value="RESOURCE">Resource Management</option><option value="PROCUREMENT">Procurement</option></select></label><button class="primary" (click)="addExpense()" [disabled]="saving">{{ saving ? 'Saving...' : 'Record Expense' }}</button></div>
+          <div class="table-wrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Source</th><th>Reference</th><th>Amount</th><th *ngIf="canEdit">Action</th></tr></thead><tbody><tr *ngFor="let item of expenses"><td>{{ item.expense_date || item.date | date:'dd MMM yyyy' }}</td><td>{{ categoryLabel(item.category) }}</td><td>{{ item.description || '—' }}</td><td>{{ item.source_module || item.source || 'Manual' }}</td><td>{{ item.reference || item.reference_no || '—' }}</td><td>{{ money(item.amount ?? item.actual_amount) }}</td><td *ngIf="canEdit"><button class="danger-link" (click)="deleteExpense(item)" [disabled]="deletingId === 'expense-' + item.id">{{ deletingId === 'expense-' + item.id ? 'Deleting...' : 'Delete' }}</button></td></tr></tbody></table><p class="empty" *ngIf="!expenses.length">No expenses are available for this project.</p></div>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='monitoring'">
+          <div class="section-head"><div><h2>Budget Monitoring</h2><p>Automatic comparison of planned, estimated and actual financial values.</p></div></div>
+          <div class="overall-progress"><div class="monitor-top"><span>Overall Budget Utilization</span><strong>{{ utilization }}%</strong></div><div class="track large"><div [style.width.%]="utilization > 100 ? 100 : utilization"></div></div><p [class.over]="amountSpent > totalBudget">{{ amountSpent > totalBudget ? 'Budget exceeded by ' + money(amountSpent-totalBudget) : money(remainingBudget) + ' remaining' }}</p></div>
+          <div class="category-monitor" *ngFor="let category of categories"><div><strong>{{ category.label }}</strong><small>Planned {{ money(categoryPlanned(category.key)) }} · Estimated {{ money(categoryEstimated(category.key)) }} · Actual {{ money(categorySpent(category.key)) }}</small></div><div class="util"><div class="track"><div [style.width.%]="categoryUtilization(category.key)"></div></div><span>{{ categoryUtilization(category.key) }}%</span></div></div>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='report'">
+          <div class="section-head"><div><h2>Financial Summary / Report</h2><p>Live Module 11 financial data prepared for Module 10 reporting integration.</p></div><a class="secondary-link" routerLink="/reports">Open Reports</a></div>
+          <div class="report-meta"><div><span>Project</span><strong>{{ projectName() }}</strong></div><div><span>Total Budget</span><strong>{{ money(totalBudget) }}</strong></div><div><span>Estimated Cost</span><strong>{{ money(estimatedCost) }}</strong></div><div><span>Actual Expenses</span><strong>{{ money(amountSpent) }}</strong></div><div><span>Remaining</span><strong>{{ money(remainingBudget) }}</strong></div><div><span>Utilization</span><strong>{{ utilization }}%</strong></div></div>
+          <p class="data-note">PDF and Excel export are handled by Module 10. This page exposes the financial summary that the report backend should consume.</p>
+        </section>
+
+        <section class="panel" *ngIf="activeTab==='categories'">
+          <div class="section-head"><div><h2>Cost Category Management</h2><p>BuildTrack's required financial categories used consistently for planning, estimates and expenses.</p></div></div>
+          <div class="category-grid"><article *ngFor="let category of categories"><strong>{{ category.label }}</strong><span>{{ category.key }}</span><small>Planned {{ money(categoryPlanned(category.key)) }} · Spent {{ money(categorySpent(category.key)) }}</small></article></div>
+          <p class="data-note">The six core categories are fixed by the project specification. A future backend can expose additional project-specific categories without changing the core financial calculations.</p>
+        </section>
+      </ng-container>
+    </ng-container>
+  </main>
+</div>

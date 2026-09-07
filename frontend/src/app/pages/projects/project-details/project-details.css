@@ -353,3 +353,27 @@
 /* Shared fixed BuildTrack sidebar shell */
 .main-content{min-height:100vh}
 @media(max-width:850px){.main-content{margin-left:0}.page-container{display:block}}
+
+
+/* Routing-safe action buttons on Project Details */
+.header-actions button,
+.error-panel button {
+  font-family: inherit;
+}
+.back-btn,
+.edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 800;
+}
+.back-btn {
+  color: #1f3763;
+  border: 1px solid #d7dfed;
+}
+.edit-btn {
+  border: 1px solid #2563eb;
+}

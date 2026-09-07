@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, roleGuard } from './guards/auth-guard';
+import { authGuard, roleGuard, dashboardGuard } from './guards/auth-guard';
 
 import { Login } from './pages/auth/login/login';
 import { Register } from './pages/auth/register/register';
@@ -24,13 +24,14 @@ import { ResourceAllocation } from './pages/resources/resource-allocation/resour
 
 import { ProjectList } from './pages/projects/project-list/project-list';
 import { CreateProject } from './pages/projects/create-project/create-project';
+import { ProjectManagerCreateProject } from './pages/project-manager-create-project/project-manager-create-project';
+import { SiteEngineerCreateProject } from './pages/site-engineer-create-project/site-engineer-create-project';
 import { Milestones } from './pages/projects/milestones/milestones';
 import { ProjectDetails } from './pages/projects/project-details/project-details';
 import { ProjectStatus } from './pages/projects/project-status/project-status';
 import { Schedule } from './pages/projects/schedule/schedule';
 import { UpdateProject } from './pages/projects/update-project/update-project';
 
-import { SiteEngineerProjects } from './pages/site-engineer-projects/site-engineer-projects';
 import { SiteEngineerMilestones } from './pages/site-engineer-milestones/site-engineer-milestones';
 
 import { Notifications } from './pages/notifications/notifications';
@@ -41,6 +42,12 @@ import { Attendance } from './pages/attendance/attendance';
 import { Procurement } from './pages/procurement/procurement';
 import { Reports } from './pages/reports/reports';
 import { Analytics } from './pages/analytics/analytics';
+import { ProjectOverview } from './pages/project-overview/project-overview';
+import { SiteProgress } from './pages/site-progress/site-progress';
+import { ResourceOperations } from './pages/resources/resource-operations/resource-operations';
+import { WorkforceOperations } from './pages/workforce/workforce-operations/workforce-operations';
+import { Documents } from './pages/documents/documents';
+import { Budget } from './pages/budget/budget';
 
 
 export const routes: Routes = [
@@ -95,22 +102,22 @@ export const routes: Routes = [
   },
 
   {
-  path: 'contractor-dashboard',
-  component: ContractorDashboard,
-  canActivate: [authGuard, roleGuard(['CONTRACTOR'])]
-},
+    path: 'contractor-dashboard',
+    component: ContractorDashboard,
+    canActivate: [authGuard, roleGuard(['CONTRACTOR'])]
+  },
 
-{
-  path: 'worker-dashboard',
-  component: WorkerDashboard,
-  canActivate: [authGuard, roleGuard(['WORKER'])]
-},
+  {
+    path: 'worker-dashboard',
+    component: WorkerDashboard,
+    canActivate: [authGuard, roleGuard(['WORKER'])]
+  },
 
-{
-  path: 'client-dashboard',
-  component: ClientDashboard,
-  canActivate: [authGuard, roleGuard(['CLIENT'])]
-},
+  {
+    path: 'client-dashboard',
+    component: ClientDashboard,
+    canActivate: [authGuard, roleGuard(['CLIENT'])]
+  },
 
 
   // User Management
@@ -136,14 +143,19 @@ export const routes: Routes = [
   {
     path: 'resource-allocation',
     component: ResourceAllocation,
-    canActivate: [authGuard]
+    canActivate: [
+      authGuard,
+      roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])
+    ]
   },
 
   {
     path: 'resources/resource-allocation',
     component: ResourceAllocation,
-    canActivate: [authGuard]
-
+    canActivate: [
+      authGuard,
+      roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])
+    ]
   },
 
 
@@ -152,13 +164,25 @@ export const routes: Routes = [
   {
     path: 'projects',
     component: ProjectList,
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CONTRACTOR', 'CLIENT'])]
   },
 
   {
     path: 'projects/create-project',
     component: CreateProject,
-    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+
+  {
+    path: 'project-manager/create-project',
+    component: ProjectManagerCreateProject,
+    canActivate: [authGuard, roleGuard(['PROJECT_MANAGER'])]
+  },
+
+  {
+    path: 'site-engineer/create-project',
+    component: SiteEngineerCreateProject,
+    canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])]
   },
 
   {
@@ -170,7 +194,7 @@ export const routes: Routes = [
   {
     path: 'projects/project-details/:id',
     component: ProjectDetails,
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CONTRACTOR', 'CLIENT'])]
   },
 
   {
@@ -182,7 +206,7 @@ export const routes: Routes = [
   {
     path: 'projects/schedule',
     component: Schedule,
-    canActivate: [authGuard]
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])]
   },
 
   {
@@ -192,29 +216,41 @@ export const routes: Routes = [
   },
 
 
+  // Site Progress Monitoring (Module 3)
+  { path: 'site-progress', component: SiteProgress, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CONTRACTOR'])] },
+  { path: 'site-progress/daily', redirectTo: 'site-progress', pathMatch: 'full' },
+  { path: 'site-progress/weekly', redirectTo: 'site-progress', pathMatch: 'full' },
+  { path: 'site-progress/delays', redirectTo: 'site-progress', pathMatch: 'full' },
+
+  // Resource Operations (Module 4)
+  { path: 'resources/operations', component: ResourceOperations, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])] },
+  { path: 'resources/equipment-tracking', component: ResourceOperations, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])] },
+  { path: 'resources/resource-utilization', component: ResourceOperations, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])] },
+  { path: 'resources/maintenance', component: ResourceOperations, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])] },
+
   // Site Engineer
 
   {
     path: 'site-engineer-projects',
-    component: SiteEngineerProjects,
-    canActivate: [authGuard]
+    redirectTo: 'projects',
+    pathMatch: 'full'
   },
 
-  {
-    path: 'site-engineer-milestones',
-    component: SiteEngineerMilestones,
-    canActivate: [authGuard]
-  },
+  { path: 'site-engineer-milestones', redirectTo: 'site-progress', pathMatch: 'full' },
 
 
 
-  { path: 'inventory', component: Inventory, canActivate: [authGuard] },
-  { path: 'workforce', component: Workforce, canActivate: [authGuard] },
-  { path: 'attendance', component: Attendance, canActivate: [authGuard] },
+  { path: 'inventory', component: Inventory, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])] },
+  { path: 'workforce', component: Workforce, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'CONTRACTOR'])] },
+  { path: 'workforce/operations', component: WorkforceOperations, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'CONTRACTOR'])] },
+  { path: 'attendance', component: Attendance, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'CONTRACTOR', 'WORKER'])] },
 
-  { path: 'procurement', component: Procurement, canActivate: [authGuard] },
-  { path: 'reports', component: Reports, canActivate: [authGuard] },
-  { path: 'analytics', component: Analytics, canActivate: [authGuard] },
+  { path: 'procurement', component: Procurement, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER'])] },
+  { path: 'budget', component: Budget, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CLIENT'])] },
+  { path: 'reports', component: Reports, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CLIENT'])] },
+  { path: 'analytics', component: Analytics, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])] },
+  { path: 'project-overview', component: ProjectOverview, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])] },
+  { path: 'documents', component: Documents, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CLIENT'])] },
 
   // Notifications
 
@@ -255,12 +291,10 @@ export const routes: Routes = [
   },
 
 
-  { path: 'dashboard', redirectTo: 'project-manager-dashboard', pathMatch: 'full' },
+  { path: 'dashboard', canActivate: [authGuard, dashboardGuard], component: Profile },
   { path: 'projects/create', redirectTo: 'projects/create-project', pathMatch: 'full' },
   { path: 'projects/status', redirectTo: 'projects/project-status', pathMatch: 'full' },
   { path: 'projects/details/:id', redirectTo: 'projects/project-details/:id', pathMatch: 'full' },
   { path: 'resources', redirectTo: 'resource-allocation', pathMatch: 'full' },
-  { path: 'resources/equipment-tracking', redirectTo: 'resource-allocation', pathMatch: 'full' },
-  { path: 'resources/resource-utilization', redirectTo: 'resource-allocation', pathMatch: 'full' },
 
 ];

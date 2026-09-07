@@ -1,0 +1,5 @@
+name,role,phone,email,category,skill_type,contractor_id,joining_date,status
+Ravi Kumar,Mason,9876543210,ravi.worker@buildtrack.com,Skilled Worker,Brick Work,,2026-09-01,Active
+Suresh Kumar,Electrician,9876543211,suresh.worker@buildtrack.com,Skilled Worker,Electrical Wiring,,2026-09-02,Active
+Meena Devi,Site Helper,9876543212,meena.worker@buildtrack.com,Unskilled Worker,Material Handling,,2026-09-03,Active
+Karthik Raj,Plumber,9876543213,karthik.worker@buildtrack.com,Skilled Worker,Plumbing,,2026-09-04,Active

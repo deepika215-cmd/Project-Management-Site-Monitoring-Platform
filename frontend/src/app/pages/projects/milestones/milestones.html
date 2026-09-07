@@ -5,7 +5,7 @@
     <header class="page-header">
       <div>
         <span class="eyebrow">PROJECT MANAGEMENT</span>
-        <h1>Project Milestones</h1>
+        <h1>🎯 Project Milestones</h1>
         <p>Create, update and track milestones persisted by the FastAPI backend.</p><small class="selected-note" *ngIf="selectedProject">Selected project: #{{ selectedProject }}</small>
       </div>
       <button class="primary-btn" type="button" (click)="openAddMilestone()" [disabled]="!selectedProject">+ Add Milestone</button>
@@ -29,7 +29,7 @@
       <div class="empty-icon">📁</div>
       <h2>No projects available</h2>
       <p>Create a project first. Milestones must belong to an existing project.</p>
-      <a routerLink="/projects/create-project" class="primary-link">Create Project</a>
+      <a *ngIf="canCreateProject()" [routerLink]="createProjectLink()" class="primary-link">➕ Create Project</a>
     </section>
 
     <section class="stats-row" *ngIf="selectedProject">
@@ -67,7 +67,7 @@
           </div>
         </div>
         <div class="form-actions">
-          <button class="secondary-btn" type="button" (click)="closeAddMilestone()">Cancel</button>
+          <button class="secondary-btn" type="button" (click)="closeAddMilestone()">✖️ Cancel</button>
           <button class="primary-btn" type="submit" [disabled]="loading || milestoneForm.invalid">{{ loading ? 'Saving...' : 'Save Milestone' }}</button>
         </div>
       </form>
@@ -90,14 +90,14 @@
                 <td>{{ m.plannedDate }}</td>
                 <td><span class="status-badge" [ngClass]="getStatusClass(m.status)">{{ m.status }}</span></td>
                 <td><span [class.delayed]="isDelayed(m)">{{ isDelayed(m) ? 'Delayed' : 'On time' }}</span></td>
-                <td class="actions"><button type="button" class="small-btn" (click)="startEdit(m)">Edit</button><button type="button" class="small-btn danger" (click)="deleteMilestone(m.id)">Delete</button></td>
+                <td class="actions"><button type="button" class="small-btn" (click)="startEdit(m)">Edit</button><button type="button" class="small-btn danger" (click)="deleteMilestone(m.id)">🗑️ Delete</button></td>
               </ng-container>
               <ng-template #editRow>
                 <td><input [(ngModel)]="editForm.name" class="inline-input"><textarea [(ngModel)]="editForm.description" class="inline-input"></textarea></td>
                 <td><input type="date" [(ngModel)]="editForm.plannedDate" class="inline-input"></td>
                 <td><select [(ngModel)]="editForm.status" class="inline-input"><option>Pending</option><option>In Progress</option><option>Completed</option></select></td>
                 <td>—</td>
-                <td class="actions"><button type="button" class="small-btn" (click)="saveEdit(m)">Save</button><button type="button" class="small-btn" (click)="cancelEdit()">Cancel</button></td>
+                <td class="actions"><button type="button" class="small-btn" (click)="saveEdit(m)">💾 Save</button><button type="button" class="small-btn" (click)="cancelEdit()">✖️ Cancel</button></td>
               </ng-template>
             </tr>
           </tbody>

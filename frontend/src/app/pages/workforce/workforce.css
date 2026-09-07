@@ -477,3 +477,184 @@ tbody tr:hover { background: #fafbfe; }
   .secondary-btn,
   .form-actions .primary-btn { width: 100%; }
 }
+
+
+/* Bulk worker registration */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.bulk-panel {
+  overflow: visible;
+}
+
+.bulk-upload-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr);
+  gap: 18px;
+  padding: 22px 23px;
+}
+
+.bulk-help-card,
+.bulk-upload-card {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  border: 1px solid #e4e9f1;
+  border-radius: 15px;
+  background: #f8fbff;
+  padding: 18px;
+}
+
+.bulk-icon,
+.file-icon {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 15px;
+  background: #eef4ff;
+  font-size: 24px;
+  box-shadow: 0 8px 18px rgba(49, 84, 199, .08);
+}
+
+.bulk-help-card h3,
+.bulk-error-table h3 {
+  margin: 0 0 7px;
+  color: #17233f;
+  font-size: 17px;
+}
+
+.bulk-help-card p {
+  margin: 0 0 14px;
+  color: #6d7890;
+  line-height: 1.55;
+}
+
+.bulk-upload-card {
+  flex-direction: column;
+}
+
+.file-drop {
+  width: 100%;
+  min-height: 145px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 2px dashed #c6d2e6;
+  border-radius: 16px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  text-align: center;
+  padding: 18px;
+}
+
+.file-drop:hover {
+  border-color: #3154c7;
+  background: #f7faff;
+  transform: translateY(-1px);
+}
+
+.file-drop input {
+  display: none;
+}
+
+.file-drop strong {
+  color: #17233f;
+  font-size: 15px;
+}
+
+.file-drop small {
+  color: #7b8599;
+}
+
+.bulk-actions {
+  width: 100%;
+  padding: 0;
+  margin-top: 0;
+}
+
+.bulk-result {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 13px;
+  padding: 0 23px 22px;
+}
+
+.result-card {
+  border: 1px solid #e4e9f1;
+  border-radius: 14px;
+  background: #fff;
+  padding: 15px;
+}
+
+.result-card strong {
+  display: block;
+  color: #17233f;
+  font-size: 25px;
+}
+
+.result-card span {
+  color: #6d7890;
+  font-weight: 700;
+}
+
+.success-card {
+  background: #effdf6;
+  border-color: #c8f3dc;
+}
+
+.skipped-card {
+  background: #fff8e7;
+  border-color: #f6e4aa;
+}
+
+.failed-card {
+  background: #fff1f0;
+  border-color: #fac8c3;
+}
+
+.bulk-error-table {
+  padding: 0 23px 23px;
+}
+
+.bulk-error-table table {
+  min-width: 650px;
+  border: 1px solid #e4e9f1;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+@media (max-width: 950px) {
+  .bulk-upload-body {
+    grid-template-columns: 1fr;
+  }
+
+  .bulk-result {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions .primary-btn,
+  .header-actions .secondary-btn {
+    width: 100%;
+  }
+
+  .bulk-result {
+    grid-template-columns: 1fr;
+  }
+}

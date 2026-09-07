@@ -5,19 +5,29 @@
     <header class="page-header">
       <div>
         <span class="eyebrow">WORKFORCE</span>
-        <h1>Workforce Management</h1>
+        <h1>👷 Workforce Management</h1>
         <p>Manage workers and record daily attendance from one place.</p>
       </div>
 
-      <button type="button" class="primary-btn" (click)="openForm()">
-        <span class="btn-icon">+</span>
-        Register Worker
-      </button>
+      <div class="header-actions">
+        <button type="button" class="secondary-btn" (click)="openBulk()">
+          📥 Bulk Upload
+        </button>
+        <button type="button" class="primary-btn" (click)="openForm()">
+          <span class="btn-icon">+</span>
+          Register Worker
+        </button>
+      </div>
     </header>
 
     <div *ngIf="error" class="alert" role="alert">
       <span>{{ error }}</span>
       <button type="button" aria-label="Close" (click)="error = ''">×</button>
+    </div>
+
+    <div *ngIf="success" class="alert success" role="status">
+      <span>{{ success }}</span>
+      <button type="button" aria-label="Close" (click)="success = ''">×</button>
     </div>
 
     <div *ngIf="loading" class="loading-bar">
@@ -27,7 +37,7 @@
 
     <section class="stats-grid">
       <article class="stat-card">
-        <div class="stat-icon workers-icon">W</div>
+        <div class="stat-icon workers-icon">👷</div>
         <div>
           <span>Total Workers</span>
           <strong>{{ workers.length }}</strong>
@@ -35,7 +45,7 @@
       </article>
 
       <article class="stat-card">
-        <div class="stat-icon active-icon">✓</div>
+        <div class="stat-icon active-icon">✅</div>
         <div>
           <span>Active Workers</span>
           <strong>{{ activeCount() }}</strong>
@@ -43,7 +53,7 @@
       </article>
 
       <article class="stat-card">
-        <div class="stat-icon inactive-icon">!</div>
+        <div class="stat-icon inactive-icon">⚠️</div>
         <div>
           <span>Inactive Workers</span>
           <strong>{{ inactiveCount() }}</strong>
@@ -51,7 +61,7 @@
       </article>
 
       <article class="stat-card">
-        <div class="stat-icon attendance-icon">A</div>
+        <div class="stat-icon attendance-icon">🕒</div>
         <div>
           <span>Attendance Records</span>
           <strong>{{ attendance.length }}</strong>
@@ -62,7 +72,7 @@
     <section class="panel form-panel" *ngIf="showForm">
       <div class="panel-heading">
         <div>
-          <h2>Register Worker</h2>
+          <h2>👷 Register Worker</h2>
           <p>Add a worker to the workforce.</p>
         </div>
         <button type="button" class="icon-btn" (click)="cancelForm()" aria-label="Close form">×</button>
@@ -98,7 +108,7 @@
         </label>
 
         <div class="form-actions">
-          <button type="button" class="secondary-btn" (click)="cancelForm()">Cancel</button>
+          <button type="button" class="secondary-btn" (click)="cancelForm()">✖️ Cancel</button>
           <button type="submit" class="primary-btn" [disabled]="saving">
             {{ saving ? 'Saving...' : 'Save Worker' }}
           </button>
@@ -106,10 +116,106 @@
       </form>
     </section>
 
+    <section class="panel bulk-panel" *ngIf="showBulk">
+      <div class="panel-heading">
+        <div>
+          <h2>📥 Bulk Worker Registration</h2>
+          <p>Upload CSV or XLSX files. Accepted headers: name, role, phone, email, category, skill_type, contractor_id, joining_date, status.</p>
+        </div>
+        <button type="button" class="icon-btn" (click)="cancelBulk()" aria-label="Close bulk upload">×</button>
+      </div>
+
+      <div class="bulk-upload-body">
+        <div class="bulk-help-card">
+          <div class="bulk-icon">📄</div>
+          <div>
+            <h3>Template format</h3>
+            <p>Use the template to avoid column-name mistakes. Full Name, Worker Name, Mobile Number and Email ID are also accepted.</p>
+            <button type="button" class="secondary-btn" (click)="downloadWorkerTemplate()">⬇️ Download CSV Template</button>
+          </div>
+        </div>
+
+        <div class="bulk-upload-card">
+          <label class="file-drop">
+            <input type="file" accept=".csv,.xlsx" (change)="onBulkFileSelected($event)" />
+            <span class="file-icon">📁</span>
+            <strong>{{ bulkFile ? bulkFile.name : 'Choose CSV or XLSX file' }}</strong>
+            <small>Maximum file size: 5 MB</small>
+          </label>
+
+          <div class="form-actions bulk-actions">
+            <button type="button" class="secondary-btn" (click)="cancelBulk()">✖️ Cancel</button>
+            <button type="button" class="primary-btn" (click)="uploadBulkWorkers()" [disabled]="bulkUploading || !bulkFile">
+              {{ bulkUploading ? 'Uploading...' : 'Upload Workers' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bulk-result" *ngIf="bulkResult">
+        <div class="result-card success-card">
+          <strong>{{ bulkResult.successful || bulkResult.created || 0 }}</strong>
+          <span>Created</span>
+        </div>
+        <div class="result-card skipped-card">
+          <strong>{{ bulkResult.skipped || 0 }}</strong>
+          <span>Skipped</span>
+        </div>
+        <div class="result-card failed-card">
+          <strong>{{ bulkResult.failed || 0 }}</strong>
+          <span>Failed</span>
+        </div>
+        <div class="result-card">
+          <strong>{{ bulkResult.total_rows || 0 }}</strong>
+          <span>Total Rows</span>
+        </div>
+      </div>
+
+      <div class="bulk-error-table" *ngIf="bulkResult?.failed_rows?.length">
+        <h3>Rows that need correction</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Name</th>
+              <th>Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of bulkResult?.failed_rows">
+              <td>{{ row.row }}</td>
+              <td>{{ row.name || '—' }}</td>
+              <td>{{ row.error }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="bulk-error-table" *ngIf="bulkResult?.skipped_rows?.length">
+        <h3>Skipped duplicate rows</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Row</th>
+              <th>Name</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of bulkResult?.skipped_rows">
+              <td>{{ row.row }}</td>
+              <td>{{ row.name || '—' }}</td>
+              <td>{{ row.reason }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <section class="panel">
       <div class="panel-heading table-heading">
         <div>
-          <h2>Workers</h2>
+          <h2>👥 Workers</h2>
           <p>{{ filteredWorkers.length }} worker{{ filteredWorkers.length === 1 ? '' : 's' }} shown</p>
         </div>
 
@@ -130,6 +236,7 @@
             <tr>
               <th>Worker</th>
               <th>Role</th>
+              <th>Category</th>
               <th>Contact</th>
               <th>Status</th>
               <th>Attendance</th>
@@ -154,6 +261,11 @@
               </td>
 
               <td>
+                <span class="role-text">{{ worker.category || 'Skilled Worker' }}</span>
+                <small class="muted" *ngIf="worker.skill_type">{{ worker.skill_type }}</small>
+              </td>
+
+              <td>
                 <div class="contact-cell">
                   <span>{{ worker.email || '—' }}</span>
                   <small>{{ worker.phone || 'No phone' }}</small>
@@ -172,22 +284,20 @@
               </td>
 
               <td class="actions">
-                <button type="button" class="attendance-btn present" (click)="mark(worker, 'Present')">
+                <button type="button" class="attendance-btn present" (click)="mark(worker, 'Present')" [disabled]="actionWorkerId === worker.id">
                   Present
                 </button>
-                <button type="button" class="attendance-btn absent" (click)="mark(worker, 'Absent')">
+                <button type="button" class="attendance-btn absent" (click)="mark(worker, 'Absent')" [disabled]="actionWorkerId === worker.id">
                   Absent
                 </button>
-                <button type="button" class="delete-btn" (click)="remove(worker)" aria-label="Delete worker">
-                  Delete
-                </button>
+                <button type="button" class="delete-btn" (click)="remove(worker)" [disabled]="actionWorkerId === worker.id" aria-label="Delete worker">🗑️ Delete</button>
               </td>
             </tr>
 
             <tr *ngIf="!loading && !filteredWorkers.length">
-              <td colspan="6">
+              <td colspan="7">
                 <div class="empty-state">
-                  <div class="empty-icon">W</div>
+                  <div class="empty-icon">👷</div>
                   <h3>No workers found</h3>
                   <p>{{ search ? 'Try a different search term.' : 'Register your first worker to get started.' }}</p>
                   <button *ngIf="!search" type="button" class="primary-btn" (click)="openForm()">Register Worker</button>

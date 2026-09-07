@@ -41,6 +41,7 @@ Zero-based visible-column index at which to start the slice. Grapheme clusters (
 Type: `number`
 
 Zero-based visible-column index at which to end the slice.
+If a full grapheme cluster would cross `endSlice`, it is excluded.
 
 ## Related
 

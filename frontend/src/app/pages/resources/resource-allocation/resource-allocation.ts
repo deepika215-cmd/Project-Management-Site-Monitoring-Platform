@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppSidebarComponent } from '../../../shared/app-sidebar.component';
+import { finalize, timeout } from 'rxjs/operators';
 import { Api } from '../../../services/api';
 
 interface Resource {
@@ -63,47 +64,100 @@ export class ResourceAllocation implements OnInit {
 
   readonly statusOptions = ['Available', 'Maintenance'];
 
-  constructor(private api: Api) { }
+  constructor(private api: Api, private cdr: ChangeDetectorRef) { }
 
   projects: ProjectOption[] = [];
 
   ngOnInit(): void {
-    this.loadResources();
+    // Load both datasets immediately on the first navigation to this page.
     this.loadProjects();
+    this.loadResources();
   }
 
   loadResources(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.api.getResources().subscribe({
+
+    this.api.getResources().pipe(
+      timeout(8000),
+      finalize(() => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: (items: any[]) => {
         this.resources = (items || []).map((r: any) => this.mapResource(r));
+        this.applyProjectNames();
         this.filterResources();
-        this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
-        this.loading = false;
-        this.errorMessage = err?.error?.detail || 'Unable to load resources. Start the backend on port 8000.';
-        const s = this.searchText.toLowerCase().trim();
-        this.filteredResources = this.resources.filter(r =>
-          (!s || r.name.toLowerCase().includes(s) || r.code.toLowerCase().includes(s) || r.category.toLowerCase().includes(s)) &&
-          (!this.selectedCategory || r.category.toLowerCase() === this.selectedCategory.toLowerCase())
-        );
+        const detail = err?.error?.detail;
+        this.errorMessage = err?.name === 'TimeoutError'
+          ? 'The backend took too long to load resources. Check that FastAPI is running on port 8000.'
+          : (Array.isArray(detail)
+              ? detail.map((item: any) => item?.msg || 'Invalid value').join(', ')
+              : detail || 'Unable to load resources. Start the backend on port 8000.');
+        this.filterResources();
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadProjects(): void {
     this.loadingProjects = true;
-    this.api.getProjects().subscribe({
+
+    this.api.getProjects().pipe(
+      timeout(8000),
+      finalize(() => {
+        this.loadingProjects = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
       next: (items: any[]) => {
-        this.projects = (items || []).map((p: any) => ({ id: p.id, name: p.name }));
-        this.loadingProjects = false;
+        // The FastAPI ProjectResponse uses `project_name`, not `name`.
+        // The old mapping produced blank options even though the projects existed.
+        this.projects = (items || [])
+          .map((p: any) => ({
+            id: Number(p?.id),
+            name: String(p?.project_name || p?.name || `Project #${p?.id || ''}`).trim()
+          }))
+          .filter((p: ProjectOption) => Number.isFinite(p.id) && p.id > 0);
+
+        this.applyProjectNames();
+
+        // If only one project is accessible, select it automatically in a new form.
+        if (this.showResourceForm && this.editingResourceId === null && this.projects.length === 1 && !this.form.projectId) {
+          this.form.projectId = this.projects[0].id;
+        }
+
+        if (!this.projects.length) {
+          this.errorMessage = 'No projects are available for this account. Create or assign a project first.';
+        }
+        this.cdr.detectChanges();
       },
-      error: () => {
-        this.loadingProjects = false;
+      error: (err: any) => {
+        const detail = err?.error?.detail;
+        this.errorMessage = err?.name === 'TimeoutError'
+          ? 'The backend took too long to load projects.'
+          : (Array.isArray(detail)
+              ? detail.map((item: any) => item?.msg || 'Invalid value').join(', ')
+              : detail || 'Unable to load projects.');
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private applyProjectNames(): void {
+    if (!this.resources.length || !this.projects.length) return;
+    const names = new Map(this.projects.map(project => [project.id, project.name]));
+    this.resources = this.resources.map(resource => ({
+      ...resource,
+      assignedProject: resource.projectId && names.has(resource.projectId)
+        ? names.get(resource.projectId)!
+        : resource.assignedProject
+    }));
+    this.filterResources();
   }
 
   private mapResource(r: any): Resource {
@@ -146,6 +200,13 @@ export class ResourceAllocation implements OnInit {
   }
 
   openAddResource(): void {
+    // Retry the project catalogue when the modal is opened. This makes the
+    // first click reliable even if the initial request finished before the
+    // view was fully rendered or a previous request failed.
+    if (!this.projects.length && !this.loadingProjects) {
+      this.loadProjects();
+    }
+
     this.editingResourceId = null;
     this.form = {
       name: '',
@@ -211,21 +272,47 @@ export class ResourceAllocation implements OnInit {
       ? this.api.createResource(payload)
       : this.api.updateResource(this.editingResourceId, payload);
 
-    request.subscribe({
-      next: () => {
+    request.pipe(
+      timeout(10000),
+      finalize(() => {
         this.saving = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (saved: any) => {
+        // Update the table immediately instead of waiting for another click or refresh.
+        const mapped = this.mapResource(saved || {});
+        const selectedProject = this.projects.find(project => project.id === projectId);
+        mapped.assignedProject = selectedProject?.name || mapped.assignedProject;
+
+        if (this.editingResourceId === null) {
+          this.resources = [...this.resources, mapped];
+        } else {
+          this.resources = this.resources.map(resource =>
+            resource.id === this.editingResourceId ? mapped : resource
+          );
+        }
+
+        this.filterResources();
         this.showResourceForm = false;
         this.notice = this.editingResourceId === null
           ? `${name} was added successfully.`
           : `${name} was updated successfully.`;
+        this.cdr.detectChanges();
+
+        // Reconcile with the database in the background.
         this.loadResources();
       },
       error: (err: any) => {
-        this.saving = false;
         const detail = err?.error?.detail;
-        this.errorMessage = Array.isArray(detail)
-          ? detail.map((item: any) => item?.msg || 'Invalid value').join(', ')
-          : detail || `Unable to ${this.editingResourceId === null ? 'add' : 'update'} the resource.`;
+        if (err?.name === 'TimeoutError') {
+          this.errorMessage = 'The server took too long to save the resource. Check the backend terminal and try again.';
+        } else {
+          this.errorMessage = Array.isArray(detail)
+            ? detail.map((item: any) => item?.msg || 'Invalid value').join(', ')
+            : detail || `Unable to ${this.editingResourceId === null ? 'add' : 'update'} the resource.`;
+        }
+        this.cdr.detectChanges();
       }
     });
   }

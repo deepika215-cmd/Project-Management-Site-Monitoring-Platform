@@ -231,7 +231,7 @@
   .sidebar {
     position: static;
     width: 100%;
-    min-height: auto;
+    min-height: unset;
   }
 
   .sidebar-bottom {
@@ -432,4 +432,49 @@
   .main-content {
     width: 100% !important
   }
+}
+
+/* Site Engineer dashboard route/icon polish */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.view-projects-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.stats-row .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.stats-row .stat-card h3 {
+  margin: 0 0 4px;
+}
+
+.stats-row .stat-card span {
+  display: block;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 28px;
+  flex-shrink: 0;
 }

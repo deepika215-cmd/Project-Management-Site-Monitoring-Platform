@@ -1,1 +1,101 @@
-<div class="page-container"><app-sidebar active="schedule"></app-sidebar><main class="main-content"><header class="page-header"><div><span class="eyebrow">PROJECT MANAGEMENT</span><h1>Project Scheduling</h1><p>Schedule activities for a real project. The current backend has no schedule endpoint, so schedule records are stored per project in this browser.</p></div><button class="back-btn" (click)="openAdd()" [disabled]="!selectedProjectId">+ Add Activity</button></header><div class="error-banner" *ngIf="error">{{error}}</div><section class="form-section project-selector"><label>Project<select [(ngModel)]="selectedProjectId" (change)="load()"><option [ngValue]="0">Select project</option><option *ngFor="let p of projects" [ngValue]="p.id">{{p.project_name}}</option></select></label><div *ngIf="project"><strong>{{project.project_name}}</strong><span>{{project.location}}</span><span>Status: {{project.status}}</span></div></section><section class="stats-row"><div class="stat-card"><h3>{{activities.length}}</h3><span>Activities</span></div><div class="stat-card"><h3>{{completed}}</h3><span>Completed</span></div><div class="stat-card"><h3>{{progress}}%</h3><span>Progress</span></div><div class="stat-card"><h3>{{delayed}}</h3><span>Delayed</span></div></section><section class="form-section"><h2>Schedule</h2><div *ngIf="!activities.length" class="empty">No activities scheduled for this project.</div><article class="activity-row" *ngFor="let a of activities"><div><strong>{{a.name}}</strong><p>{{a.description||'No description'}}</p><small>{{a.startDate}} → {{a.endDate}} · {{a.duration}} day(s) · Dependency: {{a.dependency||'None'}}</small></div><span class="status" [ngClass]="statusClass(a.status)">{{a.status}}</span><div class="row-actions"><button (click)="edit(a)">Edit</button><button (click)="remove(a)">Delete</button></div></article></section><div class="modal-backdrop" *ngIf="showModal"><div class="modal"><div class="modal-header"><h2>{{editing?'Edit Activity':'Add Activity'}}</h2><button (click)="showModal=false">×</button></div><form (ngSubmit)="save()"><label>Activity Name<input [(ngModel)]="current.name" name="name" required></label><label>Description<textarea [(ngModel)]="current.description" name="description"></textarea></label><div class="form-grid"><label>Start Date<input type="date" [(ngModel)]="current.startDate" name="start" (change)="duration()" required></label><label>End Date<input type="date" [(ngModel)]="current.endDate" name="end" (change)="duration()" required></label></div><label>Dependency<select [(ngModel)]="current.dependency" name="dependency"><option value="">None</option><option *ngFor="let a of activities" [value]="a.name" [disabled]="a.id===current.id">{{a.name}}</option></select></label><label>Status<select [(ngModel)]="current.status" name="status"><option>Not Started</option><option>In Progress</option><option>Completed</option><option>Delayed</option></select></label><p>Duration: {{current.duration}} day(s)</p><div class="modal-actions"><button type="button" (click)="showModal=false">Cancel</button><button class="submit-btn">{{editing?'Save Changes':'Add Activity'}}</button></div></form></div></div></main></div>
+<div class="page-container">
+  <app-sidebar active="schedule"></app-sidebar>
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">PROJECT MANAGEMENT</span>
+        <h1>📅 Project Scheduling</h1>
+        <p>Plan and track project activities. Schedule records are saved to the BuildTrack backend database.</p>
+      </div>
+      <button class="back-btn" (click)="openAdd()" [disabled]="!selectedProjectId || loadingProjects">+ Add Activity</button>
+    </header>
+
+    <div class="error-banner" *ngIf="error">{{error}}</div>
+    <div class="success-banner" *ngIf="success">{{success}}</div>
+
+    <section class="form-section project-selector">
+      <label>
+        Project
+        <select [(ngModel)]="selectedProjectId" (change)="onProjectChange()" [disabled]="loadingProjects">
+          <option [ngValue]="0">{{loadingProjects ? 'Loading projects...' : 'Select project'}}</option>
+          <option *ngFor="let p of projects" [ngValue]="p.id">{{p.project_name || p.name}}</option>
+        </select>
+      </label>
+      <div *ngIf="project">
+        <strong>{{project.project_name || project.name}}</strong>
+        <span>{{project.location}}</span>
+        <span>Status: {{project.status}}</span>
+      </div>
+    </section>
+
+    <section class="stats-row">
+      <div class="stat-card"><h3>{{activities.length}}</h3><span>Activities</span></div>
+      <div class="stat-card"><h3>{{completed}}</h3><span>Completed</span></div>
+      <div class="stat-card"><h3>{{progress}}%</h3><span>Progress</span></div>
+      <div class="stat-card"><h3>{{delayed}}</h3><span>Delayed</span></div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-heading">
+        <h2>📅 Schedule</h2>
+        <button type="button" class="refresh-btn" (click)="loadActivities()" [disabled]="!selectedProjectId || loadingActivities">
+          {{loadingActivities ? 'Loading...' : 'Refresh'}}
+        </button>
+      </div>
+      <div *ngIf="loadingActivities" class="empty">Loading schedule activities...</div>
+      <div *ngIf="!loadingActivities && selectedProjectId && !activities.length" class="empty">No activities scheduled for this project yet.</div>
+      <div *ngIf="!loadingActivities && !selectedProjectId" class="empty">Select a project to view its schedule.</div>
+
+      <article class="activity-row" *ngFor="let a of activities">
+        <div>
+          <strong>{{a.name}}</strong>
+          <p>{{a.description || 'No description'}}</p>
+          <small>{{a.startDate}} → {{a.endDate}} · {{a.duration}} day(s) · Dependency: {{a.dependency || 'None'}}</small>
+        </div>
+        <span class="status" [ngClass]="statusClass(a.status)">{{a.status}}</span>
+        <div class="row-actions">
+          <button type="button" (click)="edit(a)" [disabled]="deletingId === a.id">Edit</button>
+          <button type="button" (click)="remove(a)" [disabled]="deletingId === a.id">{{deletingId === a.id ? 'Deleting...' : 'Delete'}}</button>
+        </div>
+      </article>
+    </section>
+
+    <div class="modal-backdrop" *ngIf="showModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>{{editing ? 'Edit Activity' : 'Add Activity'}}</h2>
+          <button type="button" (click)="showModal=false" [disabled]="saving">×</button>
+        </div>
+        <form (ngSubmit)="save()">
+          <label>Activity Name<input [(ngModel)]="current.name" name="name" required></label>
+          <label>Description<textarea [(ngModel)]="current.description" name="description"></textarea></label>
+          <div class="form-grid">
+            <label>Start Date<input type="date" [(ngModel)]="current.startDate" name="start" (change)="duration()" required></label>
+            <label>End Date<input type="date" [(ngModel)]="current.endDate" name="end" (change)="duration()" required></label>
+          </div>
+          <label>
+            Dependency
+            <select [(ngModel)]="current.dependency" name="dependency">
+              <option value="">None</option>
+              <option *ngFor="let a of activities" [value]="a.name" [disabled]="a.id===current.id">{{a.name}}</option>
+            </select>
+          </label>
+          <label>
+            Status
+            <select [(ngModel)]="current.status" name="status">
+              <option>Not Started</option>
+              <option>In Progress</option>
+              <option>Completed</option>
+              <option>Delayed</option>
+            </select>
+          </label>
+          <p>Duration: {{current.duration}} day(s)</p>
+          <div class="modal-actions">
+            <button type="button" (click)="showModal=false" [disabled]="saving">✖️ Cancel</button>
+            <button class="submit-btn" type="submit" [disabled]="saving">{{saving ? 'Saving...' : (editing ? 'Save Changes' : 'Add Activity')}}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

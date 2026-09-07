@@ -64,7 +64,7 @@ const SGR_ANSI_256_LAST_PARAMETER_OFFSET = 2;
 const SGR_TRUECOLOR_LAST_PARAMETER_OFFSET = 4;
 const VARIATION_SELECTOR_16_CODE_POINT = 65_039;
 const COMBINING_ENCLOSING_KEYCAP_CODE_POINT = 8419;
-const EMOJI_PRESENTATION_GRAPHEME_REGEX = /\p{Emoji_Presentation}/u;
+const EMOJI_PRESENTATION_GRAPHEME_REGEX = /\p{Emoji_Presentation}/v;
 const GRAPHEME_SEGMENTER = new Intl.Segmenter(undefined, {granularity: 'grapheme'});
 
 const endCodeNumbers = new Set();

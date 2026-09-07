@@ -1,78 +1,87 @@
-<div class="dashboard">
-  <aside class="sidebar">
-    <h2>BuildTrack</h2>
-    <nav>
-      <a routerLink="/admin-dashboard">Dashboard</a>
-      <a routerLink="/user-management">User Management</a>
-      <a routerLink="/projects">Project Management</a>
-      <a routerLink="/workforce">Workforce Management</a>
-      <a routerLink="/resource-allocation">Resource Management</a>
-      <a routerLink="/inventory">Material & Inventory</a>
-      <a routerLink="/procurement">Procurement</a>
-      <a routerLink="/reports">Reports</a>
-      <a routerLink="/admin-notifications">Notifications</a>
-      <a routerLink="/analytics">Analytics</a>
-      <a routerLink="/profile">Profile</a>
-      <a (click)="logout()">Logout</a>
-    </nav>
-  </aside>
+<div class="page-container">
+  <app-sidebar active="dashboard"></app-sidebar>
+  <main class="main-content dashboard-page colorful-dashboard">
+    <header class="page-header dashboard-hero">
+      <div>
+        <h1><span class="title-icon">🛠️</span> Admin Dashboard</h1>
+        <p>System-level monitoring, analytics, reports and activity overview.</p>
+      </div>
+      <div class="header-actions">
+        <button class="secondary-btn" type="button" (click)="loadDashboard()">🔄 Refresh</button>
+        <a class="primary-btn" routerLink="/projects/create-project">➕ Create Project</a>
+      </div>
+    </header>
 
-  <main class="main-content">
-    <h1>Administrator Dashboard</h1>
-    <p>Live system overview from BuildTrack APIs.</p>
-    <div class="error-banner" *ngIf="error">{{ error }}</div>
-    <div class="loading" *ngIf="loading">Loading administration data...</div>
+    <div class="error-banner" *ngIf="error">⚠️ {{ error }}</div>
+    <div class="loading" *ngIf="loading">⏳ Loading dashboard data...</div>
 
-    <div class="stats-grid" *ngIf="!loading">
-      <div class="stat-card">
-        <h3>Total Projects</h3><strong>{{ summary.projects }}</strong>
-      </div>
-      <div class="stat-card">
-        <h3>Active Projects</h3><strong>{{ summary.activeProjects }}</strong>
-      </div>
-      <div class="stat-card">
-        <h3>Total Users</h3><strong>{{ summary.users }}</strong>
-      </div>
-      <div class="stat-card">
-        <h3>Workers</h3><strong>{{ summary.workers }}</strong>
-      </div>
-      <div class="stat-card">
-        <h3>Procurements</h3><strong>{{ summary.procurements }}</strong>
-      </div>
-      <div class="stat-card">
-        <h3>Inventory Items</h3><strong>{{ summary.inventory }}</strong>
-      </div>
-    </div>
-
-    <div class="dashboard-grid" *ngIf="!loading">
-      <section class="dashboard-section">
-        <h2>Recent Projects</h2>
-        <div class="activity-item" *ngFor="let project of recentProjects">
-          <div><strong>{{ project.project_name }}</strong>
-            <p>{{ project.location }}</p>
-          </div>
-          <span>{{ project.status }}</span>
-        </div>
-        <p *ngIf="!recentProjects.length">No projects returned by the backend.</p>
+    <ng-container *ngIf="!loading">
+      <section class="stats-grid">
+        <a class="stat-card icon-card" routerLink="/user-management">
+          <div class="stat-icon blue">👥</div>
+          <div><span class="stat-label">Registered Users</span><strong>{{ summary.users }}</strong><small>User Management</small></div>
+        </a>
+        <a class="stat-card icon-card" routerLink="/projects">
+          <div class="stat-icon green">🏗️</div>
+          <div><span class="stat-label">Projects</span><strong>{{ summary.projects }}</strong><small>{{ summary.activeProjects }} in progress</small></div>
+        </a>
+        <a class="stat-card icon-card" routerLink="/workforce">
+          <div class="stat-icon orange">👷</div>
+          <div><span class="stat-label">Workers</span><strong>{{ summary.workers }}</strong><small>Workforce Management</small></div>
+        </a>
+        <a class="stat-card icon-card" routerLink="/resource-allocation">
+          <div class="stat-icon purple">🚜</div>
+          <div><span class="stat-label">Resources</span><strong>{{ summary.resources }}</strong><small>Resource Management</small></div>
+        </a>
+        <a class="stat-card icon-card" routerLink="/procurement">
+          <div class="stat-icon teal">📦</div>
+          <div><span class="stat-label">Procurement</span><strong>{{ summary.procurements }}</strong><small>Procurement records</small></div>
+        </a>
+        <a class="stat-card icon-card" routerLink="/reports">
+          <div class="stat-icon rose">📄</div>
+          <div><span class="stat-label">Reports</span><strong>{{ summary.reports }}</strong><small>Reports Management</small></div>
+        </a>
       </section>
-      <section class="dashboard-section">
-        <h2>Procurement Overview</h2>
-        <div class="activity-item" *ngFor="let item of recentProcurements">
-          <div><strong>{{ item.item_name }}</strong>
-            <p>{{ item.supplier }} · Qty {{ item.quantity }}</p>
-          </div>
-          <span>{{ item.status }}</span>
-        </div>
-        <p *ngIf="!recentProcurements.length">No procurement records returned by the backend.</p>
-      </section>
-    </div>
 
-    <section class="dashboard-section" *ngIf="!loading">
-      <h2>System Status</h2>
-      <p>{{ summary.completedProjects }} projects are completed/closed.</p>
-      <p>{{ summary.notifications }} notification records are available.</p>
-      <p>Use <a routerLink="/analytics">Analytics</a> for detailed project, resource, inventory and workforce metrics.
-      </p>
-    </section>
+      <div class="dashboard-grid">
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>👥 User Management</h2><p>Registered users grouped by role.</p></div><a routerLink="/user-management">Manage users →</a></div>
+          <div class="role-list" *ngIf="roleCounts.length; else noUsers">
+            <div class="role-row" *ngFor="let item of roleCounts"><span>{{ roleLabel(item.role) }}</span><strong>{{ item.count }}</strong></div>
+          </div>
+          <ng-template #noUsers><p class="empty">No user data is available.</p></ng-template>
+        </section>
+
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>📊 System Analytics</h2><p>Current values from BuildTrack modules.</p></div><a routerLink="/analytics">Open analytics →</a></div>
+          <div class="analytics-mini-grid">
+            <div><strong>{{ summary.activeProjects }}</strong><span>Active Projects</span></div>
+            <div><strong>{{ summary.completedProjects }}</strong><span>Completed / Closed</span></div>
+            <div><strong>{{ analytics?.inventory?.total || 0 }}</strong><span>Inventory Items</span></div>
+            <div><strong>{{ analytics?.notifications?.total || 0 }}</strong><span>Notifications</span></div>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel icon-panel">
+        <div class="panel-head"><div><h2>🏗️ Project Monitoring</h2><p>Overall project status and progress.</p></div><a routerLink="/projects">View projects →</a></div>
+        <div class="table-wrap" *ngIf="projects.length; else noProjects"><table><thead><tr><th>Project</th><th>Status</th><th>Progress</th><th>Location</th></tr></thead><tbody><tr *ngFor="let project of projects | slice:0:8"><td><a [routerLink]="['/projects/project-details', project.id]">{{ project.project_name }}</a></td><td><span class="status-pill">{{ project.status }}</span></td><td><div class="progress-cell"><div class="progress-track"><div [style.width.%]="project.progress"></div></div><strong>{{ project.progress }}%</strong></div></td><td>{{ project.location || '—' }}</td></tr></tbody></table></div>
+        <ng-template #noProjects><p class="empty">No project data is available.</p></ng-template>
+      </section>
+
+      <div class="dashboard-grid">
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>📑 Reports Management</h2><p>Latest report records from Module 10.</p></div><a routerLink="/reports">Open reports →</a></div>
+          <div class="list-row" *ngFor="let report of reports | slice:0:6"><div><strong>📄 {{ report.title || 'Untitled report' }}</strong><small>{{ report.report_type || 'General' }}</small></div><span>{{ report.status || 'Draft' }}</span></div>
+          <p class="empty" *ngIf="!reports.length">No reports have been generated.</p>
+        </section>
+
+        <section class="panel icon-panel">
+          <div class="panel-head"><div><h2>🔔 Activity Monitoring</h2><p>Recent system activity aggregated from current module data.</p></div><a routerLink="/admin-notifications">Notifications →</a></div>
+          <div class="list-row" *ngFor="let activity of activities"><div><strong>✨ {{ activity.title }}</strong><small>{{ activity.type }}</small></div><span>{{ activity.status }}</span></div>
+          <p class="empty" *ngIf="!activities.length">No recent activity is available.</p>
+        </section>
+      </div>
+    </ng-container>
   </main>
 </div>

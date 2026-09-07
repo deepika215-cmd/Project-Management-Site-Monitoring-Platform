@@ -15,6 +15,15 @@ interface BackendProject { id: number; project_name: string; description: string
   styleUrl: './project-status.css'
 })
 export class ProjectStatus implements OnInit {
+  get currentRole(): string {
+    try { return String(JSON.parse(localStorage.getItem('currentUser') || '{}')?.role || '').toUpperCase(); }
+    catch { return ''; }
+  }
+  isAdmin(): boolean { return this.currentRole === 'ADMIN'; }
+  isProjectManager(): boolean { return this.currentRole === 'PROJECT_MANAGER'; }
+  canCreateProject(): boolean { return this.isAdmin() || this.isProjectManager(); }
+  createProjectLink(): string { return this.isProjectManager() ? '/project-manager/create-project' : '/projects/create-project'; }
+
   projects: BackendProject[] = [];
   selectedProjectId = 0;
   selectedProject: BackendProject | null = null;
@@ -72,7 +81,8 @@ export class ProjectStatus implements OnInit {
     if (!this.selectedProject) return [];
     const transitions: Record<string, string[]> = {
       Planning: ['In Progress'],
-      'In Progress': ['Completed'],
+      'In Progress': ['On Hold', 'Completed'],
+      'On Hold': ['In Progress'],
       Completed: ['Closed'],
       Closed: []
     };
@@ -138,7 +148,7 @@ export class ProjectStatus implements OnInit {
   }
 
   get completion(): number { return Math.max(0, Math.min(100, Number(this.tracking?.progress ?? 0))); }
-  getStatusClass(status: string): string { return ({ Planning:'planning', 'In Progress':'in-progress', Completed:'completed', Closed:'closed' } as Record<string,string>)[status] || ''; }
+  getStatusClass(status: string): string { return ({ Planning:'planning', 'In Progress':'in-progress', 'On Hold':'on-hold', Completed:'completed', Closed:'closed' } as Record<string,string>)[status] || ''; }
 
   private getError(err: any, fallback: string): string {
     const detail = err?.error?.detail;

@@ -3,7 +3,7 @@ Slice a string with [ANSI escape codes](https://en.wikipedia.org/wiki/ANSI_escap
 
 @param string - A string with ANSI escape codes. Like one styled by [`chalk`](https://github.com/chalk/chalk).
 @param startSlice - Zero-based visible-column index at which to start the slice. Grapheme clusters are kept intact.
-@param endSlice - Zero-based visible-column index at which to end the slice.
+@param endSlice - Zero-based visible-column index at which to end the slice. If a full grapheme cluster would cross `endSlice`, it is excluded.
 
 @example
 ```

@@ -156,3 +156,1386 @@ app-sidebar .sidebar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, .28) transparent;
 }
+/* ================================================================
+   BuildTrack UI Consistency Layer
+   Applied across authenticated modules so cards, forms, tables,
+   page spacing and interactions feel like one application.
+   ================================================================ */
+:root {
+  --bt-primary: #2f55c7;
+  --bt-primary-hover: #2447b3;
+  --bt-primary-soft: #eef3ff;
+  --bt-page: #f5f7fb;
+  --bt-surface: #ffffff;
+  --bt-surface-soft: #f8faff;
+  --bt-border: #e3e8f1;
+  --bt-border-strong: #d4dce9;
+  --bt-text: #17233f;
+  --bt-muted: #6d7890;
+  --bt-success: #16835b;
+  --bt-success-soft: #ecfdf3;
+  --bt-warning: #b76e00;
+  --bt-warning-soft: #fff8e7;
+  --bt-danger: #b42318;
+  --bt-danger-soft: #fff1f0;
+  --bt-radius-sm: 9px;
+  --bt-radius: 14px;
+  --bt-radius-lg: 18px;
+  --bt-shadow: 0 8px 26px rgba(31, 48, 85, .06);
+  --bt-shadow-hover: 0 14px 34px rgba(31, 48, 85, .11);
+  --bt-sidebar: 235px;
+}
+
+/* Unified application canvas */
+.page-container,
+.page-shell,
+.dashboard,
+.shell {
+  min-height: 100vh;
+  background: var(--bt-page) !important;
+  color: var(--bt-text);
+}
+
+.page-container,
+.dashboard {
+  display: flex;
+}
+
+.page-container > .main-content,
+.dashboard > .main-content {
+  flex: 1;
+  min-width: 0;
+  margin-left: 0 !important;
+  padding: 32px clamp(24px, 3.2vw, 48px) 48px !important;
+}
+
+.page-shell > .main-content,
+.shell > main {
+  min-width: 0;
+  margin-left: var(--bt-sidebar) !important;
+  padding: 32px clamp(24px, 3.2vw, 48px) 48px !important;
+}
+
+/* Consistent typography */
+.main-content h1,
+.shell > main h1 {
+  margin-top: 0;
+  color: var(--bt-text) !important;
+  font-size: clamp(28px, 3vw, 36px) !important;
+  line-height: 1.15;
+  font-weight: 780;
+  letter-spacing: -.035em;
+}
+
+.main-content h2,
+.shell > main h2 {
+  color: var(--bt-text);
+  letter-spacing: -.018em;
+}
+
+.main-content p,
+.shell > main p {
+  line-height: 1.55;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 26px !important;
+}
+
+.page-header h1 {
+  margin-bottom: 7px !important;
+}
+
+.page-header p,
+.main-content > p:first-of-type {
+  margin-top: 0;
+  color: var(--bt-muted) !important;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 7px;
+  color: var(--bt-primary) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+  text-transform: uppercase;
+}
+
+/* Unified cards / panels */
+.main-content :is(.card,.panel,.table-card,.form-card,.users-card,.project-section,.filter-card,.dashboard-card,.dashboard-section,.notification-card,.resource-card,.category-card),
+.shell > main :is(.card,.panel) {
+  background: var(--bt-surface) !important;
+  border: 1px solid var(--bt-border) !important;
+  border-radius: var(--bt-radius) !important;
+  box-shadow: var(--bt-shadow) !important;
+}
+
+.main-content :is(.card,.panel,.dashboard-card,.dashboard-section,.resource-card,.category-card,.notification-card),
+.shell > main .card {
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.main-content :is(.card,.panel,.dashboard-card,.dashboard-section,.resource-card,.category-card,.notification-card):hover,
+.shell > main .card:hover {
+  transform: translateY(-2px);
+  border-color: var(--bt-border-strong) !important;
+  box-shadow: var(--bt-shadow-hover) !important;
+}
+
+/* Stat cards use the same visual language everywhere */
+.main-content :is(.stats,.stats-grid,.stats-row,.cards,.summary-grid) :is(.stat-card,article,div),
+.shell > main .stats article {
+  border-color: var(--bt-border);
+}
+
+.main-content .stat-card,
+.main-content .stats > article,
+.main-content .stats-grid > .stat-card,
+.main-content .stats-row > .stat-card,
+.shell > main .stats > article {
+  background: var(--bt-surface) !important;
+  border: 1px solid var(--bt-border) !important;
+  border-radius: var(--bt-radius) !important;
+  box-shadow: var(--bt-shadow) !important;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.main-content .stat-card:hover,
+.main-content .stats > article:hover,
+.main-content .stats-grid > .stat-card:hover,
+.main-content .stats-row > .stat-card:hover,
+.shell > main .stats > article:hover {
+  transform: translateY(-3px);
+  border-color: #cdd8ef !important;
+  box-shadow: var(--bt-shadow-hover) !important;
+}
+
+.main-content .stat-card :is(strong,h2,h3),
+.shell > main .stats article b {
+  color: var(--bt-text);
+}
+
+.main-content .stat-card :is(span,small),
+.shell > main .stats article small {
+  color: var(--bt-muted) !important;
+}
+
+/* Forms */
+.main-content :is(input,select,textarea),
+.shell > main :is(input,select,textarea) {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px !important;
+  border: 1px solid var(--bt-border-strong) !important;
+  border-radius: var(--bt-radius-sm) !important;
+  background: #fff !important;
+  color: var(--bt-text) !important;
+  outline: none;
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.main-content textarea,
+.shell > main textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.main-content :is(input,select,textarea):hover,
+.shell > main :is(input,select,textarea):hover {
+  border-color: #b8c5dc !important;
+}
+
+.main-content :is(input,select,textarea):focus,
+.shell > main :is(input,select,textarea):focus {
+  border-color: var(--bt-primary) !important;
+  box-shadow: 0 0 0 4px rgba(47, 85, 199, .11) !important;
+}
+
+.main-content label,
+.shell > main label {
+  color: #34425e;
+}
+
+/* Buttons - consistent shape and motion, preserving semantic colours */
+.main-content button,
+.main-content a[class*="btn"],
+.main-content a[class*="button"],
+.shell > main button {
+  min-height: 38px;
+  border-radius: var(--bt-radius-sm) !important;
+  font-weight: 700;
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.main-content button:not(:disabled):hover,
+.main-content a[class*="btn"]:hover,
+.main-content a[class*="button"]:hover,
+.shell > main button:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(31, 48, 85, .10);
+}
+
+.main-content button:not(:disabled):active,
+.main-content a[class*="btn"]:active,
+.shell > main button:not(:disabled):active {
+  transform: translateY(0) scale(.985);
+}
+
+:is(.primary,.primary-btn,.create-btn,.create-project-btn,.add-user-btn,.view-projects-btn) {
+  background: var(--bt-primary) !important;
+  border-color: var(--bt-primary) !important;
+  color: #fff !important;
+}
+
+:is(.primary,.primary-btn,.create-btn,.create-project-btn,.add-user-btn,.view-projects-btn):hover {
+  background: var(--bt-primary-hover) !important;
+  border-color: var(--bt-primary-hover) !important;
+}
+
+:is(.danger,.danger-btn,.delete-btn) {
+  color: var(--bt-danger) !important;
+}
+
+/* Tables */
+.main-content :is(.table-wrap,.table-container,.table-wrapper,.table),
+.shell > main .table {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.main-content table,
+.shell > main table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bt-surface);
+}
+
+.main-content thead th,
+.shell > main thead th {
+  padding: 12px 14px !important;
+  background: var(--bt-surface-soft) !important;
+  color: #536078 !important;
+  border-bottom: 1px solid var(--bt-border) !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.main-content tbody td,
+.shell > main tbody td {
+  padding: 13px 14px !important;
+  border-bottom: 1px solid #edf0f5 !important;
+  vertical-align: middle;
+}
+
+.main-content tbody tr,
+.shell > main tbody tr {
+  transition: background-color .16s ease, transform .16s ease;
+}
+
+.main-content tbody tr:hover,
+.shell > main tbody tr:hover {
+  background: #f8faff !important;
+}
+
+/* Tabs and compact nav controls */
+.main-content :is(.tabs,nav.tabs),
+.shell > main nav {
+  gap: 8px;
+}
+
+.main-content .tabs button,
+.shell > main nav button {
+  border: 1px solid var(--bt-border-strong) !important;
+  background: #fff !important;
+  color: #4c5a73 !important;
+}
+
+.main-content .tabs button.active,
+.shell > main nav button.active {
+  background: var(--bt-primary) !important;
+  border-color: var(--bt-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 5px 14px rgba(47,85,199,.20);
+}
+
+/* Status / feedback */
+:is(.status,.pill,.badge) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 4px 9px;
+  border-radius: 999px !important;
+  font-size: 12px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+:is(.error,.error-banner,.alert.error) {
+  border: 1px solid #f2c6c2 !important;
+  border-radius: 10px !important;
+  background: var(--bt-danger-soft) !important;
+  color: var(--bt-danger) !important;
+}
+
+:is(.success,.success-banner,.alert.success) {
+  border: 1px solid #bde8d3 !important;
+  border-radius: 10px !important;
+  background: var(--bt-success-soft) !important;
+  color: var(--bt-success) !important;
+}
+
+/* Animated loading indicator without changing existing templates */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--bt-muted) !important;
+}
+
+.loading::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  border: 2px solid #d8dfec;
+  border-top-color: var(--bt-primary);
+  border-radius: 50%;
+  animation: bt-spin .7s linear infinite;
+}
+
+/* Progress feels alive when data changes */
+:is(.progress,.progress-fill,.bar > span,.progress-bar > div,.progress-line > div) {
+  transition: width .55s cubic-bezier(.2,.7,.2,1);
+}
+
+/* Subtle entrance animation for authenticated pages */
+.main-content,
+.shell > main {
+  animation: bt-page-in .28s ease both;
+}
+
+@keyframes bt-page-in {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bt-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 850px) {
+  .page-container,
+  .dashboard {
+    flex-direction: column;
+  }
+
+  .page-container > .main-content,
+  .dashboard > .main-content,
+  .page-shell > .main-content,
+  .shell > main {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding: 24px 18px 38px !important;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Authentication pages now share one BuildTrack visual identity. */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 18px !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(80, 116, 255, .22), transparent 34%),
+    radial-gradient(circle at 84% 80%, rgba(61, 99, 221, .18), transparent 30%),
+    linear-gradient(145deg, #0f1b38 0%, #152752 52%, #1d3470 100%) !important;
+}
+
+.auth-container :is(.auth-card,.register-card,.forgot-card,.reset-card) {
+  width: min(100%, 680px);
+  background: rgba(255,255,255,.97) !important;
+  color: var(--bt-text) !important;
+  border: 1px solid rgba(255,255,255,.35) !important;
+  border-radius: var(--bt-radius-lg) !important;
+  box-shadow: 0 24px 70px rgba(4, 13, 37, .32) !important;
+  backdrop-filter: blur(12px);
+  animation: bt-auth-in .36s ease both;
+}
+
+.auth-container .auth-card { max-width: 460px; }
+.auth-container :is(.forgot-card,.reset-card) { max-width: 560px; }
+
+.auth-container :is(h1,h2) {
+  color: var(--bt-text) !important;
+}
+
+.auth-container :is(p,.subtitle) {
+  color: var(--bt-muted) !important;
+}
+
+.auth-container label {
+  color: #34425e !important;
+  font-weight: 700;
+}
+
+.auth-container :is(input,select,textarea) {
+  min-height: 44px;
+  border: 1px solid var(--bt-border-strong) !important;
+  border-radius: var(--bt-radius-sm) !important;
+  background: #fff !important;
+  color: var(--bt-text) !important;
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.auth-container :is(input,select,textarea):focus {
+  border-color: var(--bt-primary) !important;
+  box-shadow: 0 0 0 4px rgba(47,85,199,.12) !important;
+  outline: none !important;
+}
+
+.auth-container :is(button,.login-btn,.register-btn,.reset-btn,.forgot-btn) {
+  border-radius: var(--bt-radius-sm) !important;
+  background: var(--bt-primary) !important;
+  color: #fff !important;
+  border-color: var(--bt-primary) !important;
+  font-weight: 750;
+  transition: transform .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.auth-container :is(button,.login-btn,.register-btn,.reset-btn,.forgot-btn):hover:not(:disabled) {
+  background: var(--bt-primary-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(47,85,199,.22);
+}
+
+.auth-container a {
+  color: var(--bt-primary) !important;
+  font-weight: 700;
+}
+
+@keyframes bt-auth-in {
+  from { opacity: 0; transform: translateY(12px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+
+/* BuildTrack 2026 full-project consistency pass */
+:root { --bt-sidebar: 240px; --bt-control-h: 42px; --bt-button-radius: 9px; }
+app-sidebar { width: var(--bt-sidebar) !important; min-width: var(--bt-sidebar) !important; flex-basis: var(--bt-sidebar) !important; }
+.page-container > .main-content, .dashboard > .main-content { padding: 30px 36px 46px !important; }
+.main-content button, .main-content .btn, .main-content a.create-btn, .main-content a.primary-link,
+.main-content .create-project-btn, .main-content .view-projects-btn {
+  min-height: var(--bt-control-h); padding: 0 16px; border-radius: var(--bt-button-radius); font-size: 14px; font-weight: 650;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; line-height: 1.2; text-decoration: none;
+}
+.main-content input:not([type=checkbox]):not([type=radio]), .main-content select { min-height: var(--bt-control-h); border-radius: 9px; }
+.main-content textarea { border-radius: 9px; }
+.page-header { min-height: 72px; margin-bottom: 24px; align-items: center; }
+.page-header h1 { font-size: 30px !important; margin-bottom: 6px !important; }
+.stat-card, .dashboard-section, .filter-card, .project-section, .table-card, .form-card, .panel, .notification-card {
+  border-radius: 14px !important; box-shadow: var(--bt-shadow) !important;
+}
+.main-content table th { font-size: 12px; font-weight: 750; }
+.main-content table td { font-size: 13.5px; }
+@media (max-width: 850px) {
+  app-sidebar { width: 100% !important; min-width: 0 !important; flex-basis: auto !important; }
+  .page-container > .main-content, .dashboard > .main-content { padding: 22px 16px 36px !important; }
+}
+
+
+/* ================================================================
+   BuildTrack Global Typography Scale
+   Keeps font sizes consistent across every authenticated module and
+   shared control even when older page-level styles use different sizes.
+   ================================================================ */
+:root {
+  --bt-font-xs: 12px;
+  --bt-font-sm: 13px;
+  --bt-font-base: 14px;
+  --bt-font-md: 16px;
+  --bt-font-lg: 20px;
+  --bt-font-xl: 30px;
+}
+
+body {
+  font-size: var(--bt-font-base) !important;
+  line-height: 1.5;
+}
+
+/* Page titles */
+.main-content h1,
+.shell > main h1,
+.page-header h1,
+.dashboard-header h1,
+.notifications-header h1 {
+  font-size: var(--bt-font-xl) !important;
+  line-height: 1.2 !important;
+  font-weight: 750 !important;
+}
+
+/* Section titles */
+.main-content h2,
+.shell > main h2,
+.card h2,
+.panel h2,
+.modal h2,
+.modal-card h2 {
+  font-size: var(--bt-font-lg) !important;
+  line-height: 1.3 !important;
+  font-weight: 700 !important;
+}
+
+/* Card/subsection titles */
+.main-content h3,
+.shell > main h3,
+.card h3,
+.panel h3 {
+  font-size: var(--bt-font-md) !important;
+  line-height: 1.35 !important;
+  font-weight: 700 !important;
+}
+
+.main-content p,
+.shell > main p,
+.main-content label,
+.shell > main label,
+.main-content input,
+.main-content select,
+.main-content textarea,
+.main-content button,
+.shell > main input,
+.shell > main select,
+.shell > main textarea,
+.shell > main button,
+.main-content table,
+.shell > main table {
+  font-size: var(--bt-font-base) !important;
+}
+
+.main-content th,
+.shell > main th {
+  font-size: var(--bt-font-xs) !important;
+  font-weight: 750 !important;
+  letter-spacing: .04em;
+}
+
+.main-content td,
+.shell > main td {
+  font-size: var(--bt-font-sm) !important;
+}
+
+.main-content small,
+.shell > main small,
+.main-content .subtitle,
+.shell > main .subtitle,
+.main-content .muted,
+.shell > main .muted,
+.main-content .hint,
+.shell > main .hint,
+.main-content .eyebrow,
+.shell > main .eyebrow {
+  font-size: var(--bt-font-xs) !important;
+}
+
+/* Shared sidebar scale */
+app-sidebar .sidebar,
+app-sidebar .sidebar a,
+app-sidebar .sidebar button,
+app-sidebar .sidebar .nav-item {
+  font-size: var(--bt-font-sm) !important;
+}
+
+/* Status chips/badges remain compact but readable */
+.main-content :is(.badge,.pill,.status,.status-pill,.chip,.tag),
+.shell > main :is(.badge,.pill,.status,.status-pill,.chip,.tag) {
+  font-size: var(--bt-font-xs) !important;
+}
+
+/* Consistent form controls and action buttons */
+.main-content :is(input,select,textarea),
+.shell > main :is(input,select,textarea) {
+  min-height: 40px;
+}
+
+.main-content textarea,
+.shell > main textarea {
+  min-height: 88px;
+}
+
+.main-content button,
+.shell > main button {
+  min-height: 38px;
+}
+
+/* Make generic loading/error/empty states consistent across modules. */
+.main-content :is(.loading,.loading-state,.empty,.empty-state,.error,.error-message,.notice,.message),
+.shell > main :is(.loading,.loading-state,.empty,.empty-state,.error,.error-message,.notice,.message) {
+  font-size: var(--bt-font-base) !important;
+  line-height: 1.5 !important;
+}
+
+
+/* Authentication pages use the same type scale too. */
+.auth-container :is(.auth-card,.register-card,.forgot-card,.reset-card) h1 {
+  font-size: 30px !important;
+  line-height: 1.2 !important;
+  font-weight: 750 !important;
+}
+.auth-container :is(.auth-card,.register-card,.forgot-card,.reset-card) h2 {
+  font-size: 22px !important;
+  line-height: 1.3 !important;
+  font-weight: 700 !important;
+}
+.auth-container :is(p,label,input,select,textarea,button,a) {
+  font-size: 14px !important;
+}
+
+
+/* ================================================================
+   BuildTrack 2026 final integration polish
+   Slightly larger, consistent typography and control sizing across all modules.
+   ================================================================ */
+:root {
+  --bt-font-xs: 13px;
+  --bt-font-sm: 14px;
+  --bt-font-base: 15px;
+  --bt-font-md: 17px;
+  --bt-font-lg: 21px;
+  --bt-font-xl: 32px;
+  --bt-control-h: 44px;
+}
+html, body, input, select, textarea, button, table {
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+}
+body { font-size: var(--bt-font-base) !important; }
+.main-content h1, .shell > main h1, .page-header h1, header h1, .dashboard-header h1, .notifications-header h1, .auth-container h1 {
+  font-size: var(--bt-font-xl) !important;
+}
+.main-content h2, .shell > main h2, .card h2, .panel h2, article h2, .auth-container h2 {
+  font-size: var(--bt-font-lg) !important;
+}
+.main-content h3, .shell > main h3, .card h3, article h3 {
+  font-size: var(--bt-font-md) !important;
+}
+.main-content :is(p,label,input,select,textarea,button,table), .shell > main :is(p,label,input,select,textarea,button,table), .auth-container :is(p,label,input,select,textarea,button,a) {
+  font-size: var(--bt-font-base) !important;
+}
+.main-content th, .shell > main th { font-size: var(--bt-font-xs) !important; }
+.main-content td, .shell > main td { font-size: var(--bt-font-sm) !important; }
+.main-content :is(input,select,textarea), .shell > main :is(input,select,textarea), .auth-container :is(input,select,textarea) {
+  min-height: var(--bt-control-h) !important;
+  border-radius: 10px !important;
+}
+.main-content button, .shell > main button, .auth-container button {
+  min-height: 42px !important;
+  border-radius: 10px !important;
+}
+.main-content :is(.card,article,.panel,.dashboard-section,.table-card,.form-card), .shell > main :is(.card,article,.panel,.dashboard-section,.table-card,.form-card) {
+  border-radius: 16px !important;
+}
+.main-content :is(.loading,.empty,.error,.success,.alert,.message,.notice), .shell > main :is(.loading,.empty,.error,.success,.alert,.message,.notice) {
+  font-size: var(--bt-font-base) !important;
+  line-height: 1.55 !important;
+}
+
+/* Dashboard refresh/action consistency */
+.main-content .header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.main-content .secondary-btn,
+.main-content .view-projects-btn {
+  border: 1px solid #cfd8ea;
+  background: #ffffff;
+  color: #1c2a44;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.main-content .secondary-btn:hover,
+.main-content .view-projects-btn:hover {
+  box-shadow: 0 6px 16px rgba(35, 80, 180, .12);
+}
+
+
+/* ================================================================
+   BuildTrack presentation typography bump
+   Slightly bigger font size across the complete frontend for projector/demo use.
+   ================================================================ */
+:root {
+  --bt-font-xs: 14px;
+  --bt-font-sm: 15px;
+  --bt-font-base: 16px;
+  --bt-font-md: 19px;
+  --bt-font-lg: 23px;
+  --bt-font-xl: 35px;
+  --bt-control-h: 46px;
+}
+html, body, app-root, input, select, textarea, button, table {
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+}
+body, .main-content, .shell > main, .auth-container {
+  font-size: var(--bt-font-base) !important;
+}
+.main-content h1, .shell > main h1, .page-header h1, header h1, .dashboard-header h1, .notifications-header h1, .auth-container h1 {
+  font-size: var(--bt-font-xl) !important;
+  line-height: 1.14 !important;
+}
+.main-content h2, .shell > main h2, .card h2, .panel h2, article h2, .auth-container h2 {
+  font-size: var(--bt-font-lg) !important;
+}
+.main-content h3, .shell > main h3, .card h3, article h3 {
+  font-size: var(--bt-font-md) !important;
+}
+.main-content :is(p,label,input,select,textarea,button,table,a), .shell > main :is(p,label,input,select,textarea,button,table,a), .auth-container :is(p,label,input,select,textarea,button,a) {
+  font-size: var(--bt-font-base) !important;
+}
+.main-content th, .shell > main th { font-size: var(--bt-font-xs) !important; }
+.main-content td, .shell > main td { font-size: var(--bt-font-sm) !important; }
+app-sidebar .sidebar,
+app-sidebar .sidebar a,
+app-sidebar .sidebar button,
+app-sidebar .sidebar .nav-item {
+  font-size: var(--bt-font-base) !important;
+}
+.main-content :is(.subtitle,.muted,.hint,.breadcrumb,.eyebrow,small), .shell > main :is(.subtitle,.muted,.hint,.breadcrumb,.eyebrow,small) {
+  font-size: var(--bt-font-sm) !important;
+}
+.main-content :is(input,select,textarea), .shell > main :is(input,select,textarea), .auth-container :is(input,select,textarea) {
+  min-height: var(--bt-control-h) !important;
+}
+.main-content button, .shell > main button, .auth-container button {
+  min-height: 44px !important;
+}
+
+
+/* ================================================================
+   BuildTrack dashboard icon + smooth flow polish
+   Added to make every role dashboard more colourful, readable and smooth.
+   ================================================================ */
+:root {
+  --bt-font-xs: 15px;
+  --bt-font-sm: 16px;
+  --bt-font-base: 17px;
+  --bt-font-md: 21px;
+  --bt-font-lg: 27px;
+  --bt-font-xl: 40px;
+  --bt-control-h: 50px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body,
+.main-content,
+.shell > main,
+.auth-container {
+  font-size: var(--bt-font-base) !important;
+}
+
+.main-content h1,
+.shell > main h1,
+.page-header h1,
+.dashboard-header h1 {
+  font-size: var(--bt-font-xl) !important;
+  letter-spacing: -0.04em !important;
+}
+
+.main-content h2,
+.shell > main h2,
+.dashboard-section h2,
+.panel h2 {
+  font-size: var(--bt-font-lg) !important;
+}
+
+.main-content h3,
+.shell > main h3,
+.stat-card h3,
+.stat-card strong {
+  font-size: var(--bt-font-md) !important;
+}
+
+.main-content :is(p, label, input, select, textarea, button, a, span),
+.shell > main :is(p, label, input, select, textarea, button, a, span) {
+  font-size: var(--bt-font-base) !important;
+}
+
+app-sidebar .sidebar,
+app-sidebar .sidebar a,
+app-sidebar .sidebar button,
+app-sidebar .nav-item {
+  font-size: var(--bt-font-base) !important;
+}
+
+.main-content :is(input, select, textarea),
+.shell > main :is(input, select, textarea) {
+  min-height: var(--bt-control-h) !important;
+}
+
+.main-content button,
+.main-content .primary-btn,
+.main-content .secondary-btn,
+.main-content .view-projects-btn,
+.shell > main button {
+  min-height: 48px !important;
+  border-radius: 14px !important;
+}
+
+.dashboard-page {
+  animation: btPageFadeIn .28s ease both;
+}
+
+@keyframes btPageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-hero {
+  animation: btSoftSlide .32s ease both;
+}
+
+@keyframes btSoftSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.colorful-dashboard .title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-right: 10px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #eef4ff, #ffffff);
+  box-shadow: 0 8px 20px rgba(35, 80, 180, .12);
+  vertical-align: middle;
+}
+
+.colorful-dashboard .icon-card,
+.colorful-dashboard .stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background-color .22s ease !important;
+}
+
+.colorful-dashboard .icon-card::after,
+.colorful-dashboard .stat-card::after {
+  content: "";
+  position: absolute;
+  right: -38px;
+  top: -38px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(49, 91, 212, .055);
+  pointer-events: none;
+}
+
+.colorful-dashboard .icon-card:hover,
+.colorful-dashboard .stat-card:hover,
+.colorful-dashboard .panel:hover,
+.colorful-dashboard .dashboard-section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 38px rgba(31, 48, 85, .12) !important;
+  border-color: rgba(49, 91, 212, .22) !important;
+}
+
+.colorful-dashboard .icon-card,
+.colorful-dashboard .stats-row .stat-card,
+.colorful-dashboard .stats-grid .stat-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 18px !important;
+}
+
+.colorful-dashboard .stat-icon {
+  width: 58px !important;
+  height: 58px !important;
+  min-width: 58px !important;
+  border-radius: 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 30px !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 10px 22px rgba(31,48,85,.10);
+}
+
+.colorful-dashboard .stat-icon.blue { background: #eaf1ff !important; color: #244ed8 !important; }
+.colorful-dashboard .stat-icon.green { background: #eafaf0 !important; color: #15803d !important; }
+.colorful-dashboard .stat-icon.orange { background: #fff4e6 !important; color: #c2410c !important; }
+.colorful-dashboard .stat-icon.purple { background: #f4edff !important; color: #6d28d9 !important; }
+.colorful-dashboard .stat-icon.teal { background: #e6fffb !important; color: #0f766e !important; }
+.colorful-dashboard .stat-icon.rose { background: #fff1f2 !important; color: #be123c !important; }
+
+.colorful-dashboard .panel,
+.colorful-dashboard .dashboard-section {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease !important;
+}
+
+.colorful-dashboard .panel-head h2,
+.colorful-dashboard .dashboard-section h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorful-dashboard .primary-btn,
+.colorful-dashboard .secondary-btn,
+.colorful-dashboard .view-projects-btn,
+.colorful-dashboard button,
+.colorful-dashboard a[routerLink] {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease, border-color .2s ease !important;
+}
+
+.colorful-dashboard .primary-btn:hover,
+.colorful-dashboard .secondary-btn:hover,
+.colorful-dashboard .view-projects-btn:hover,
+.colorful-dashboard button:not(:disabled):hover,
+.colorful-dashboard a[routerLink]:hover {
+  transform: translateY(-2px);
+}
+
+.colorful-dashboard .activity-item,
+.colorful-dashboard .list-row,
+.colorful-dashboard .role-row,
+.colorful-dashboard tbody tr {
+  transition: background-color .18s ease, transform .18s ease;
+}
+
+.colorful-dashboard .activity-item:hover,
+.colorful-dashboard .list-row:hover,
+.colorful-dashboard .role-row:hover {
+  background: #f8fbff;
+  transform: translateX(3px);
+}
+
+.colorful-dashboard .loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  animation: btPulseText 1.2s ease-in-out infinite;
+}
+
+@keyframes btPulseText {
+  0%, 100% { opacity: .7; }
+  50% { opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .main-content h1,
+  .shell > main h1,
+  .page-header h1,
+  .dashboard-header h1 {
+    font-size: 34px !important;
+  }
+  .colorful-dashboard .stat-icon {
+    width: 50px !important;
+    height: 50px !important;
+    min-width: 50px !important;
+    font-size: 26px !important;
+  }
+}
+
+
+/* ================================================================
+   BuildTrack Full Frontend Icon + Smooth Flow Polish
+   Applies visual consistency across every frontend page.
+   ================================================================ */
+:root {
+  --bt-font-size: 16.25px;
+  --bt-font-size-sm: 14.25px;
+  --bt-font-size-xs: 12.75px;
+  --bt-font-size-lg: 20px;
+  --bt-font-size-xl: 31px;
+  --bt-page-fade: 220ms;
+  --bt-ease: cubic-bezier(.2,.8,.2,1);
+  --bt-icon-blue: #eaf1ff;
+  --bt-icon-green: #eafff4;
+  --bt-icon-orange: #fff4e6;
+  --bt-icon-purple: #f4edff;
+  --bt-icon-rose: #fff0f3;
+  --bt-icon-teal: #e8fffb;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-size: var(--bt-font-size) !important;
+  line-height: 1.55;
+}
+
+/* Smooth page entry for every routed page. */
+main,
+.main-content,
+.page-content,
+.dashboard-page,
+.auth-card,
+.panel,
+.form-card,
+.table-card,
+.project-section,
+.resource-card,
+.notification-card {
+  animation: bt-soft-enter var(--bt-page-fade) var(--bt-ease) both;
+}
+
+@keyframes bt-soft-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-header,
+.notifications-header,
+.dashboard-hero {
+  animation: bt-soft-enter 180ms var(--bt-ease) both;
+}
+
+h1 {
+  font-size: clamp(29px, 2.2vw, 36px) !important;
+  line-height: 1.16 !important;
+  letter-spacing: -.035em;
+}
+
+h2 {
+  font-size: clamp(21px, 1.6vw, 26px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.02em;
+}
+
+h3 {
+  font-size: clamp(18px, 1.2vw, 21px) !important;
+}
+
+p,
+span,
+small,
+label,
+td,
+th,
+input,
+select,
+textarea,
+button,
+a {
+  font-size: inherit;
+}
+
+small,
+.table-help,
+.help-text,
+.subtitle,
+.data-note,
+.empty {
+  font-size: var(--bt-font-size-sm) !important;
+}
+
+/* Unified colorful icon boxes */
+.title-icon,
+.section-icon,
+.stat-icon,
+.module-icon,
+.card-icon,
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.title-icon {
+  width: 42px;
+  height: 42px;
+  margin-right: 10px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #eef4ff, #ffffff);
+  box-shadow: 0 8px 20px rgba(45, 75, 179, .12);
+}
+
+.stat-icon,
+.card-icon,
+.module-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 17px;
+  font-size: 26px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, .08);
+}
+
+.stat-icon.blue,
+.card-icon.blue { background: var(--bt-icon-blue); }
+.stat-icon.green,
+.card-icon.green { background: var(--bt-icon-green); }
+.stat-icon.orange,
+.card-icon.orange { background: var(--bt-icon-orange); }
+.stat-icon.purple,
+.card-icon.purple { background: var(--bt-icon-purple); }
+.stat-icon.rose,
+.card-icon.rose { background: var(--bt-icon-rose); }
+.stat-icon.teal,
+.card-icon.teal { background: var(--bt-icon-teal); }
+
+/* Make dashboard cards and module panels smoother and neater. */
+.stat-card,
+.icon-card,
+.panel,
+.icon-panel,
+.form-card,
+.table-card,
+.users-card,
+.project-section,
+.resource-card,
+.category-card,
+.notification-card,
+.dashboard-section,
+.filter-card {
+  border-radius: 18px !important;
+  transition:
+    transform .22s var(--bt-ease),
+    box-shadow .22s var(--bt-ease),
+    border-color .22s var(--bt-ease),
+    background-color .22s var(--bt-ease) !important;
+}
+
+.stat-card:hover,
+.icon-card:hover,
+.panel:hover,
+.icon-panel:hover,
+.form-card:hover,
+.table-card:hover,
+.users-card:hover,
+.project-section:hover,
+.resource-card:hover,
+.category-card:hover,
+.notification-card:hover,
+.dashboard-section:hover,
+.filter-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, .09) !important;
+  border-color: #cfdaf0 !important;
+}
+
+/* Buttons and links feel smoother */
+button,
+.primary-btn,
+.secondary-btn,
+.btn,
+.action-btn,
+.save-btn,
+.submit-btn,
+.cancel-btn,
+.delete-btn,
+.refresh-btn,
+a.primary-btn,
+a.secondary-btn {
+  min-height: 42px;
+  border-radius: 12px !important;
+  transition:
+    transform .18s var(--bt-ease),
+    box-shadow .18s var(--bt-ease),
+    background-color .18s var(--bt-ease),
+    border-color .18s var(--bt-ease),
+    opacity .18s var(--bt-ease) !important;
+}
+
+button:not(:disabled):hover,
+.primary-btn:hover,
+.secondary-btn:hover,
+.btn:hover,
+.action-btn:hover,
+.save-btn:hover,
+.submit-btn:hover,
+.refresh-btn:hover,
+a.primary-btn:hover,
+a.secondary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(45, 75, 179, .15);
+}
+
+button:disabled,
+.btn:disabled {
+  opacity: .62;
+}
+
+/* Inputs/selects/textareas */
+input,
+select,
+textarea {
+  min-height: 43px;
+  border-radius: 12px !important;
+  transition:
+    border-color .18s var(--bt-ease),
+    box-shadow .18s var(--bt-ease),
+    background-color .18s var(--bt-ease) !important;
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #b7c4dc !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #315bd4 !important;
+  box-shadow: 0 0 0 4px rgba(49, 91, 212, .12) !important;
+}
+
+/* Tables */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+th {
+  font-size: var(--bt-font-size-xs) !important;
+  letter-spacing: .05em;
+}
+
+td {
+  font-size: var(--bt-font-size-sm) !important;
+}
+
+tbody tr {
+  transition: background-color .18s var(--bt-ease), transform .18s var(--bt-ease);
+}
+
+tbody tr:hover {
+  background: #f8fbff !important;
+}
+
+/* Loading/empty states */
+.loading,
+.empty,
+.error-banner,
+.success-banner {
+  border-radius: 14px;
+}
+
+.loading::before {
+  filter: drop-shadow(0 3px 8px rgba(45, 75, 179, .16));
+}
+
+/* Dashboard header action rows */
+.header-actions,
+.dashboard-actions,
+.pm-top-actions,
+.page-actions {
+  gap: 12px !important;
+}
+
+/* Sidebar icons */
+app-sidebar .sidebar a,
+app-sidebar .logout-btn {
+  gap: 10px;
+}
+
+app-sidebar .nav-icon {
+  width: 23px;
+  height: 23px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.13);
+  font-size: 14px;
+}
+
+app-sidebar .sidebar a::before,
+app-sidebar .logout-btn::before {
+  display: none !important;
+}
+
+app-sidebar .sidebar a.active .nav-icon {
+  background: rgba(255,255,255,.24);
+}
+
+/* Make all pages a bit easier to present on projector. */
+.main-content {
+  padding-top: 34px !important;
+}
+
+.page-header {
+  margin-bottom: 24px !important;
+}
+
+@media (max-width: 900px) {
+  body {
+    font-size: 15.5px !important;
+  }
+
+  h1 {
+    font-size: 28px !important;
+  }
+
+  h2 {
+    font-size: 22px !important;
+  }
+
+  .stat-icon,
+  .card-icon,
+  .module-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 23px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

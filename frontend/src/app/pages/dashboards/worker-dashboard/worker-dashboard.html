@@ -1,37 +1,23 @@
 <div class="page-container">
-    <aside class="sidebar">
-        <div class="logo">
-            <h2>BuildTrack</h2><span>Construction Management</span>
-        </div>
-        <nav><a routerLink="/worker-dashboard" class="active">Dashboard</a><a routerLink="/attendance">Attendance</a><a
-                routerLink="/projects">Projects</a><a routerLink="/notifications">Notifications</a></nav>
-        <div class="sidebar-bottom"><a routerLink="/profile">Profile</a><a routerLink="/login">Logout</a></div>
-    </aside>
-    <main class="main-content">
-        <header class="page-header">
+  <app-sidebar active="dashboard"></app-sidebar>
+
+  <main class="main-content dashboard-page colorful-dashboard">
+        <header class="page-header dashboard-hero">
             <div>
-                <h1>Worker Dashboard</h1>
+                <h1><span class="title-icon">🧰</span> Worker Dashboard</h1>
                 <p>Attendance and worker profile information from BuildTrack.</p>
-            </div>
+            </div><div class="header-actions"><button class="secondary-btn" type="button" (click)="load()">🔄 Refresh</button><a class="primary-btn" routerLink="/attendance">✅ Attendance</a></div>
         </header>
-        <div class="error-banner" *ngIf="error">{{ error }}</div>
-        <div class="loading" *ngIf="loading">Loading worker data...</div>
+        <div class="error-banner" *ngIf="error">⚠️ {{ error }}</div>
+        <div class="loading" *ngIf="loading">⏳ Loading worker data...</div>
         <section class="stats-row" *ngIf="!loading">
-            <div class="stat-card">
-                <h3>{{ worker ? worker.name : 'Not linked' }}</h3><span>Worker Account</span>
-            </div>
-            <div class="stat-card">
-                <h3>{{ presentCount }}</h3><span>Present Records</span>
-            </div>
-            <div class="stat-card">
-                <h3>{{ absentCount }}</h3><span>Absent Records</span>
-            </div>
-            <div class="stat-card">
-                <h3>{{ attendanceRate }}%</h3><span>Attendance Rate</span>
-            </div>
+            <div class="stat-card icon-card"><div class="stat-icon blue">👷</div><div><h3>{{ worker ? worker.name : 'Not linked' }}</h3><span>Worker Account</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon green">✅</div><div><h3>{{ presentCount }}</h3><span>Present Records</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon rose">❌</div><div><h3>{{ absentCount }}</h3><span>Absent Records</span></div></div>
+            <div class="stat-card icon-card"><div class="stat-icon purple">📈</div><div><h3>{{ attendanceRate }}%</h3><span>Attendance Rate</span></div></div>
         </section>
-        <section class="dashboard-section" *ngIf="!loading">
-            <h2>Worker Profile</h2>
+        <section class="dashboard-section icon-panel" *ngIf="!loading">
+            <h2>👷 Worker Profile</h2>
             <div *ngIf="worker; else noWorker">
                 <p><strong>Name:</strong> {{ worker.name }}</p>
                 <p><strong>Role:</strong> {{ worker.role }}</p>
@@ -42,10 +28,10 @@
                     worker-to-task/schedule mapping.</p>
             </ng-template>
         </section>
-        <section class="dashboard-section" *ngIf="!loading">
-            <h2>Recent Attendance</h2>
+        <section class="dashboard-section icon-panel" *ngIf="!loading">
+            <h2>🕒 Recent Attendance</h2>
             <div class="activity-item" *ngFor="let record of attendance.slice(-10).reverse()">
-                <div><strong>{{ record.date | date:'dd MMM yyyy' }}</strong></div><span>{{ record.status }}</span>
+                <div><strong>📅 {{ record.date | date:'dd MMM yyyy' }}</strong></div><span>{{ record.status }}</span>
             </div>
             <p *ngIf="!attendance.length">No attendance records found.</p>
         </section>

@@ -1,0 +1,73 @@
+<div class="page-container">
+  <app-sidebar active="overview"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <h1>🏗️ Project Overview</h1>
+        <p>Quick project-level summary for dashboard monitoring.</p>
+      </div>
+
+      <div class="header-actions">
+        <select [(ngModel)]="selectedProjectId" (ngModelChange)="onProjectChange()">
+          <option [ngValue]="null">Select a project</option>
+          <option *ngFor="let project of projects" [ngValue]="project.id">
+            {{ project.project_name || project.name }}
+          </option>
+        </select>
+        <button type="button" (click)="load()" [disabled]="refreshing">
+          {{ refreshing ? 'Refreshing...' : 'Refresh' }}
+        </button>
+      </div>
+    </header>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
+    <div class="loading" *ngIf="loading">Loading project overview...</div>
+
+    <ng-container *ngIf="!loading && selectedProject">
+      <section class="cards">
+        <div>
+          <span>Status</span>
+          <strong>{{ selectedProject.status || 'Planning' }}</strong>
+        </div>
+        <div>
+          <span>Progress</span>
+          <strong>{{ pct(selectedProgress.progress) }}%</strong>
+        </div>
+        <div>
+          <span>Milestones</span>
+          <strong>{{ selectedProgress.completed_milestones || 0 }}/{{ selectedProgress.total_milestones || 0 }}</strong>
+        </div>
+        <div>
+          <span>Location</span>
+          <strong>{{ selectedProject.location || '—' }}</strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>{{ selectedProject.project_name || selectedProject.name }}</h2>
+            <p>{{ selectedProject.project_code || selectedProject.code || '' }}</p>
+          </div>
+          <span class="badge">{{ selectedProject.status || 'Planning' }}</span>
+        </div>
+
+        <div class="bar">
+          <div [style.width.%]="pct(selectedProgress.progress)"></div>
+        </div>
+
+        <div class="meta">
+          <span>Start: {{ selectedProject.start_date ? (selectedProject.start_date | date:'dd MMM yyyy') : '—' }}</span>
+          <span>Completion: {{ selectedProject.end_date ? (selectedProject.end_date | date:'dd MMM yyyy') : '—' }}</span>
+        </div>
+
+        <p>{{ selectedProject.description || 'No project description is available.' }}</p>
+      </section>
+    </ng-container>
+
+    <section class="panel empty-panel" *ngIf="!loading && !selectedProject">
+      No accessible projects are available.
+    </section>
+  </main>
+</div>

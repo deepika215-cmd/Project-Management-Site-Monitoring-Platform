@@ -1,0 +1,81 @@
+<div class="page-container">
+  <app-sidebar active="create"></app-sidebar>
+
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">PROJECT MANAGEMENT</span>
+        <h1>➕ Create Project - Site Engineer</h1>
+        <p>Create a new project from the Site Engineer workspace and assign an active Project Manager.</p>
+      </div>
+      <a class="back-btn" routerLink="/projects">← Back to Projects</a>
+    </header>
+
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+
+    <form class="project-form" (ngSubmit)="createProject()" #projectForm="ngForm">
+      <section class="form-card">
+        <div class="card-heading">
+          <div><h2>ℹ️ Project Information</h2><p>Enter the core project details and select the responsible Project Manager.</p></div>
+          <span class="required-note"><span>*</span> Required</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name">Project Name <span>*</span></label>
+            <input id="name" name="name" [(ngModel)]="project.name" required placeholder="e.g. Green Valley Apartments">
+          </div>
+          <div class="form-group">
+            <label for="manager">Project Manager <span>*</span></label>
+            <select id="manager" name="manager" [(ngModel)]="project.managerId" required [disabled]="loadingManagers">
+              <option [ngValue]="0">{{ loadingManagers ? 'Loading Project Managers...' : 'Select Project Manager' }}</option>
+              <option *ngFor="let manager of managers" [ngValue]="manager.id">{{ manager.name }} ({{ manager.email }})</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="location">Location <span>*</span></label>
+            <input id="location" name="location" [(ngModel)]="project.location" required placeholder="e.g. Chennai, Tamil Nadu">
+          </div>
+          <div class="form-group">
+            <label for="budget">Budget (₹) <span>*</span></label>
+            <input id="budget" type="number" name="budget" [(ngModel)]="project.budget" min="0" step="1" required placeholder="Enter project budget">
+          </div>
+          <div class="form-group">
+            <label for="start">Start Date <span>*</span></label>
+            <input id="start" type="date" name="start" [(ngModel)]="project.startDate" required>
+          </div>
+          <div class="form-group">
+            <label for="end">Completion Date <span>*</span></label>
+            <input id="end" type="date" name="end" [(ngModel)]="project.completionDate" required>
+          </div>
+          <div class="form-group">
+            <label for="status">Initial Status</label>
+            <select id="status" name="status" [(ngModel)]="project.status">
+              <option value="Planning">Planning</option>
+              <option value="In Progress">In Progress</option>
+              <option value="On Hold">On Hold</option>
+              <option value="Completed">Completed</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="card-heading"><div><h2>📝 Project Description</h2><p>Add a short description of the project scope.</p></div></div>
+        <div class="form-group full-width">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" [(ngModel)]="project.description" rows="5" placeholder="Enter project description"></textarea>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <a class="cancel-btn" routerLink="/projects">✖️ Cancel</a>
+        <button class="submit-btn" type="submit" [disabled]="loading || loadingManagers || !projectForm.form.valid || !project.managerId">
+          {{ loading ? 'Creating...' : 'Create Project' }}
+        </button>
+      </div>
+    </form>
+  </main>
+</div>

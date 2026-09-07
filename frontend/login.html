@@ -117,11 +117,14 @@ Password
 
 </label>
 
+<div class="input-group">
 <input
 type="password"
 id="password"
 class="form-control"
 placeholder="Enter Password">
+<button class="btn btn-outline-secondary" type="button" onclick="togglePassword()" id="showPasswordBtn">Show</button>
+</div>
 
 </div>
 
@@ -174,6 +177,16 @@ Password : admin123
 </div>
 
 <script>
+
+function togglePassword(){
+
+let passwordInput=document.getElementById("password");
+let button=document.getElementById("showPasswordBtn");
+let showing=passwordInput.type==="text";
+passwordInput.type=showing?"password":"text";
+button.innerText=showing?"Show":"Hide";
+
+}
 
 function login(){
 
