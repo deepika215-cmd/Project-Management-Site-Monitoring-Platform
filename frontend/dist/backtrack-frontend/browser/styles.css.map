@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/styles.css"],
-  "sourcesContent": ["/* Global styles */\r\nbody {\r\n  margin: 0;\r\n  background: #f4f6f9;\r\n}"],
-  "mappings": ";AACA;AACE,UAAQ;AACR,cAAY;AACd;",
-  "names": []
-}
