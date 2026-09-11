@@ -1,7 +1,9 @@
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 
-load_dotenv()
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BACKEND_DIR / '.env')
 
 
 def _getenv(name: str, default: str) -> str:
@@ -18,6 +20,12 @@ def _getint(name: str, default: int) -> int:
         return default
 
 
+
+
+def _getlist(name: str, default: str) -> list[str]:
+    raw = _getenv(name, default)
+    return [item.strip().rstrip('/') for item in raw.split(',') if item.strip()]
+
 def _getbool(name: str, default: bool) -> bool:
     raw = os.getenv(name)
     if raw is None or str(raw).strip() == "":
@@ -31,6 +39,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = _getint("ACCESS_TOKEN_EXPIRE_MINUTES", 60)
 
 # Frontend URL used inside password-reset emails.
 FRONTEND_BASE_URL = _getenv("FRONTEND_BASE_URL", "http://localhost:4200")
+
+# Comma-separated frontend origins allowed to call the API.
+CORS_ORIGINS = _getlist("CORS_ORIGINS", "http://localhost:4200,http://127.0.0.1:4200")
 
 # Password-reset email behavior.
 # Keep this true only for local testing without SMTP. Set it to false in real use.

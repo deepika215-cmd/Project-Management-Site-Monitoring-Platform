@@ -119,6 +119,11 @@ def create_procurement(
             title="Procurement Request Created",
             message=message,
             recipient=manager_email,
+            notification_type="PROCUREMENT",
+            project_id=new_procurement.project_id,
+            related_entity_type="PROCUREMENT",
+            related_entity_id=new_procurement.id,
+            action_url="/procurement",
         )
 
     return new_procurement
@@ -347,6 +352,11 @@ def update_procurement(
                 title=title,
                 message=message,
                 recipient=manager_email,
+                notification_type="PROCUREMENT",
+                project_id=procurement.project_id,
+                related_entity_type="PROCUREMENT",
+                related_entity_id=procurement.id,
+                action_url="/procurement",
             )
 
     return procurement

@@ -45,44 +45,39 @@ export class ProjectDetails implements OnInit {
       return;
     }
 
-    // The project list endpoint is already known to be the persisted source
-    // used by the My Projects page. Resolve the detail page from that list
-    // first so a slow/unresponsive /projects/{id} request cannot leave the
-    // user stuck on an endless loading screen.
-    this.projectService.getProjects().pipe(timeout(10000), catchError(err => { this.errorMessage = this.getError(err, 'Unable to load the project list.'); return of([]); })).subscribe({
+    // Resolve from the persisted project list first. If that request fails OR
+    // the requested project is not present in the list, fall back to the
+    // single-project endpoint instead of getting trapped by catchError(of([])).
+    this.projectService.getProjects().pipe(timeout(10000)).subscribe({
       next: projects => {
         const match = (Array.isArray(projects) ? projects : []).find(p => Number(p.id) === id);
-        if (!match) {
-          this.loading = false;
-          this.errorMessage = `Project #${id} was not found in the persisted project list.`;
-          this.cdr.detectChanges();
-          return;
+        if (match) {
+          this.applyLoadedProject(match, id);
+        } else {
+          this.loadProjectFallback(id);
         }
-
-        this.project = this.projectService.toViewModel(match);
-        this.loading = false;
-        this.cdr.detectChanges();
-        this.loadTracking(id);
-        this.loadMilestones(id);
       },
-      error: err => {
-        // Only use the single-project endpoint as a fallback.
-        this.projectService.getProject(id).pipe(timeout(10000)).subscribe({
-          next: backendProject => {
-            this.project = this.projectService.toViewModel(backendProject);
-            this.loading = false;
-            this.cdr.detectChanges();
-            this.loadTracking(id);
-            this.loadMilestones(id);
-          },
-          error: fallbackErr => {
-            this.loading = false;
-            this.errorMessage = fallbackErr?.error?.detail || err?.error?.detail || 'Project could not be loaded. Confirm the backend is running.';
-            this.cdr.detectChanges();
-          }
-        });
+      error: primaryError => this.loadProjectFallback(id, primaryError)
+    });
+  }
+
+  private loadProjectFallback(id: number, primaryError?: any): void {
+    this.projectService.getProject(id).pipe(timeout(10000)).subscribe({
+      next: backendProject => this.applyLoadedProject(backendProject, id),
+      error: fallbackError => {
+        this.loading = false;
+        this.errorMessage = fallbackError?.error?.detail || primaryError?.error?.detail || 'Project could not be loaded. Confirm the backend is running.';
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  private applyLoadedProject(backendProject: any, id: number): void {
+    this.project = this.projectService.toViewModel(backendProject);
+    this.loading = false;
+    this.cdr.detectChanges();
+    this.loadTracking(id);
+    this.loadMilestones(id);
   }
 
   private loadTracking(id: number): void {
@@ -110,7 +105,7 @@ export class ProjectDetails implements OnInit {
 
   editProject(): void {
     if (!this.project || !this.canEditProject()) return;
-    this.router.navigate(['/projects/update-project', this.project.id]);
+    this.router.navigate(['/projects/update-project', this.project.id], { queryParams: { from: 'details' } });
   }
 
   deleteProject(): void {

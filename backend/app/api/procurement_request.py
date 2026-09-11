@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.database.database import get_db
 from app.models.procurement_request import ProcurementRequest
 from app.models.user import User
+from app.models.project import Project
+from app.services.notification_service import create_notification
 from app.schemas.procurement_request_schema import (
     ProcurementRequestCreate,
     ProcurementRequestResponse,
@@ -45,6 +47,29 @@ def create_procurement_request(
     db.add(new_request)
     db.commit()
     db.refresh(new_request)
+
+    project = db.query(Project).filter(Project.id == new_request.project_id).first()
+    if project and project.manager_id:
+        manager = db.query(User).filter(
+            User.id == project.manager_id,
+            User.is_active == True,
+        ).first()
+        if manager:
+            create_notification(
+                db=db,
+                title="Procurement Request Pending",
+                message=(
+                    f"Procurement request #{new_request.id} for {new_request.item_name} "
+                    f"requires review for Project #{new_request.project_id}."
+                ),
+                recipient=manager.email,
+                recipient_user_id=manager.id,
+                notification_type="PROCUREMENT",
+                project_id=new_request.project_id,
+                related_entity_type="PROCUREMENT_REQUEST",
+                related_entity_id=new_request.id,
+                action_url="/procurement",
+            )
 
     return new_request
 
@@ -148,6 +173,21 @@ def approve_procurement_request(
     db.commit()
     db.refresh(request)
 
+    requester = db.query(User).filter(User.id == request.requested_by, User.is_active == True).first()
+    if requester:
+        create_notification(
+            db=db,
+            title="Procurement Request Approved",
+            message=f"Your procurement request #{request.id} for {request.item_name} was approved.",
+            recipient=requester.email,
+            recipient_user_id=requester.id,
+            notification_type="PROCUREMENT",
+            project_id=request.project_id,
+            related_entity_type="PROCUREMENT_REQUEST",
+            related_entity_id=request.id,
+            action_url="/procurement",
+        )
+
     return request
 
 
@@ -192,5 +232,20 @@ def reject_procurement_request(
 
     db.commit()
     db.refresh(request)
+
+    requester = db.query(User).filter(User.id == request.requested_by, User.is_active == True).first()
+    if requester:
+        create_notification(
+            db=db,
+            title="Procurement Request Rejected",
+            message=f"Your procurement request #{request.id} for {request.item_name} was rejected.",
+            recipient=requester.email,
+            recipient_user_id=requester.id,
+            notification_type="PROCUREMENT",
+            project_id=request.project_id,
+            related_entity_type="PROCUREMENT_REQUEST",
+            related_entity_id=request.id,
+            action_url="/procurement",
+        )
 
     return request

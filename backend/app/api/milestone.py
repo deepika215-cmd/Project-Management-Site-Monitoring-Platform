@@ -325,10 +325,17 @@ def generate_milestone_deadline_notifications(
             if existing_notification:
                 continue
 
+            recipient_user = db.query(User).filter(User.email == recipient).first()
             notification = Notification(
                 title=notification_title,
                 message=notification_message,
                 recipient=recipient,
+                recipient_user_id=recipient_user.id if recipient_user else None,
+                notification_type="DEADLINE",
+                project_id=milestone.project_id,
+                related_entity_type="MILESTONE",
+                related_entity_id=milestone.id,
+                action_url=f"/projects/project-details/{milestone.project_id}",
                 status="Unread"
             )
 
@@ -469,10 +476,17 @@ def update_milestone(
 
         for recipient in recipients:
 
+            recipient_user = db.query(User).filter(User.email == recipient).first()
             notification = Notification(
                 title="Milestone Completed",
                 message=notification_message,
                 recipient=recipient,
+                recipient_user_id=recipient_user.id if recipient_user else None,
+                notification_type="PROJECT_UPDATE",
+                project_id=milestone.project_id,
+                related_entity_type="MILESTONE",
+                related_entity_id=milestone.id,
+                action_url=f"/projects/project-details/{milestone.project_id}",
                 status="Unread"
             )
 

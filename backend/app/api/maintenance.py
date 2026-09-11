@@ -8,6 +8,9 @@ from app.core.permissions import role_required
 from app.models.maintenance import Maintenance
 from app.models.machinery import Machinery
 from app.models.notification import Notification
+from app.models.project import Project
+from app.models.project_engineer_assignment import ProjectEngineerAssignment
+from app.models.user import User
 
 from app.schemas.maintenance_schema import (
     MaintenanceCreate,
@@ -155,14 +158,38 @@ def get_maintenance_notifications(
             f"Maintenance type: {maintenance.maintenance_type}."
         )
 
-        for recipient in ["ADMIN", "PROJECT_MANAGER"]:
+        project_id = machinery.project_id if machinery else None
+        recipients = []
+        if project_id:
+            project = db.query(Project).filter(Project.id == project_id).first()
+            if project and project.manager_id:
+                manager = db.query(User).filter(User.id == project.manager_id, User.is_active == True).first()
+                if manager:
+                    recipients.append(manager)
+            engineer_ids = [
+                row[0]
+                for row in db.query(ProjectEngineerAssignment.engineer_id)
+                .filter(ProjectEngineerAssignment.project_id == project_id)
+                .all()
+            ]
+            if engineer_ids:
+                recipients.extend(
+                    db.query(User)
+                    .filter(User.id.in_(engineer_ids), User.is_active == True)
+                    .all()
+                )
 
+        # Use direct users instead of broadcasting to every manager in the
+        # organization.  De-duplicate by user id in case of overlapping data.
+        unique_recipients = {user.id: user for user in recipients}.values()
+        for user in unique_recipients:
             existing_notification = (
                 db.query(Notification)
                 .filter(
                     Notification.title == title,
                     Notification.message == message,
-                    Notification.recipient == recipient
+                    Notification.recipient_user_id == user.id,
+                    Notification.status.in_(["Unread", "unread", "UNREAD"]),
                 )
                 .first()
             )
@@ -173,7 +200,13 @@ def get_maintenance_notifications(
             notification = Notification(
                 title=title,
                 message=message,
-                recipient=recipient,
+                recipient=user.email,
+                recipient_user_id=user.id,
+                notification_type="MAINTENANCE",
+                project_id=project_id,
+                related_entity_type="MAINTENANCE",
+                related_entity_id=maintenance.id,
+                action_url="/resources/operations",
                 status="Unread"
             )
 

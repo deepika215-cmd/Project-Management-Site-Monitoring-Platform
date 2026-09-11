@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from app.database.database import get_db
 from app.core.permissions import role_required
@@ -45,6 +46,21 @@ REPORT_READ_ROLES = ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "CONTRACTOR", 
 REPORT_WRITE_ROLES = ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER"]
 
 
+def _ensure_report_project_id_column(db: Session):
+    """Older SQLite demo databases may not have reports.project_id yet."""
+    try:
+        bind = db.get_bind()
+        if bind.dialect.name == "sqlite":
+            rows = db.execute("PRAGMA table_info(reports)").fetchall()
+            names = {row[1] for row in rows}
+            if "project_id" not in names:
+                db.execute("ALTER TABLE reports ADD COLUMN project_id INTEGER")
+                db.commit()
+    except Exception:
+        db.rollback()
+
+
+
 # ============================================================
 # CREATE REPORT
 # ============================================================
@@ -54,6 +70,7 @@ def create_report(
     report: ReportCreate,
     db: Session = Depends(get_db),
 ):
+    _ensure_report_project_id_column(db)
     new_report = Report(
         **report.model_dump()
     )
@@ -73,8 +90,150 @@ def create_report(
 def get_reports(
     db: Session = Depends(get_db),
 ):
-    return db.query(Report).all()
+    _ensure_report_project_id_column(db)
+    return db.query(Report).order_by(Report.id.desc()).all()
 
+
+# ============================================================
+# MODULE 10 — REPORT PREVIEW / GENERIC PDF / EXCEL EXPORT
+# ============================================================
+
+def _report_project(report, db):
+    """Resolve the report project using project_id first, then legacy title/description text."""
+    project_id = getattr(report, "project_id", None)
+    if project_id:
+        project = db.query(Project).filter(Project.id == int(project_id)).first()
+        if project:
+            return project
+
+    projects = db.query(Project).all()
+    text = f"{report.title or ''} {report.description or ''}".lower()
+    for project in projects:
+        if (project.project_name or '').lower() and (project.project_name or '').lower() in text:
+            return project
+    return projects[0] if len(projects) == 1 else None
+
+
+def _report_preview_payload(report, db):
+    project = _report_project(report, db)
+    kind = (report.report_type or '').strip().lower()
+    headers, rows = [], []
+
+    if kind in {'project progress', 'progress', 'project_progress'}:
+        headers = ['Record Type', 'Date / Milestone', 'Activity / Description', 'Progress / Status']
+        if project:
+            for item in db.query(DailyProgress).filter(DailyProgress.project_id == project.id).order_by(DailyProgress.report_date).all():
+                rows.append(['Daily Progress', str(item.report_date or ''), item.activity or '', f"{item.completion_percentage or 0}%"])
+            for item in db.query(ProjectMilestone).filter(ProjectMilestone.project_id == project.id).order_by(ProjectMilestone.due_date).all():
+                rows.append(['Milestone', str(item.due_date or ''), item.title or '', item.status or ''])
+
+    elif kind in {'resource utilization', 'resource', 'resources'}:
+        from app.models.resource import Resource
+        headers = ['Resource', 'Type', 'Total Qty', 'Allocated', 'Available', 'Utilization', 'Status']
+        query = db.query(Resource)
+        if project: query = query.filter((Resource.project_id == project.id) | (Resource.project_id.is_(None)))
+        for item in query.order_by(Resource.id).all():
+            total = float(item.quantity or 0); allocated = float(item.allocated_quantity or 0)
+            util = round((allocated / total) * 100, 2) if total else 0
+            rows.append([item.name or '', item.type or '', total, allocated, max(0,total-allocated), f'{util}%', item.status or ''])
+
+    elif kind in {'workforce', 'workforce report'}:
+        from app.models.worker import Worker
+        from app.models.attendance import Attendance
+        headers = ['Worker', 'Role', 'Category', 'Attendance Records', 'Present', 'Absent']
+        for worker in db.query(Worker).order_by(Worker.id).all():
+            aq = db.query(Attendance).filter(Attendance.worker_id == worker.id)
+            if project: aq = aq.filter((Attendance.project_id == project.id) | (Attendance.project_id.is_(None)))
+            records = aq.all(); present=sum(1 for x in records if str(x.status).lower()=='present'); absent=sum(1 for x in records if str(x.status).lower()=='absent')
+            rows.append([worker.name or '', worker.role or '', worker.category or '', len(records), present, absent])
+
+    elif kind in {'procurement', 'procurement report'}:
+        from app.models.procurement_request import ProcurementRequest
+        from app.models.purchase_order import PurchaseOrder
+        from app.models.invoice import Invoice
+        headers = ['Record Type', 'Reference', 'Item / Vendor', 'Amount / Qty', 'Status', 'Date']
+        if project:
+            for x in db.query(ProcurementRequest).filter(ProcurementRequest.project_id==project.id).all():
+                rows.append(['Request', f'PR-{x.id}', x.item_name or '', x.quantity or 0, x.status or '', str(x.request_date or '')])
+            for x in db.query(PurchaseOrder).filter(PurchaseOrder.project_id==project.id).all():
+                rows.append(['Purchase Order', f'PO-{x.id}', f'Vendor #{x.vendor_id}', x.overall_amount or x.total_amount or 0, x.status or '', str(x.order_date or '')])
+            for x in db.query(Invoice).filter(Invoice.project_id==project.id).all():
+                rows.append(['Invoice', x.invoice_number or f'INV-{x.id}', f'Vendor #{x.vendor_id}', x.invoice_amount or 0, x.payment_status or '', str(x.invoice_date or '')])
+
+    elif kind in {'budget', 'budget report', 'financial'}:
+        from app.models.budget import Budget
+        from app.models.cost_estimate import CostEstimate
+        from app.models.expense import Expense
+        from app.models.budget_category import BudgetCategory
+        headers = ['Category', 'Planned', 'Estimated', 'Actual', 'Remaining', 'Utilization']
+        if project:
+            for cat in db.query(BudgetCategory).order_by(BudgetCategory.id).all():
+                planned = sum(float(x.allocated_amount or 0) for x in db.query(Budget).filter(Budget.project_id==project.id,Budget.category_id==cat.id).all())
+                estimated = sum(float(x.estimated_amount or 0) for x in db.query(CostEstimate).filter(CostEstimate.project_id==project.id,CostEstimate.category_id==cat.id).all())
+                actual = sum(float(x.amount or 0) for x in db.query(Expense).filter(Expense.project_id==project.id,Expense.category_id==cat.id).all())
+                if planned or estimated or actual:
+                    util=round(actual/planned*100,2) if planned else 0
+                    rows.append([cat.name, planned, estimated, actual, planned-actual, f'{util}%'])
+    else:
+        headers = ['Field', 'Value']
+        rows = [['Title', report.title], ['Type', report.report_type or ''], ['Status', report.status or ''], ['Description', report.description or '']]
+
+    return {
+        'id': report.id,
+        'title': report.title,
+        'description': report.description,
+        'report_type': report.report_type,
+        'status': report.status,
+        'project': project.project_name if project else None,
+        'project_id': project.id if project else getattr(report, 'project_id', None),
+        'project_link': f'/projects/project-details/{project.id}' if project else None,
+        'headers': headers,
+        'rows': rows,
+    }
+
+
+@router.get('/{report_id}/preview', dependencies=[Depends(role_required(REPORT_READ_ROLES))])
+def preview_report(report_id: int, db: Session = Depends(get_db)):
+    _ensure_report_project_id_column(db)
+    report = db.query(Report).filter(Report.id == report_id).first()
+    if not report: raise HTTPException(status_code=404, detail='Report not found')
+    return _report_preview_payload(report, db)
+
+
+@router.get('/{report_id}/export', dependencies=[Depends(role_required(REPORT_READ_ROLES))])
+def export_report(report_id: int, format: str = 'pdf', db: Session = Depends(get_db)):
+    _ensure_report_project_id_column(db)
+    report = db.query(Report).filter(Report.id == report_id).first()
+    if not report: raise HTTPException(status_code=404, detail='Report not found')
+    payload = _report_preview_payload(report, db)
+    fmt = format.lower()
+    output_directory = 'generated_reports'; os.makedirs(output_directory, exist_ok=True)
+    safe = ''.join(c if c.isalnum() or c in '-_' else '_' for c in (report.title or f'report_{report.id}'))[:80]
+
+    if fmt == 'pdf':
+        file_path = os.path.join(output_directory, f'{safe}.pdf')
+        doc = SimpleDocTemplate(file_path, pagesize=landscape(A4), rightMargin=25, leftMargin=25, topMargin=25, bottomMargin=25)
+        styles=getSampleStyleSheet(); story=[Paragraph(report.title, styles['Title']), Spacer(1,10)]
+        if report.description: story += [Paragraph(report.description, styles['Normal']), Spacer(1,10)]
+        data=[payload['headers']] + [[str(v if v is not None else '') for v in row] for row in payload['rows']]
+        if len(data)==1: data.append(['No matching data'] + ['']*(max(1,len(payload['headers']))-1))
+        table=Table(data, repeatRows=1)
+        table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.lightgrey),('FONTNAME',(0,0),(-1,0),'Helvetica-Bold'),('GRID',(0,0),(-1,-1),0.5,colors.grey),('FONTSIZE',(0,0),(-1,-1),7),('VALIGN',(0,0),(-1,-1),'TOP')]))
+        story.append(table); doc.build(story)
+        return FileResponse(file_path, filename=os.path.basename(file_path), media_type='application/pdf')
+
+    if fmt in {'xlsx','excel'}:
+        file_path=os.path.join(output_directory,f'{safe}.xlsx'); wb=Workbook(); ws=wb.active; ws.title='Report'
+        ws.append([report.title]); ws.append([report.description or '']); ws.append([]); ws.append(payload['headers'])
+        for cell in ws[4]: cell.font=Font(bold=True)
+        for row in payload['rows']: ws.append(list(row))
+        if not payload['rows']: ws.append(['No matching data'])
+        for col in range(1, ws.max_column+1):
+            width=max(len(str(ws.cell(r,col).value or '')) for r in range(1,ws.max_row+1)); ws.column_dimensions[get_column_letter(col)].width=min(max(width+2,12),40)
+        wb.save(file_path)
+        return FileResponse(file_path, filename=os.path.basename(file_path), media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+    raise HTTPException(status_code=400, detail='format must be pdf or xlsx')
 
 # ============================================================
 # GET REPORT BY ID
@@ -85,6 +244,7 @@ def get_report(
     report_id: int,
     db: Session = Depends(get_db),
 ):
+    _ensure_report_project_id_column(db)
     report = (
         db.query(Report)
         .filter(Report.id == report_id)
@@ -110,6 +270,7 @@ def update_report(
     updated_report: ReportCreate,
     db: Session = Depends(get_db),
 ):
+    _ensure_report_project_id_column(db)
     report = (
         db.query(Report)
         .filter(Report.id == report_id)
@@ -933,134 +1094,3 @@ def generate_project_excel(
             "spreadsheetml.sheet"
         ),
     )
-
-# ============================================================
-# MODULE 10 — REPORT PREVIEW / GENERIC PDF / EXCEL EXPORT
-# ============================================================
-
-def _report_project(report, db):
-    """Resolve the report project without changing the legacy reports table."""
-    projects = db.query(Project).all()
-    text = f"{report.title or ''} {report.description or ''}".lower()
-    for project in projects:
-        if (project.project_name or '').lower() and (project.project_name or '').lower() in text:
-            return project
-    return projects[0] if len(projects) == 1 else None
-
-
-def _report_preview_payload(report, db):
-    project = _report_project(report, db)
-    kind = (report.report_type or '').strip().lower()
-    headers, rows = [], []
-
-    if kind in {'project progress', 'progress', 'project_progress'}:
-        headers = ['Record Type', 'Date / Milestone', 'Activity / Description', 'Progress / Status']
-        if project:
-            for item in db.query(DailyProgress).filter(DailyProgress.project_id == project.id).order_by(DailyProgress.report_date).all():
-                rows.append(['Daily Progress', str(item.report_date or ''), item.activity or '', f"{item.completion_percentage or 0}%"])
-            for item in db.query(ProjectMilestone).filter(ProjectMilestone.project_id == project.id).order_by(ProjectMilestone.due_date).all():
-                rows.append(['Milestone', str(item.due_date or ''), item.title or '', item.status or ''])
-
-    elif kind in {'resource utilization', 'resource', 'resources'}:
-        from app.models.resource import Resource
-        headers = ['Resource', 'Type', 'Total Qty', 'Allocated', 'Available', 'Utilization', 'Status']
-        query = db.query(Resource)
-        if project: query = query.filter((Resource.project_id == project.id) | (Resource.project_id.is_(None)))
-        for item in query.order_by(Resource.id).all():
-            total = float(item.quantity or 0); allocated = float(item.allocated_quantity or 0)
-            util = round((allocated / total) * 100, 2) if total else 0
-            rows.append([item.name or '', item.type or '', total, allocated, max(0,total-allocated), f'{util}%', item.status or ''])
-
-    elif kind in {'workforce', 'workforce report'}:
-        from app.models.worker import Worker
-        from app.models.attendance import Attendance
-        headers = ['Worker', 'Role', 'Category', 'Attendance Records', 'Present', 'Absent']
-        for worker in db.query(Worker).order_by(Worker.id).all():
-            aq = db.query(Attendance).filter(Attendance.worker_id == worker.id)
-            if project: aq = aq.filter((Attendance.project_id == project.id) | (Attendance.project_id.is_(None)))
-            records = aq.all(); present=sum(1 for x in records if str(x.status).lower()=='present'); absent=sum(1 for x in records if str(x.status).lower()=='absent')
-            rows.append([worker.name or '', worker.role or '', worker.category or '', len(records), present, absent])
-
-    elif kind in {'procurement', 'procurement report'}:
-        from app.models.procurement_request import ProcurementRequest
-        from app.models.purchase_order import PurchaseOrder
-        from app.models.invoice import Invoice
-        headers = ['Record Type', 'Reference', 'Item / Vendor', 'Amount / Qty', 'Status', 'Date']
-        if project:
-            for x in db.query(ProcurementRequest).filter(ProcurementRequest.project_id==project.id).all():
-                rows.append(['Request', f'PR-{x.id}', x.item_name or '', x.quantity or 0, x.status or '', str(x.request_date or '')])
-            for x in db.query(PurchaseOrder).filter(PurchaseOrder.project_id==project.id).all():
-                rows.append(['Purchase Order', f'PO-{x.id}', f'Vendor #{x.vendor_id}', x.overall_amount or x.total_amount or 0, x.status or '', str(x.order_date or '')])
-            for x in db.query(Invoice).filter(Invoice.project_id==project.id).all():
-                rows.append(['Invoice', x.invoice_number or f'INV-{x.id}', f'Vendor #{x.vendor_id}', x.invoice_amount or 0, x.payment_status or '', str(x.invoice_date or '')])
-
-    elif kind in {'budget', 'budget report', 'financial'}:
-        from app.models.budget import Budget
-        from app.models.cost_estimate import CostEstimate
-        from app.models.expense import Expense
-        from app.models.budget_category import BudgetCategory
-        headers = ['Category', 'Planned', 'Estimated', 'Actual', 'Remaining', 'Utilization']
-        if project:
-            for cat in db.query(BudgetCategory).order_by(BudgetCategory.id).all():
-                planned = sum(float(x.allocated_amount or 0) for x in db.query(Budget).filter(Budget.project_id==project.id,Budget.category_id==cat.id).all())
-                estimated = sum(float(x.estimated_amount or 0) for x in db.query(CostEstimate).filter(CostEstimate.project_id==project.id,CostEstimate.category_id==cat.id).all())
-                actual = sum(float(x.amount or 0) for x in db.query(Expense).filter(Expense.project_id==project.id,Expense.category_id==cat.id).all())
-                if planned or estimated or actual:
-                    util=round(actual/planned*100,2) if planned else 0
-                    rows.append([cat.name, planned, estimated, actual, planned-actual, f'{util}%'])
-    else:
-        headers = ['Field', 'Value']
-        rows = [['Title', report.title], ['Type', report.report_type or ''], ['Status', report.status or ''], ['Description', report.description or '']]
-
-    return {
-        'id': report.id,
-        'title': report.title,
-        'description': report.description,
-        'report_type': report.report_type,
-        'status': report.status,
-        'project': project.project_name if project else None,
-        'headers': headers,
-        'rows': rows,
-    }
-
-
-@router.get('/{report_id}/preview', dependencies=[Depends(role_required(REPORT_READ_ROLES))])
-def preview_report(report_id: int, db: Session = Depends(get_db)):
-    report = db.query(Report).filter(Report.id == report_id).first()
-    if not report: raise HTTPException(status_code=404, detail='Report not found')
-    return _report_preview_payload(report, db)
-
-
-@router.get('/{report_id}/export', dependencies=[Depends(role_required(REPORT_READ_ROLES))])
-def export_report(report_id: int, format: str = 'pdf', db: Session = Depends(get_db)):
-    report = db.query(Report).filter(Report.id == report_id).first()
-    if not report: raise HTTPException(status_code=404, detail='Report not found')
-    payload = _report_preview_payload(report, db)
-    fmt = format.lower()
-    output_directory = 'generated_reports'; os.makedirs(output_directory, exist_ok=True)
-    safe = ''.join(c if c.isalnum() or c in '-_' else '_' for c in (report.title or f'report_{report.id}'))[:80]
-
-    if fmt == 'pdf':
-        file_path = os.path.join(output_directory, f'{safe}.pdf')
-        doc = SimpleDocTemplate(file_path, pagesize=landscape(A4), rightMargin=25, leftMargin=25, topMargin=25, bottomMargin=25)
-        styles=getSampleStyleSheet(); story=[Paragraph(report.title, styles['Title']), Spacer(1,10)]
-        if report.description: story += [Paragraph(report.description, styles['Normal']), Spacer(1,10)]
-        data=[payload['headers']] + [[str(v if v is not None else '') for v in row] for row in payload['rows']]
-        if len(data)==1: data.append(['No matching data'] + ['']*(max(1,len(payload['headers']))-1))
-        table=Table(data, repeatRows=1)
-        table.setStyle(TableStyle([('BACKGROUND',(0,0),(-1,0),colors.lightgrey),('FONTNAME',(0,0),(-1,0),'Helvetica-Bold'),('GRID',(0,0),(-1,-1),0.5,colors.grey),('FONTSIZE',(0,0),(-1,-1),7),('VALIGN',(0,0),(-1,-1),'TOP')]))
-        story.append(table); doc.build(story)
-        return FileResponse(file_path, filename=os.path.basename(file_path), media_type='application/pdf')
-
-    if fmt in {'xlsx','excel'}:
-        file_path=os.path.join(output_directory,f'{safe}.xlsx'); wb=Workbook(); ws=wb.active; ws.title='Report'
-        ws.append([report.title]); ws.append([report.description or '']); ws.append([]); ws.append(payload['headers'])
-        for cell in ws[4]: cell.font=Font(bold=True)
-        for row in payload['rows']: ws.append(list(row))
-        if not payload['rows']: ws.append(['No matching data'])
-        for col in range(1, ws.max_column+1):
-            width=max(len(str(ws.cell(r,col).value or '')) for r in range(1,ws.max_row+1)); ws.column_dimensions[get_column_letter(col)].width=min(max(width+2,12),40)
-        wb.save(file_path)
-        return FileResponse(file_path, filename=os.path.basename(file_path), media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-
-    raise HTTPException(status_code=400, detail='format must be pdf or xlsx')

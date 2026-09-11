@@ -1,21 +1,95 @@
-<aside class="sidebar"><div class="logo"><h2>BuildTrack</h2><span>Construction Management</span></div><nav class="nav-main">
-<a [routerLink]="dashboardLink" [class.active]="active==='dashboard'"><span class="nav-icon">📊</span><span>Dashboard</span></a>
-<a *ngIf="role!=='WORKER'" routerLink="/projects" [class.active]="active==='projects'"><span class="nav-icon">📁</span><span>{{role==='SITE_ENGINEER'?'Assigned Projects':'Projects'}}</span></a>
-<ng-container *ngIf="isAdmin()"><a routerLink="/user-management" [class.active]="active==='users'"><span class="nav-icon">👥</span><span>User Management</span></a><a routerLink="/projects/create-project" [class.active]="active==='create'">➕ Create Project</a></ng-container>
-<a *ngIf="isProjectManager()" routerLink="/project-manager/create-project" [class.active]="active==='create'">➕ Create Project</a>
-<a *ngIf="isSiteEngineer()" routerLink="/site-engineer/create-project" [class.active]="active==='create'">➕ Create Project</a>
-<ng-container *ngIf="isAdmin()||isProjectManager()"><a routerLink="/projects/milestones" [class.active]="active==='milestones'"><span class="nav-icon">🎯</span><span>Project Milestones</span></a><a routerLink="/projects/project-status" [class.active]="active==='status'"><span class="nav-icon">📌</span><span>Project Status</span></a><a routerLink="/projects/schedule" [class.active]="active==='schedule'"><span class="nav-icon">📅</span><span>Project Schedule</span></a></ng-container>
-<a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()||role==='CONTRACTOR'" routerLink="/site-progress" [class.active]="active==='site-progress'"><span class="nav-icon">📊</span><span>Site Progress</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/resource-allocation" [class.active]="active==='resources'"><span class="nav-icon">🚜</span><span>Resource Allocation</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/resources/operations" [class.active]="active==='resource-operations'"><span class="nav-icon">🛠️</span><span>Equipment & Maintenance</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/inventory" [class.active]="active==='inventory'"><span class="nav-icon">🏗️</span><span>Material Inventory</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||role==='CONTRACTOR'" routerLink="/workforce" [class.active]="active==='workforce'"><span class="nav-icon">👷</span><span>Workforce</span></a>
-<a *ngIf="canManageWorkforceOps()" routerLink="/workforce/operations" [class.active]="active==='workforce-ops'"><span class="nav-icon">🕒</span><span>Assignments & Shifts</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||role==='CONTRACTOR'||role==='WORKER'" routerLink="/attendance" [class.active]="active==='attendance'"><span class="nav-icon">✅</span><span>Attendance</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/procurement" [class.active]="active==='procurement'"><span class="nav-icon">📦</span><span>Procurement</span></a>
-<a *ngIf="canViewBudget()" routerLink="/budget" [class.active]="active==='budget'"><span class="nav-icon">₹</span><span>Budget & Cost</span></a>
-<a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()||role==='CLIENT'" routerLink="/reports" [class.active]="active==='reports'"><span class="nav-icon">📑</span><span>Reports</span></a>
-<a *ngIf="canViewDocuments()" routerLink="/documents" [class.active]="active==='documents'"><span class="nav-icon">📂</span><span>Documents</span></a>
-<a *ngIf="isAdmin()||isProjectManager()" routerLink="/project-overview" [class.active]="active==='overview'"><span class="nav-icon">🏗️</span><span>Project Overview</span></a>
-<a *ngIf="isAdmin()||isProjectManager()" routerLink="/analytics" [class.active]="active==='analytics'"><span class="nav-icon">📈</span><span>Analytics</span></a>
-</nav><nav class="nav-bottom"><a [routerLink]="notificationLink" [class.active]="active==='notifications'"><span class="nav-icon">🔔</span><span>Notifications</span></a><a routerLink="/profile" [class.active]="active==='profile'"><span class="nav-icon">👤</span><span>Profile</span></a><button class="logout-btn" type="button" (click)="logout()"><span class="nav-icon">🚪</span><span>Logout</span></button></nav></aside>
+<aside class="sidebar">
+  <div class="logo">
+    <h2>BuildTrack</h2>
+    <span>Construction Management</span>
+  </div>
+
+  <nav class="nav-main">
+    <a [routerLink]="dashboardLink" [class.active]="active==='dashboard'"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+    <a *ngIf="role!=='WORKER'" routerLink="/projects" [class.active]="active==='projects'"><span class="nav-icon">📁</span><span>{{role==='SITE_ENGINEER'?'Assigned Projects':'Projects'}}</span></a>
+
+    <ng-container *ngIf="isAdmin()">
+      <a routerLink="/user-management" [class.active]="active==='users'"><span class="nav-icon">👥</span><span>User Management</span></a>
+      <a routerLink="/projects/create-project" [class.active]="active==='create'"><span class="nav-icon">➕</span><span>Create Project</span></a>
+    </ng-container>
+
+    <a *ngIf="isProjectManager()" routerLink="/project-manager/create-project" [class.active]="active==='create'"><span class="nav-icon">➕</span><span>Create Project</span></a>
+    <a *ngIf="isSiteEngineer()" routerLink="/site-engineer/create-project" [class.active]="active==='create'"><span class="nav-icon">➕</span><span>Create Project</span></a>
+
+    <ng-container *ngIf="isAdmin()||isProjectManager()">
+      <a routerLink="/projects/milestones" [class.active]="active==='milestones'"><span class="nav-icon">🎯</span><span>Project Milestones</span></a>
+      <a routerLink="/projects/project-status" [class.active]="active==='status'"><span class="nav-icon">📌</span><span>Project Status</span></a>
+      <a routerLink="/projects/schedule" [class.active]="active==='schedule'"><span class="nav-icon">📅</span><span>Project Schedule</span></a>
+    </ng-container>
+
+    <a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()||role==='CONTRACTOR'" routerLink="/site-progress" [class.active]="active==='site-progress'"><span class="nav-icon">📊</span><span>Site Progress</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/resource-allocation" [class.active]="active==='resources'"><span class="nav-icon">🚜</span><span>Resource Allocation</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/resources/operations" [class.active]="active==='resource-operations'"><span class="nav-icon">🛠️</span><span>Equipment &amp; Maintenance</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/inventory" [class.active]="active==='inventory'"><span class="nav-icon">🏗️</span><span>Material Inventory</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()||role==='CONTRACTOR'" routerLink="/workforce" [class.active]="active==='workforce'"><span class="nav-icon">👷</span><span>Workforce</span></a>
+    <a *ngIf="canManageWorkforceOps()" routerLink="/workforce/operations" [class.active]="active==='workforce-ops'"><span class="nav-icon">🕒</span><span>Assignments &amp; Shifts</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()||role==='CONTRACTOR'||role==='WORKER'" routerLink="/attendance" [class.active]="active==='attendance'"><span class="nav-icon">✅</span><span>Attendance</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()||isSiteEngineer()" routerLink="/procurement" [class.active]="active==='procurement'"><span class="nav-icon">📦</span><span>Procurement</span></a>
+    <a *ngIf="canViewBudget()" routerLink="/budget" [class.active]="active==='budget'"><span class="nav-icon">₹</span><span>Budget &amp; Cost</span></a>
+    <a *ngIf="canViewReports()" routerLink="/reports" [class.active]="active==='reports'"><span class="nav-icon">📑</span><span>Reports</span></a>
+    <a *ngIf="canViewDocuments()" routerLink="/documents" [class.active]="active==='documents'"><span class="nav-icon">📂</span><span>Documents</span></a>
+    <a *ngIf="isAdmin()||isProjectManager()" routerLink="/project-overview" [class.active]="active==='overview'"><span class="nav-icon">🏗️</span><span>Project Overview</span></a>
+    <a *ngIf="canViewAnalytics()" routerLink="/analytics" [class.active]="active==='analytics'"><span class="nav-icon">📈</span><span>Analytics</span></a>
+  </nav>
+
+  <nav class="nav-bottom">
+    <div class="notification-nav-wrap">
+      <a class="notification-link" [routerLink]="notificationLink" [class.active]="active==='notifications'" (click)="closeNotificationPanel()">
+        <span class="nav-icon">🔔</span>
+        <span>Notifications</span>
+        <span class="notification-badge" *ngIf="unreadCount > 0" [attr.aria-label]="unreadCount + ' unread notifications'">
+          {{ unreadCount > 99 ? '99+' : unreadCount }}
+        </span>
+      </a>
+      <button
+        type="button"
+        class="notification-preview-toggle"
+        (click)="toggleNotificationPanel($event)"
+        [attr.aria-expanded]="notificationPanelOpen"
+        aria-label="Show notification preview"
+        title="Show recent notifications"
+      >
+        {{ notificationPanelOpen ? '▴' : '▾' }}
+      </button>
+
+      <section class="notification-preview" *ngIf="notificationPanelOpen" (click)="$event.stopPropagation()" aria-label="Recent notifications">
+        <div class="notification-preview-head">
+          <div>
+            <strong>Recent Alerts</strong>
+            <small>{{ unreadCount }} unread</small>
+          </div>
+          <button type="button" (click)="closeNotificationPanel()" aria-label="Close notification preview">×</button>
+        </div>
+
+        <div class="notification-preview-empty" *ngIf="!recentNotifications.length">
+          No notifications available.
+        </div>
+
+        <a
+          *ngFor="let notification of recentNotifications"
+          class="notification-preview-item"
+          [routerLink]="notificationLink"
+          (click)="closeNotificationPanel()"
+          [class.unread]="(notification.status || '').toLowerCase() === 'unread'"
+        >
+          <span class="preview-item-icon">{{ previewIcon(notification) }}</span>
+          <span class="preview-item-copy">
+            <strong>{{ notification.title || 'Notification' }}</strong>
+            <small>{{ notification.message || 'Open to view notification details.' }}</small>
+          </span>
+          <span class="preview-unread-dot" *ngIf="(notification.status || '').toLowerCase() === 'unread'"></span>
+        </a>
+
+        <a class="notification-preview-all" [routerLink]="notificationLink" (click)="closeNotificationPanel()">View all notifications →</a>
+      </section>
+    </div>
+
+    <a routerLink="/profile" [class.active]="active==='profile'"><span class="nav-icon">👤</span><span>Profile</span></a>
+    <button class="logout-btn" type="button" (click)="logout()"><span class="nav-icon">🚪</span><span>Logout</span></button>
+  </nav>
+</aside>

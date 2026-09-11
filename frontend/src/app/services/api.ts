@@ -1,13 +1,26 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class Api {
 
-  private readonly baseUrl = 'http://localhost:8000';
+  private readonly baseUrl = this.resolveBaseUrl();
+
+  /**
+   * API URL resolution:
+   * 1) window.__BUILDTRACK_API_URL__ (runtime deployment override),
+   * 2) Angular environment apiBaseUrl,
+   * 3) same-origin fallback for reverse-proxy deployments.
+   */
+  private resolveBaseUrl(): string {
+    const runtimeUrl = String((globalThis as any).__BUILDTRACK_API_URL__ || '').trim();
+    const configuredUrl = runtimeUrl || String(environment.apiBaseUrl || '').trim();
+    return configuredUrl.replace(/\/+$/, '');
+  }
 
   constructor(private http: HttpClient) { }
 
@@ -74,6 +87,13 @@ export class Api {
     const p = payroll || {};
     const status = p.payroll_status ?? p.status ?? 'PENDING';
     return { ...p, status, payroll_status: status, estimated_pay: Number(p.estimated_pay ?? 0) };
+  }
+
+  private normalizeDocument(document: any): any {
+    const d = document || {};
+    const title = d.title ?? d.description ?? d.file_name ?? 'Untitled document';
+    const documentType = d.document_type ?? d.category ?? 'Other';
+    return { ...d, title, description: d.description ?? title, document_type: documentType, category: d.category ?? documentType };
   }
 
   // =====================================================
@@ -740,22 +760,60 @@ export class Api {
   }
 
 
+
+  private normalizeReport(report: any): any {
+    const r = report || {};
+    const projectId = r.project_id ?? r.projectId ?? r.project?.id ?? null;
+    return {
+      ...r,
+      project_id: projectId,
+      projectId,
+      title: r.title || 'Untitled report',
+      report_type: r.report_type || r.reportType || r.type || 'Project Progress',
+      status: r.status || 'Generated',
+      created_at: r.created_at || r.createdAt || null
+    };
+  }
+
+  private normalizeNotification(notification: any): any {
+    const n = notification || {};
+    return {
+      ...n,
+      title: n.title || n.subject || 'Notification',
+      message: n.message || n.description || '',
+      status: n.status || 'Unread',
+      recipient: n.recipient || '',
+      recipient_user_id: n.recipient_user_id ?? n.recipientUserId ?? null,
+      notification_type: n.notification_type || n.notificationType || 'SYSTEM',
+      project_id: n.project_id ?? n.projectId ?? null,
+      related_entity_type: n.related_entity_type || n.relatedEntityType || null,
+      related_entity_id: n.related_entity_id ?? n.relatedEntityId ?? null,
+      action_url: n.action_url || n.actionUrl || null,
+      created_at: n.created_at || n.createdAt || n.time || '',
+      read_at: n.read_at || n.readAt || null
+    };
+  }
+
   // =====================================================
   // NOTIFICATIONS
   // =====================================================
 
   // Current user's notifications. This is safe for every dashboard role.
   getNotifications() {
-    return this.http.get<any[]>(`${this.baseUrl}/notification/my`);
+    return this.getMyNotifications();
   }
 
   getMyNotifications() {
-    return this.http.get<any[]>(`${this.baseUrl}/notification/my`);
+    return this.http.get<any[]>(`${this.baseUrl}/notification/my`).pipe(
+      map(items => (items || []).map(item => this.normalizeNotification(item)))
+    );
   }
 
-  // Admin / Project Manager full notification feed.
+  // Admin-only notification management feed.
   getAllNotifications() {
-    return this.http.get<any[]>(`${this.baseUrl}/notification/`);
+    return this.http.get<any[]>(`${this.baseUrl}/notification/`).pipe(
+      map(items => (items || []).map(item => this.normalizeNotification(item)))
+    );
   }
 
   getUnreadNotificationCount() {
@@ -764,6 +822,10 @@ export class Api {
 
   markAllMyNotificationsRead() {
     return this.http.put<any>(`${this.baseUrl}/notification/my/read-all`, {});
+  }
+
+  markAllNotificationsRead() {
+    return this.http.put<any>(`${this.baseUrl}/notification/read-all`, {});
   }
 
   createNotification(notification: any) {
@@ -813,34 +875,21 @@ export class Api {
   // =====================================================
 
   getReports() {
-
-
-    return this.http.get<any[]>(
-      `${this.baseUrl}/report/`
+    return this.http.get<any[]>(`${this.baseUrl}/report/`).pipe(
+      map(items => (items || []).map(item => this.normalizeReport(item)))
     );
-
-
   }
 
   createReport(report: any) {
-
-
-    return this.http.post<any>(
-      `${this.baseUrl}/report/`,
-      report
+    return this.http.post<any>(`${this.baseUrl}/report/`, report).pipe(
+      map(item => this.normalizeReport(item))
     );
-
-
   }
 
   getReport(reportId: number) {
-
-
-    return this.http.get<any>(
-      `${this.baseUrl}/report/${reportId}`
+    return this.http.get<any>(`${this.baseUrl}/report/${reportId}`).pipe(
+      map(item => this.normalizeReport(item))
     );
-
-
   }
 
   updateReport(reportId: number, report: any) {
@@ -1050,8 +1099,24 @@ export class Api {
   exportReport(id: number, format: 'pdf'|'xlsx') { return this.http.get(`${this.baseUrl}/report/${id}/export?format=${format}`, { responseType: 'blob' }); }
 
   // Document management
-  getDocuments(projectId?: number) { const q = projectId ? `?project_id=${projectId}` : ''; return this.http.get<any[]>(`${this.baseUrl}/documents/${q}`); }
-  uploadDocument(projectId: number, title: string, documentType: string, file: File) { const fd = new FormData(); fd.append('project_id', String(projectId)); fd.append('title', title); fd.append('document_type', documentType); fd.append('file', file); return this.http.post<any>(`${this.baseUrl}/documents/`, fd); }
+  getDocuments(projectId?: number) {
+    const q = projectId ? `?project_id=${projectId}` : '';
+    return this.http.get<any[]>(`${this.baseUrl}/documents/${q}`).pipe(
+      map(items => (Array.isArray(items) ? items : []).map(item => this.normalizeDocument(item)))
+    );
+  }
+  uploadDocument(projectId: number, title: string, documentType: string, file: File) {
+    const fd = new FormData();
+    fd.append('project_id', String(projectId));
+    // Backend stores the UI's document type in `category` and title in `description`.
+    // It also accepts the old aliases for backwards compatibility.
+    fd.append('category', documentType);
+    fd.append('description', title);
+    fd.append('file', file);
+    return this.http.post<any>(`${this.baseUrl}/documents/`, fd).pipe(
+      map(item => this.normalizeDocument(item))
+    );
+  }
   downloadDocument(id: number) { return this.http.get(`${this.baseUrl}/documents/${id}/download`, { responseType: 'blob' }); }
   deleteDocument(id: number) { return this.http.delete<any>(`${this.baseUrl}/documents/${id}`); }
 

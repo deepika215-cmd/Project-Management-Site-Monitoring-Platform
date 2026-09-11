@@ -4,7 +4,7 @@
   <main class="main-content">
     <header class="page-header">
       <div>
-        <h1>{{ roleTitle() }}</h1>
+        <h1>📈 {{ roleTitle() }}</h1>
         <p>Database-driven analytics from Project, Resource, Inventory, Workforce, Procurement and Reports modules.</p>
       </div>
 
@@ -16,13 +16,13 @@
           </option>
         </select>
         <button type="button" (click)="load()" [disabled]="refreshing">
-          {{ refreshing ? 'Refreshing...' : 'Refresh' }}
+          {{ refreshing ? 'Refreshing...' : '🔄 Refresh' }}
         </button>
       </div>
     </header>
 
     <div class="error" *ngIf="error">{{ error }}</div>
-    <div class="loading" *ngIf="loading">Loading analytics...</div>
+    <div class="loading" *ngIf="loading">⏳ Loading analytics...</div>
 
     <ng-container *ngIf="!loading">
       <section class="cards">
@@ -36,24 +36,28 @@
       <section class="panel">
         <div class="panel-head">
           <div>
-            <h2>Project Progress</h2>
+            <h2>📊 Project Progress</h2>
             <p>Completion and milestone information.</p>
           </div>
         </div>
-        <div class="metric-row" *ngFor="let project of filteredProgress">
+        <div class="metric-row progress-row" *ngFor="let project of filteredProgress">
           <div class="metric-name">
             <strong>{{ project.project_name || project.name || 'Project' }}</strong>
-            <small>{{ project.completed_milestones ?? 0 }} / {{ project.total_milestones ?? 0 }} milestones</small>
+            <small>{{ project.progress_note || ((project.total_milestones ?? 0) + ' milestones tracked') }}</small>
           </div>
-          <div class="bar"><div [style.width.%]="pct(project.progress)"></div></div>
-          <strong>{{ pct(project.progress) }}%</strong>
+          <div class="progress-bar-wrap" [attr.aria-label]="(project.project_name || project.name || 'Project') + ' progress ' + pct(project.progress) + '%'">
+            <div class="bar progress-bar">
+              <div class="progress-fill" [style.width.%]="pct(project.progress)"></div>
+            </div>
+          </div>
+          <strong class="progress-percent">{{ pct(project.progress) }}%</strong>
         </div>
         <p class="empty" *ngIf="!filteredProgress.length">No project-progress analytics are available.</p>
       </section>
 
       <div class="two-col">
         <section class="panel">
-          <h2>Resource Utilization</h2>
+          <h2>🚜 Resource Utilization</h2>
           <div class="metric-row" *ngFor="let item of filteredResources">
             <span>{{ item.resource_name || item.name || 'Resource' }}</span>
             <div class="bar"><div [style.width.%]="pct(item.utilization ?? item.utilization_percentage)"></div></div>
@@ -63,7 +67,7 @@
         </section>
 
         <section class="panel">
-          <h2>Workforce Status</h2>
+          <h2>👷 Workforce Status</h2>
           <div class="metric-row" *ngFor="let item of filteredWorkforce">
             <span>{{ item.worker_name || item.name || 'Worker' }}</span>
             <div class="bar"><div [style.width.%]="pct(item.attendance_percentage)"></div></div>
@@ -75,7 +79,7 @@
 
       <div class="two-col">
         <section class="panel">
-          <h2>Procurement Overview</h2>
+          <h2>📦 Procurement Overview</h2>
           <div class="simple-row" *ngFor="let item of filteredProcurement">
             <div>
               <strong>{{ item.item_name || item.title || 'Procurement item' }}</strong>
@@ -87,7 +91,7 @@
         </section>
 
         <section class="panel">
-          <h2>Inventory Status</h2>
+          <h2>🏗️ Inventory Status</h2>
           <div class="simple-row" *ngFor="let item of inventoryStatus | slice:0:8">
             <span>{{ item.item_name || item.material_name || 'Item' }}</span>
             <strong>{{ item.remaining ?? item.quantity ?? 0 }}</strong>

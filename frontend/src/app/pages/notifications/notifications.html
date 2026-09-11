@@ -5,15 +5,29 @@
     <header class="notifications-header">
       <div>
         <p class="breadcrumb">Dashboard / Notifications</p>
-        <h1>🔔 Project Notifications</h1>
-        <p class="subtitle">Live notifications from the BuildTrack notification API.</p>
+        <h1>🔔 {{ pageTitle() }}</h1>
+        <p class="subtitle">{{ pageSubtitle() }}</p>
       </div>
       <div class="header-actions">
-        
-        <button type="button" class="secondary-btn" (click)="markAllRead()" [disabled]="loading || !notifications.length">Mark all read</button>
-        <button type="button" class="secondary-btn" (click)="load()" [disabled]="loading">↻ Refresh</button>
+        <button
+          *ngIf="isAdmin()"
+          type="button"
+          class="primary-btn generate-btn"
+          (click)="generate()"
+          [disabled]="generating || loading"
+          title="Scan live BuildTrack data for deadline, procurement, attendance, maintenance and system alerts"
+        >
+          {{ generating ? '⚡ Generating...' : '⚡ Generate Alerts' }}
+        </button>
+        <button type="button" class="secondary-btn" (click)="markAllRead()" [disabled]="loading || !unread()">✅ Mark all read</button>
+        <button type="button" class="secondary-btn" (click)="load()" [disabled]="loading">🔄 Refresh</button>
       </div>
     </header>
+
+    <div class="admin-hint" *ngIf="isAdmin()">
+      <strong>Admin alert generator:</strong>
+      scans live project deadlines, milestone/task deadlines, pending procurement requests, attendance exceptions, upcoming maintenance and resource/system conditions. Duplicate unread alerts are not created.
+    </div>
 
     <div class="alert success" *ngIf="message">{{ message }}</div>
     <div class="alert error" *ngIf="error">{{ error }}</div>
@@ -21,11 +35,15 @@
     <section class="stats-row" *ngIf="!loading">
       <article class="stat-card">
         <h3>{{ notifications.length }}</h3>
-        <p>Total Notifications</p>
+        <p>{{ isAdmin() ? 'Managed Notifications' : 'Total Notifications' }}</p>
       </article>
       <article class="stat-card">
         <h3>{{ unread() }}</h3>
         <p>Unread</p>
+      </article>
+      <article class="stat-card">
+        <h3>{{ typeCount() }}</h3>
+        <p>Alert Types</p>
       </article>
     </section>
 
@@ -44,21 +62,67 @@
         <div class="card-icon" [ngClass]="iconClass(n)">{{ iconFor(n) }}</div>
         <div class="notification-content">
           <div class="notification-title-row">
-            <h3>{{ n.title || 'Notification' }}</h3>
+            <div>
+              <div class="type-row">
+                <span class="type-pill">{{ displayType(n) }}</span>
+                <span class="project-pill" *ngIf="n.project_id">Project #{{ n.project_id }}</span>
+              </div>
+              <h3>{{ n.title || 'Notification' }}</h3>
+            </div>
             <span class="status-pill" [class.read]="(n.status || '').toLowerCase() === 'read'">
               {{ n.status || 'Unread' }}
             </span>
           </div>
+
           <p>{{ n.message || 'No message available.' }}</p>
-          <small *ngIf="n.created_at">{{ n.created_at }}</small>
-          <small *ngIf="n.recipient">Recipient: {{ n.recipient }}</small>
+
+          <div class="notification-meta">
+            <small *ngIf="n.created_at">🕒 {{ n.created_at | date:'medium' }}</small>
+            <small *ngIf="isAdmin() && n.recipient">👤 Recipient: {{ n.recipient }}</small>
+            <small *ngIf="n.related_entity_type">🔗 {{ n.related_entity_type }}<span *ngIf="n.related_entity_id"> #{{ n.related_entity_id }}</span></small>
+          </div>
+
+          <div class="card-actions">
+            <button type="button" class="mini-btn" (click)="showDetails($event, n)">Details</button>
+            <button *ngIf="relatedRoute(n)" type="button" class="mini-btn primary-mini" (click)="openRelated($event, n)">View Related</button>
+            <button *ngIf="isAdmin()" type="button" class="mini-btn danger-mini" (click)="deleteNotification($event, n)" [disabled]="deleting">Delete</button>
+          </div>
         </div>
       </article>
 
       <div class="empty-state" *ngIf="!notifications.length">
-        <h3>No notifications</h3>
-        <p>You do not have any notifications right now.</p>
+        <h3>🔔 No notifications</h3>
+        <p>No alerts are available for this account right now.</p>
+        <button *ngIf="isAdmin()" type="button" class="primary-btn" (click)="generate()" [disabled]="generating">⚡ Generate Alerts</button>
       </div>
     </section>
   </main>
+
+  <div class="modal-backdrop" *ngIf="selectedNotification" (click)="closeDetails()">
+    <section class="details-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Notification details">
+      <div class="modal-head">
+        <div>
+          <span class="type-pill">{{ displayType(selectedNotification) }}</span>
+          <h2>{{ selectedNotification.title }}</h2>
+        </div>
+        <button type="button" class="close-btn" (click)="closeDetails()" aria-label="Close notification details">×</button>
+      </div>
+
+      <p class="details-message">{{ selectedNotification.message }}</p>
+
+      <dl class="details-grid">
+        <div><dt>Status</dt><dd>{{ selectedNotification.status || 'Unread' }}</dd></div>
+        <div><dt>Date / Time</dt><dd>{{ selectedNotification.created_at ? (selectedNotification.created_at | date:'medium') : 'Not available' }}</dd></div>
+        <div *ngIf="selectedNotification.project_id"><dt>Project</dt><dd>#{{ selectedNotification.project_id }}</dd></div>
+        <div *ngIf="selectedNotification.related_entity_type"><dt>Related Record</dt><dd>{{ selectedNotification.related_entity_type }}<span *ngIf="selectedNotification.related_entity_id"> #{{ selectedNotification.related_entity_id }}</span></dd></div>
+        <div *ngIf="isAdmin()"><dt>Recipient</dt><dd>{{ selectedNotification.recipient || 'Not specified' }}</dd></div>
+        <div *ngIf="selectedNotification.read_at"><dt>Read At</dt><dd>{{ selectedNotification.read_at | date:'medium' }}</dd></div>
+      </dl>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" (click)="closeDetails()">Close</button>
+        <button *ngIf="relatedRoute(selectedNotification)" type="button" class="primary-btn" (click)="openRelated($event, selectedNotification)">Open Related Information</button>
+      </div>
+    </section>
+  </div>
 </div>

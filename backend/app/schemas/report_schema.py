@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 class ReportCreate(BaseModel):
     title: str
+    project_id: Optional[int] = None
     description: Optional[str] = None
     report_type: Optional[str] = None
     status: Optional[str] = None

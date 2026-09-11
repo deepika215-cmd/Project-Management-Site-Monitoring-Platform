@@ -22,12 +22,24 @@ export class Documents implements OnInit{
     });
   }
   projectName(id:any){return this.projects.find(p=>Number(p.id)===Number(id))?.project_name||`Project #${id}`}
-  choose(event:Event){this.selectedFile=(event.target as HTMLInputElement).files?.[0]||null}
+  choose(event:Event){
+    const input=event.target as HTMLInputElement;
+    const file=input.files?.[0]||null;
+    this.error='';
+    this.message='';
+    if(file && file.size>15*1024*1024){
+      this.selectedFile=null;
+      input.value='';
+      this.error='File is too large. Maximum upload size is 15 MB.';
+      return;
+    }
+    this.selectedFile=file;
+  }
   upload(){
     if(!this.canEdit())return;
     if(!this.form.project_id||!String(this.form.title||'').trim()||!this.selectedFile){this.error='Project, title and file are required.';return}
     this.uploading=true;this.error='';this.message='';
-    this.api.uploadDocument(this.form.project_id,this.form.title.trim(),this.form.document_type,this.selectedFile).pipe(timeout(15000),finalize(()=>{this.uploading=false;this.cdr.detectChanges();})).subscribe({
+    this.api.uploadDocument(this.form.project_id,this.form.title.trim(),this.form.document_type,this.selectedFile).pipe(timeout(60000),finalize(()=>{this.uploading=false;this.cdr.detectChanges();})).subscribe({
       next:(created:any)=>{this.message='Document uploaded.';if(created?.id)this.documents=[created,...this.documents];this.form.title='';this.selectedFile=null;this.load();},
       error:e=>this.error=this.parseError(e,'Unable to upload document.')
     });

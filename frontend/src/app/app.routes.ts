@@ -48,6 +48,7 @@ import { ResourceOperations } from './pages/resources/resource-operations/resour
 import { WorkforceOperations } from './pages/workforce/workforce-operations/workforce-operations';
 import { Documents } from './pages/documents/documents';
 import { Budget } from './pages/budget/budget';
+import { NotFound } from './pages/not-found/not-found';
 
 
 export const routes: Routes = [
@@ -215,6 +216,24 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
   },
 
+  {
+    path: 'projects/edit/:id',
+    component: UpdateProject,
+    canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER'])]
+  },
+
+  {
+    path: 'admin/projects/update-project/:id',
+    component: UpdateProject,
+    canActivate: [authGuard, roleGuard(['ADMIN'])]
+  },
+
+  {
+    path: 'project-manager/update-project/:id',
+    component: UpdateProject,
+    canActivate: [authGuard, roleGuard(['PROJECT_MANAGER'])]
+  },
+
 
   // Site Progress Monitoring (Module 3)
   { path: 'site-progress', component: SiteProgress, canActivate: [authGuard, roleGuard(['ADMIN', 'PROJECT_MANAGER', 'SITE_ENGINEER', 'CONTRACTOR'])] },
@@ -260,35 +279,15 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  {
-    path: 'admin-notifications',
-    component: AdminNotifications,
-    canActivate: [authGuard, roleGuard(['ADMIN'])]
-  },
+  { path: 'admin-notifications', redirectTo: 'notifications', pathMatch: 'full' },
 
-  {
-    path: 'contractor-notifications',
-    component: ContractorNotifications,
-    canActivate: [authGuard, roleGuard(['CONTRACTOR'])]
-  },
+  { path: 'contractor-notifications', redirectTo: 'notifications', pathMatch: 'full' },
 
-  {
-    path: 'client-notifications',
-    component: ClientNotifications,
-    canActivate: [authGuard, roleGuard(['CLIENT'])]
-  },
+  { path: 'client-notifications', redirectTo: 'notifications', pathMatch: 'full' },
 
-  {
-    path: 'worker-notifications',
-    component: WorkerNotifications,
-    canActivate: [authGuard, roleGuard(['WORKER'])]
-  },
+  { path: 'worker-notifications', redirectTo: 'notifications', pathMatch: 'full' },
 
-  {
-    path: 'site-engineer-notifications',
-    component: SiteEngineerNotifications,
-    canActivate: [authGuard, roleGuard(['SITE_ENGINEER'])]
-  },
+  { path: 'site-engineer-notifications', redirectTo: 'notifications', pathMatch: 'full' },
 
 
   { path: 'dashboard', canActivate: [authGuard, dashboardGuard], component: Profile },
@@ -296,5 +295,8 @@ export const routes: Routes = [
   { path: 'projects/status', redirectTo: 'projects/project-status', pathMatch: 'full' },
   { path: 'projects/details/:id', redirectTo: 'projects/project-details/:id', pathMatch: 'full' },
   { path: 'resources', redirectTo: 'resource-allocation', pathMatch: 'full' },
+
+  // Friendly fallback for invalid/dead links. Must remain the final route.
+  { path: '**', component: NotFound },
 
 ];

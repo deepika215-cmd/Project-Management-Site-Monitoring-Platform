@@ -8,6 +8,8 @@ class Report(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
+    project_id = Column(Integer, nullable=True)
+
     title = Column(String(200), nullable=False)
 
     description = Column(String(500), nullable=True)

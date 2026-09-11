@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.database import Base, engine, SessionLocal
+from app.core.config import CORS_ORIGINS
 
 
 # ============================================================
@@ -298,8 +299,15 @@ def ensure_core_sqlite_schema() -> None:
             ("title", "VARCHAR(200) DEFAULT 'Notification'"),
             ("message", "VARCHAR(500) DEFAULT ''"),
             ("recipient", "VARCHAR(100) DEFAULT 'ALL'"),
+            ("recipient_user_id", "INTEGER"),
+            ("notification_type", "VARCHAR(50) DEFAULT 'SYSTEM'"),
+            ("project_id", "INTEGER"),
+            ("related_entity_type", "VARCHAR(80)"),
+            ("related_entity_id", "INTEGER"),
+            ("action_url", "VARCHAR(300)"),
             ("status", "VARCHAR(50) DEFAULT 'Unread'"),
             ("created_at", "DATETIME"),
+            ("read_at", "DATETIME"),
         ],
     }
 
@@ -317,10 +325,46 @@ def ensure_core_sqlite_schema() -> None:
         conn.execute(text("UPDATE notifications SET title = 'Notification' WHERE title IS NULL OR title = ''"))
         conn.execute(text("UPDATE notifications SET message = '' WHERE message IS NULL"))
         conn.execute(text("UPDATE notifications SET recipient = 'ALL' WHERE recipient IS NULL OR recipient = ''"))
+        conn.execute(text("UPDATE notifications SET notification_type = 'SYSTEM' WHERE notification_type IS NULL OR notification_type = ''"))
         conn.execute(text("UPDATE notifications SET status = 'Unread' WHERE status IS NULL OR status = ''"))
 
 ensure_core_sqlite_schema()
 
+
+def ensure_module8_notification_schema() -> None:
+    """Add Module 8 notification metadata columns to an existing database.
+
+    ``create_all`` cannot alter an already-created table.  This lightweight
+    compatibility guard supports the project's local SQLite database and an
+    existing PostgreSQL deployment without requiring users to delete data.
+    """
+    from sqlalchemy import inspect, text
+
+    inspector = inspect(engine)
+    if "notifications" not in inspector.get_table_names():
+        return
+
+    existing = {column["name"] for column in inspector.get_columns("notifications")}
+    dialect = engine.dialect.name
+    datetime_type = "TIMESTAMP" if dialect == "postgresql" else "DATETIME"
+    required = [
+        ("recipient_user_id", "INTEGER"),
+        ("notification_type", "VARCHAR(50) DEFAULT 'SYSTEM'"),
+        ("project_id", "INTEGER"),
+        ("related_entity_type", "VARCHAR(80)"),
+        ("related_entity_id", "INTEGER"),
+        ("action_url", "VARCHAR(300)"),
+        ("read_at", datetime_type),
+    ]
+
+    with engine.begin() as conn:
+        for name, ddl in required:
+            if name not in existing:
+                conn.execute(text(f"ALTER TABLE notifications ADD COLUMN {name} {ddl}"))
+        conn.execute(text("UPDATE notifications SET notification_type = 'SYSTEM' WHERE notification_type IS NULL OR notification_type = ''"))
+
+
+ensure_module8_notification_schema()
 
 
 def _ensure_budget_categories() -> None:
@@ -1175,9 +1219,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:4200"
-    ],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -123,10 +123,17 @@ def create_delay(
 
     if manager_email:
 
+        manager_user = db.query(User).filter(User.email == manager_email).first()
         manager_notification = Notification(
             title="Project Delay Reported",
             message=notification_message,
             recipient=manager_email,
+            recipient_user_id=manager_user.id if manager_user else None,
+            notification_type="PROJECT_UPDATE",
+            project_id=delay.project_id,
+            related_entity_type="DELAY",
+            related_entity_id=new_delay.id,
+            action_url="/site-progress",
             status="Unread"
         )
 

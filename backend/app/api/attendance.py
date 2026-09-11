@@ -9,6 +9,7 @@ from app.models.worker import Worker
 from app.models.worker_assignment import WorkerAssignment
 from app.models.project import Project
 from app.models.user import User
+from app.models.contractor import Contractor
 
 from app.schemas.attendance_schema import (
     AttendanceCreate,
@@ -58,6 +59,36 @@ def get_project_manager_email(
         return None
 
     return manager.email
+
+
+def get_attendance_alert_recipients(db: Session, project_id: int, worker_id: int) -> set[str]:
+    """Project manager + the contractor responsible for this worker."""
+    recipients: set[str] = set()
+
+    manager_email = get_project_manager_email(db, project_id)
+    if manager_email:
+        recipients.add(manager_email)
+
+    assignment = (
+        db.query(WorkerAssignment)
+        .filter(
+            WorkerAssignment.worker_id == worker_id,
+            WorkerAssignment.project_id == project_id,
+            WorkerAssignment.assignment_status == "ACTIVE",
+        )
+        .first()
+    )
+    if assignment:
+        contractor = db.query(Contractor).filter(Contractor.id == assignment.contractor_id).first()
+        if contractor and contractor.email:
+            contractor_user = db.query(User).filter(
+                User.email == contractor.email,
+                User.is_active == True,
+            ).first()
+            if contractor_user:
+                recipients.add(contractor_user.email)
+
+    return recipients
 
 
 # ============================================================
@@ -220,22 +251,22 @@ def create_attendance(
             f" Project: #{new_attendance.project_id}."
         )
 
-        # ----------------------------------------------------
-        # Find responsible Project Manager
-        # ----------------------------------------------------
-
-        manager_email = get_project_manager_email(
+        # Notify only the manager and contractor responsible for this worker.
+        for recipient in get_attendance_alert_recipients(
             db=db,
             project_id=new_attendance.project_id,
-        )
-
-        if manager_email:
-
+            worker_id=new_attendance.worker_id,
+        ):
             create_notification(
                 db=db,
                 title=title,
                 message=message,
-                recipient=manager_email,
+                recipient=recipient,
+                notification_type="ATTENDANCE",
+                project_id=new_attendance.project_id,
+                related_entity_type="ATTENDANCE",
+                related_entity_id=new_attendance.id,
+                action_url="/attendance",
             )
 
     return new_attendance
@@ -566,22 +597,21 @@ def update_attendance(
             f" Project: #{attendance.project_id}."
         )
 
-        # ----------------------------------------------------
-        # Find responsible Project Manager
-        # ----------------------------------------------------
-
-        manager_email = get_project_manager_email(
+        for recipient in get_attendance_alert_recipients(
             db=db,
             project_id=attendance.project_id,
-        )
-
-        if manager_email:
-
+            worker_id=attendance.worker_id,
+        ):
             create_notification(
                 db=db,
                 title=title,
                 message=message,
-                recipient=manager_email,
+                recipient=recipient,
+                notification_type="ATTENDANCE",
+                project_id=attendance.project_id,
+                related_entity_type="ATTENDANCE",
+                related_entity_id=attendance.id,
+                action_url="/attendance",
             )
 
     return attendance

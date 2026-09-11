@@ -50,6 +50,7 @@ export class ContractorNotifications implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((response: any) => {
       this.notifications = this.normalizeList(response);
+      this.error = '';
     });
   }
 

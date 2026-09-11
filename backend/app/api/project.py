@@ -18,6 +18,7 @@ from app.models.payroll import Payroll
 from app.models.maintenance import Maintenance
 from app.models.machinery import Machinery
 from app.models.notification import Notification
+from app.models.contractor import Contractor
 
 from app.schemas.project_schema import (
     ProjectCreate,
@@ -114,6 +115,22 @@ def get_project_notification_recipients(
 
         if engineer and engineer.email:
             recipients.add(engineer.email)
+
+    # -----------------------------------------------------
+    # Contractor assigned to this project
+    # -----------------------------------------------------
+    contractors = db.query(Contractor).filter(
+        Contractor.project_id == project_id,
+        Contractor.status.in_(["Active", "ACTIVE", "active"]),
+    ).all()
+    contractor_emails = [c.email for c in contractors if c.email]
+    if contractor_emails:
+        contractor_users = db.query(User).filter(
+            User.email.in_(contractor_emails),
+            User.is_active == True,
+        ).all()
+        for contractor_user in contractor_users:
+            recipients.add(contractor_user.email)
 
     return recipients
 
@@ -434,10 +451,17 @@ def generate_project_deadline_notifications(
             if existing_notification:
                 continue
 
+            recipient_user = db.query(User).filter(User.email == recipient).first()
             notification = Notification(
                 title=notification_title,
                 message=notification_message,
                 recipient=recipient,
+                recipient_user_id=recipient_user.id if recipient_user else None,
+                notification_type="DEADLINE",
+                project_id=project.id,
+                related_entity_type="PROJECT",
+                related_entity_id=project.id,
+                action_url=f"/projects/project-details/{project.id}",
                 status="Unread"
             )
 
@@ -810,10 +834,12 @@ def update_project(
     # Validate project code uniqueness
     # -----------------------------------------------------
 
-    existing_project = db.query(Project).filter(
-        Project.project_code == project_data.project_code,
-        Project.id != project_id
-    ).first()
+    existing_project = None
+    if project_data.project_code:
+        existing_project = db.query(Project).filter(
+            Project.project_code == project_data.project_code,
+            Project.id != project_id
+        ).first()
 
     if existing_project:
         raise HTTPException(
@@ -855,6 +881,7 @@ def update_project(
         "end_date",
         "budget",
         "priority",
+        "status",
         "manager_id"
     ]
 
@@ -868,6 +895,7 @@ def update_project(
         "end_date": project_data.end_date,
         "budget": project_data.budget,
         "priority": project_data.priority,
+        "status": project_data.status,
         "manager_id": project_data.manager_id
     }
 
@@ -914,6 +942,7 @@ def update_project(
     project.end_date = project_data.end_date
     project.budget = project_data.budget
     project.priority = project_data.priority
+    project.status = project_data.status
     project.manager_id = project_data.manager_id
 
     db.commit()
@@ -965,7 +994,12 @@ def update_project(
                     f"Changed fields: "
                     f"{changed_fields_text}."
                 ),
-                recipient=recipient
+                recipient=recipient,
+                notification_type="PROJECT_UPDATE",
+                project_id=project.id,
+                related_entity_type="PROJECT",
+                related_entity_id=project.id,
+                action_url=f"/projects/project-details/{project.id}",
             )
 
         print(
@@ -1128,7 +1162,12 @@ def update_project_status(
                 f"{project.project_name} status changed "
                 f"from {current_status} to {new_status}."
             ),
-            recipient=recipient
+            recipient=recipient,
+            notification_type="PROJECT_UPDATE",
+            project_id=project.id,
+            related_entity_type="PROJECT",
+            related_entity_id=project.id,
+            action_url=f"/projects/project-details/{project.id}",
         )
 
     return project

@@ -3,3 +3,48 @@
 /* Shared fixed BuildTrack sidebar shell */
 .main-content{min-height:100vh}
 @media(max-width:850px){.main-content{margin-left:0}.page-container{display:block}}
+
+
+/* Edit Project loading and routing fix */
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.secondary-btn,
+.back-btn {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e3a8a;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondary-btn:hover,
+.back-btn:hover {
+  background: #eef4ff;
+  transform: translateY(-1px);
+}
+
+.loading-card small {
+  display: block;
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.alert.success {
+  background: #ecfdf3;
+  color: #146c43;
+  border: 1px solid #bbf7d0;
+}

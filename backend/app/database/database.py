@@ -1,12 +1,15 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Resolve the bundled SQLite database relative to the backend directory,
 # not relative to whichever terminal folder uvicorn was started from.
 BACKEND_DIR = Path(__file__).resolve().parents[2]
+load_dotenv(BACKEND_DIR / ".env")
 DEFAULT_SQLITE_PATH = BACKEND_DIR / "buildtrack.db"
 DEFAULT_DATABASE_URL = f"sqlite:///{DEFAULT_SQLITE_PATH.as_posix()}"
 

@@ -207,3 +207,212 @@
 .logout-btn span:last-child {
   line-height: 1.25;
 }
+
+/* Module 8: unread badge + compact notification preview panel */
+.notification-nav-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.notification-link {
+  padding-right: 58px !important;
+}
+
+.notification-badge {
+  margin-left: auto;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 7px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #2447b3;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 3px 10px rgba(12, 27, 77, .18);
+}
+
+.notification-preview-toggle {
+  position: absolute;
+  z-index: 2;
+  right: 8px;
+  top: 7px;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 8px;
+  background: rgba(255,255,255,.11);
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.notification-preview-toggle:hover {
+  background: rgba(255,255,255,.22);
+}
+
+.notification-preview {
+  position: fixed;
+  z-index: 500;
+  left: calc(var(--bt-sidebar, 240px) + 10px);
+  bottom: 18px;
+  width: min(360px, calc(100vw - var(--bt-sidebar, 240px) - 28px));
+  max-height: min(520px, calc(100vh - 36px));
+  overflow: auto;
+  padding: 9px;
+  border: 1px solid #dfe5f2;
+  border-radius: 14px;
+  background: #fff;
+  color: #1a2845;
+  box-shadow: 0 20px 48px rgba(16, 35, 82, .24);
+}
+
+.notification-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 7px 10px;
+  border-bottom: 1px solid #eef1f7;
+}
+
+.notification-preview-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notification-preview-head strong {
+  font-size: 13px;
+}
+
+.notification-preview-head small {
+  color: #71809c;
+  font-size: 11px;
+}
+
+.notification-preview-head button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 8px;
+  background: #f1f4fa;
+  color: #34435f;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.sidebar .notification-preview-item,
+.sidebar .notification-preview-all {
+  color: #1a2845;
+  transform: none;
+}
+
+.sidebar .notification-preview-item::before,
+.sidebar .notification-preview-all::before {
+  display: none;
+}
+
+.sidebar .notification-preview-item {
+  min-height: 0;
+  margin-top: 5px;
+  padding: 9px 8px;
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) 8px;
+  align-items: start;
+  gap: 8px;
+  background: #fff;
+}
+
+.sidebar .notification-preview-item:hover {
+  background: #f5f7fc;
+  transform: none;
+}
+
+.sidebar .notification-preview-item.unread {
+  background: #eef3ff;
+}
+
+.preview-item-icon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #f0f4ff;
+  font-size: 14px;
+}
+
+.preview-item-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.preview-item-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #1b2945;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+
+.preview-item-copy small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: #72809a;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.preview-unread-dot {
+  width: 7px;
+  height: 7px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #315bd6;
+}
+
+.notification-preview-empty {
+  padding: 18px 10px;
+  color: #7b879d;
+  font-size: 11.5px;
+  text-align: center;
+}
+
+.sidebar .notification-preview-all {
+  min-height: 35px;
+  margin-top: 6px;
+  padding: 7px 9px;
+  justify-content: center;
+  border-top: 1px solid #eef1f7;
+  border-radius: 8px;
+  color: #2f56c6;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.sidebar .notification-preview-all:hover {
+  background: #f5f7fc;
+  transform: none;
+}
+
+@media (max-width: 850px) {
+  .notification-preview {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    width: min(360px, calc(100vw - 30px));
+  }
+}

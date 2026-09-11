@@ -50,6 +50,7 @@ export class SiteEngineerNotifications implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe((response: any) => {
       this.notifications = this.normalizeList(response);
+      this.error = '';
     });
   }
 

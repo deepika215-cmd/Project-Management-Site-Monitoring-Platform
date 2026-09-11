@@ -1,5 +1,5 @@
 import os
-import shutil
+from pathlib import Path
 
 from fastapi import (
     APIRouter,
@@ -44,8 +44,9 @@ def get_db():
 # DOCUMENT STORAGE DIRECTORY
 # ============================================================
 
-UPLOAD_DIRECTORY = "uploads/documents"
-MAX_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+UPLOAD_DIRECTORY = BACKEND_DIR / "uploads" / "documents"
+MAX_UPLOAD_SIZE_BYTES = 15 * 1024 * 1024
 ALLOWED_DOCUMENT_EXTENSIONS = {".pdf", ".doc", ".docx", ".xls", ".xlsx", ".png", ".jpg", ".jpeg"}
 ALLOWED_DOCUMENT_TYPES = {
     "application/pdf",
@@ -59,10 +60,16 @@ ALLOWED_DOCUMENT_TYPES = {
 DOCUMENT_READ_ROLES = ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "CONTRACTOR", "CLIENT"]
 DOCUMENT_WRITE_ROLES = ["ADMIN", "PROJECT_MANAGER", "SITE_ENGINEER", "CONTRACTOR"]
 
-os.makedirs(
-    UPLOAD_DIRECTORY,
+UPLOAD_DIRECTORY.mkdir(
+    parents=True,
     exist_ok=True
 )
+
+
+def resolve_document_path(stored_path: str) -> Path:
+    """Resolve old/new relative document paths against the backend folder."""
+    path = Path(stored_path)
+    return path if path.is_absolute() else BACKEND_DIR / path
 
 
 # ============================================================
@@ -76,8 +83,11 @@ os.makedirs(
 )
 def upload_document(
     file: UploadFile = File(...),
-    category: str = Form(...),
+    category: str | None = Form(None),
     description: str | None = Form(None),
+    # Compatibility aliases used by older Angular builds.
+    title: str | None = Form(None),
+    document_type: str | None = Form(None),
     project_id: int | None = Form(None),
     uploaded_by: int | None = Form(None),
     db: Session = Depends(get_db),
@@ -92,6 +102,15 @@ def upload_document(
         raise HTTPException(
             status_code=400,
             detail="File name is required"
+        )
+
+    effective_category = str(category or document_type or '').strip()
+    effective_description = str(description or title or '').strip() or None
+
+    if not effective_category:
+        raise HTTPException(
+            status_code=400,
+            detail="Document type/category is required"
         )
 
     # --------------------------------------------------------
@@ -147,10 +166,7 @@ def upload_document(
             detail="Unsupported file content type.",
         )
 
-    file_path = os.path.join(
-        UPLOAD_DIRECTORY,
-        original_name
-    )
+    file_path = UPLOAD_DIRECTORY / original_name
 
     # --------------------------------------------------------
     # Avoid overwriting existing files
@@ -169,16 +185,11 @@ def upload_document(
             f"{extension}"
         )
 
-        file_path = os.path.join(
-            UPLOAD_DIRECTORY,
-            new_name
-        )
+        file_path = UPLOAD_DIRECTORY / new_name
 
         counter += 1
 
-    stored_file_name = os.path.basename(
-        file_path
-    )
+    stored_file_name = file_path.name
 
     # --------------------------------------------------------
     # Save file
@@ -197,7 +208,7 @@ def upload_document(
                     os.remove(file_path)
                 raise HTTPException(
                     status_code=413,
-                    detail="File size exceeds the 10 MB upload limit.",
+                    detail="File size exceeds the 15 MB upload limit.",
                 )
             buffer.write(chunk)
 
@@ -205,9 +216,7 @@ def upload_document(
     # Get file size
     # --------------------------------------------------------
 
-    file_size = os.path.getsize(
-        file_path
-    )
+    file_size = file_path.stat().st_size
 
     # --------------------------------------------------------
     # Create database record
@@ -215,11 +224,11 @@ def upload_document(
 
     new_document = Document(
         file_name=stored_file_name,
-        file_path=file_path,
+        file_path=(Path("uploads") / "documents" / stored_file_name).as_posix(),
         file_type=file.content_type,
         file_size=file_size,
-        category=category,
-        description=description,
+        category=effective_category,
+        description=effective_description,
         project_id=project_id,
         uploaded_by=current_user.id
     )
@@ -243,14 +252,13 @@ def upload_document(
     dependencies=[Depends(role_required(DOCUMENT_READ_ROLES))]
 )
 def get_documents(
+    project_id: int | None = None,
     db: Session = Depends(get_db)
 ):
-
-    return db.query(
-        Document
-    ).order_by(
-        Document.id.desc()
-    ).all()
+    query = db.query(Document)
+    if project_id is not None:
+        query = query.filter(Document.project_id == project_id)
+    return query.order_by(Document.id.desc()).all()
 
 
 # ============================================================
@@ -309,9 +317,9 @@ def download_document(
             detail="Document not found"
         )
 
-    if not os.path.exists(
-        document.file_path
-    ):
+    resolved_path = resolve_document_path(document.file_path)
+
+    if not resolved_path.exists():
 
         raise HTTPException(
             status_code=404,
@@ -319,7 +327,7 @@ def download_document(
         )
 
     return FileResponse(
-        path=document.file_path,
+        path=str(resolved_path),
         filename=document.file_name,
         media_type=document.file_type
         or "application/octet-stream"
@@ -422,13 +430,9 @@ def delete_document(
     # Delete physical file
     # --------------------------------------------------------
 
-    if os.path.exists(
-        document.file_path
-    ):
-
-        os.remove(
-            document.file_path
-        )
+    resolved_path = resolve_document_path(document.file_path)
+    if resolved_path.exists():
+        resolved_path.unlink()
 
     # --------------------------------------------------------
     # Delete database record

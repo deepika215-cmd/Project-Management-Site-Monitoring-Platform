@@ -191,7 +191,12 @@ def create_worker_assignment(
                 f"{worker_name} has been assigned to "
                 f"{project_name}."
             ),
-            recipient=manager_email
+            recipient=manager_email,
+            notification_type="TASK_ASSIGNMENT",
+            project_id=assignment.project_id,
+            related_entity_type="WORKER_ASSIGNMENT",
+            related_entity_id=new_assignment.id,
+            action_url="/workforce/operations",
         )
 
     return new_assignment
@@ -403,7 +408,12 @@ def close_worker_assignment(
                 f"{worker_name}'s assignment to "
                 f"{project_name} has been closed."
             ),
-            recipient=manager_email
+            recipient=manager_email,
+            notification_type="TASK_ASSIGNMENT",
+            project_id=assignment.project_id,
+            related_entity_type="WORKER_ASSIGNMENT",
+            related_entity_id=assignment.id,
+            action_url="/workforce/operations",
         )
 
     return assignment

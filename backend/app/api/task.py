@@ -109,7 +109,13 @@ def create_task(
             f"'{new_task.title}' for Project "
             f"#{project.id} - {project.project_name}."
         ),
-        recipient=assignee.email
+        recipient=assignee.email,
+        recipient_user_id=assignee.id,
+        notification_type="TASK_ASSIGNMENT",
+        project_id=project.id,
+        related_entity_type="TASK",
+        related_entity_id=new_task.id,
+        action_url=(f"/projects/project-details/{project.id}" if assignee.role != "WORKER" else "/worker-dashboard"),
     )
 
     return new_task
@@ -300,6 +306,12 @@ def generate_task_deadline_notifications(
             title=notification_title,
             message=notification_message,
             recipient=assignee.email,
+            recipient_user_id=assignee.id,
+            notification_type="DEADLINE",
+            project_id=task.project_id,
+            related_entity_type="TASK",
+            related_entity_id=task.id,
+            action_url=(f"/projects/project-details/{task.project_id}" if assignee.role != "WORKER" else "/worker-dashboard"),
             status="Unread"
         )
 
@@ -490,7 +502,13 @@ def update_task(
                 f"#{new_project.id} - "
                 f"{new_project.project_name}."
             ),
-            recipient=new_assignee.email
+            recipient=new_assignee.email,
+            recipient_user_id=new_assignee.id,
+            notification_type="TASK_ASSIGNMENT",
+            project_id=new_project.id,
+            related_entity_type="TASK",
+            related_entity_id=task.id,
+            action_url=(f"/projects/project-details/{new_project.id}" if new_assignee.role != "WORKER" else "/worker-dashboard"),
         )
 
     return task

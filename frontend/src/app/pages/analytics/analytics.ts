@@ -106,7 +106,8 @@ export class Analytics implements OnInit {
   get filteredWorkforce(): any[] { return this.filterProject(this.workerAttendance); }
 
   pct(value: any): number {
-    return Math.max(0, Math.min(100, Number(value) || 0));
+    const numberValue = Math.round(Number(value) || 0);
+    return Math.max(0, Math.min(100, numberValue));
   }
 
   roleTitle(): string {
@@ -172,13 +173,43 @@ export class Analytics implements OnInit {
   }
 
   private normalizeProjectProgress(row: any): any {
+    const totalMilestones = Number(row?.total_milestones ?? row?.totalMilestones ?? row?.milestone_count ?? 0);
+    let completedMilestones = Number(row?.completed_milestones ?? row?.completedMilestones ?? row?.completed_count ?? 0);
+    let progress = Number(
+      row?.progress ??
+      row?.progress_percentage ??
+      row?.completion_percentage ??
+      row?.overall_progress ??
+      row?.percentage ??
+      0
+    );
+
+    if ((!progress || progress <= 0) && totalMilestones > 0 && completedMilestones > 0) {
+      progress = (completedMilestones / totalMilestones) * 100;
+    }
+
+    progress = this.pct(progress);
+
+    // Some analytics APIs return overall project progress but not completed
+    // milestone count. In that case, avoid displaying a confusing "0 / 3"
+    // label beside a non-zero progress bar.
+    let progressNote = '';
+    if (totalMilestones > 0 && completedMilestones > 0) {
+      progressNote = `${completedMilestones} / ${totalMilestones} milestones completed`;
+    } else if (totalMilestones > 0) {
+      progressNote = `${totalMilestones} milestones tracked`;
+    } else {
+      progressNote = 'Overall project progress';
+    }
+
     return {
       ...row,
       project_id: Number(row?.project_id ?? row?.projectId ?? row?.id),
       project_name: row?.project_name || row?.name || 'Project',
-      progress: Number(row?.progress ?? row?.completion_percentage ?? 0),
-      completed_milestones: Number(row?.completed_milestones ?? row?.completedMilestones ?? 0),
-      total_milestones: Number(row?.total_milestones ?? row?.totalMilestones ?? 0)
+      progress,
+      completed_milestones: completedMilestones,
+      total_milestones: totalMilestones,
+      progress_note: progressNote
     };
   }
 

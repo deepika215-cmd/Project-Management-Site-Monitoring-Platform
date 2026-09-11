@@ -160,7 +160,13 @@ def assign_engineer(
             f"You have been assigned as a Site Engineer to "
             f"Project #{project.id} - {project.project_name}."
         ),
-        recipient=engineer.email
+        recipient=engineer.email,
+        recipient_user_id=engineer.id,
+        notification_type="TASK_ASSIGNMENT",
+        project_id=project.id,
+        related_entity_type="PROJECT_ENGINEER_ASSIGNMENT",
+        related_entity_id=new_assignment.id,
+        action_url=f"/projects/project-details/{project.id}",
     )
 
     return new_assignment
