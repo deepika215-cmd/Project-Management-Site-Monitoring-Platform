@@ -12,3 +12,9 @@ frontend/.angular/
 
 # Environment variables
 .env
+frontend/node_modules/
+backend/venv/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+backend/*.db
