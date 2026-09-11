@@ -306,6 +306,7 @@ def ensure_core_sqlite_schema() -> None:
             ("related_entity_id", "INTEGER"),
             ("action_url", "VARCHAR(300)"),
             ("status", "VARCHAR(50) DEFAULT 'Unread'"),
+            ("notification_type", "VARCHAR(50) DEFAULT 'SYSTEM'"),
             ("created_at", "DATETIME"),
             ("read_at", "DATETIME"),
         ],
@@ -327,6 +328,7 @@ def ensure_core_sqlite_schema() -> None:
         conn.execute(text("UPDATE notifications SET recipient = 'ALL' WHERE recipient IS NULL OR recipient = ''"))
         conn.execute(text("UPDATE notifications SET notification_type = 'SYSTEM' WHERE notification_type IS NULL OR notification_type = ''"))
         conn.execute(text("UPDATE notifications SET status = 'Unread' WHERE status IS NULL OR status = ''"))
+        conn.execute(text("UPDATE notifications SET notification_type = 'SYSTEM' WHERE notification_type IS NULL OR notification_type = ''"))
 
 ensure_core_sqlite_schema()
 
@@ -727,7 +729,7 @@ def _ensure_presentation_demo_data() -> None:
             if not db.query(Notification).filter_by(title=title, message=message).first():
                 db.add(Notification(
                     title=title, message=message, recipient=recipient,
-                    status=status, created_at=datetime.utcnow()
+                    status=status, notification_type="SYSTEM", created_at=datetime.utcnow()
                 ))
 
         db.commit()
@@ -934,7 +936,7 @@ def _ensure_presentation_page_records() -> None:
 
         for title, message, recipient in [("Project Schedule Updated","Five schedule activities were added for BuildTrack Test Project.","ALL"),("Procurement Request Pending","TMT Steel Bars request is waiting for approval.","PROJECT_MANAGER"),("Inventory Stock Added","Cement, steel, bricks and sand demo stock is available.","SITE_ENGINEER"),("Budget Demo Ready","Budget, estimates and expenses are available for BuildTrack Test Project.","ADMIN"),("Worker Linked","Worker dashboard is linked to Ravi Kumar / worker@buildtrack.com.","WORKER")]:
             if not scalar(conn, "SELECT id FROM notifications WHERE title=:t AND message=:m", {"t":title,"m":message}):
-                insert_filtered(conn, "notifications", {"title":title,"message":message,"recipient":recipient,"status":"Unread","created_at":datetime.utcnow()})
+                insert_filtered(conn, "notifications", {"title":title,"message":message,"recipient":recipient,"status":"Unread","notification_type":"SYSTEM","created_at":datetime.utcnow()})
 
 _ensure_presentation_page_records()
 
@@ -1109,7 +1111,7 @@ def _ensure_consistent_dashboard_demo_data() -> None:
             ('Worker Dashboard Linked','worker@buildtrack.com is linked to Ravi Kumar and attendance records.','WORKER')
         ]:
             if not scalar('select id from notifications where title=? and message=?', (title, msg)):
-                insert_filtered('notifications', {'title': title, 'message': msg, 'recipient': recipient, 'status': 'Unread', 'created_at': datetime.now().isoformat(sep=' ')})
+                insert_filtered('notifications', {'title': title, 'message': msg, 'recipient': recipient, 'status': 'Unread', 'notification_type': 'SYSTEM', 'created_at': datetime.now().isoformat(sep=' ')})
 
     conn.commit()
     conn.close()
